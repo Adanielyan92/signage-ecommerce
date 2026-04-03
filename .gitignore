@@ -39,3 +39,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Screenshots and dev artifacts
+*.png
+/docs/
+/e2e/
+/.claude/
+/.github/
+/.playwright-mcp/
+/mocku*

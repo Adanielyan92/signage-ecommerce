@@ -1,0 +1,70 @@
+import type { SignTemplate } from "@/types/templates";
+
+export const retailTemplates: SignTemplate[] = [
+  {
+    id: "retail-01",
+    name: "Fashion Boutique",
+    category: "retail",
+    description:
+      "Elegant halo-lit letters with warm white glow for clothing boutiques and fashion stores",
+    configuration: {
+      productType: "halo-lit",
+      text: "LUXE BOUTIQUE",
+      height: 16,
+      font: "Playfair Display",
+      lit: "Lit",
+      led: "3000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "retail-02",
+    name: "Electronics Store",
+    category: "retail",
+    description:
+      "Modern front-lit letters with cool white LEDs for tech and electronics retailers",
+    configuration: {
+      productType: "front-lit-trim-cap",
+      text: "TECH ZONE",
+      height: 22,
+      font: "Russo One",
+      lit: "Lit",
+      led: "6000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "-",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "retail-03",
+    name: "Pharmacy",
+    category: "retail",
+    description:
+      "Classic front-lit letters with green LEDs for pharmacies and drugstores",
+    configuration: {
+      productType: "front-lit-trim-cap",
+      text: "PHARMACY",
+      height: 18,
+      font: "Standard",
+      lit: "Lit",
+      led: "Green",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "-",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+];

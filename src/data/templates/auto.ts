@@ -1,0 +1,70 @@
+import type { SignTemplate } from "@/types/templates";
+
+export const autoTemplates: SignTemplate[] = [
+  {
+    id: "auto-01",
+    name: "Auto Repair Shop",
+    category: "auto",
+    description:
+      "Bold front-lit channel letters with red LEDs for auto repair and service centers",
+    configuration: {
+      productType: "front-lit-trim-cap",
+      text: "AUTO REPAIR",
+      height: 24,
+      font: "Anton",
+      lit: "Lit",
+      led: "Red",
+      litSides: "Face Lit",
+      sideDepth: '5"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "auto-02",
+    name: "Express Car Wash",
+    category: "auto",
+    description:
+      "Eye-catching trimless letters with blue LEDs for car wash businesses",
+    configuration: {
+      productType: "trimless",
+      text: "EXPRESS WASH",
+      height: 20,
+      font: "Bebas Neue",
+      lit: "Lit",
+      led: "Blue",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "-",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "auto-03",
+    name: "Car Dealership",
+    category: "auto",
+    description:
+      "Premium halo-lit letters with cool white LED for car dealerships",
+    configuration: {
+      productType: "halo-lit",
+      text: "PREMIER MOTORS",
+      height: 30,
+      font: "Oswald",
+      lit: "Lit",
+      led: "6000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway Box",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+];

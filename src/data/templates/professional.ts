@@ -1,0 +1,70 @@
+import type { SignTemplate } from "@/types/templates";
+
+export const professionalTemplates: SignTemplate[] = [
+  {
+    id: "prof-01",
+    name: "Law Firm",
+    category: "professional",
+    description:
+      "Refined halo-lit letters with neutral white for law offices and legal practices",
+    configuration: {
+      productType: "halo-lit",
+      text: "HARRIS & COLE",
+      height: 14,
+      font: "Playfair Display",
+      lit: "Lit",
+      led: "3500K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "prof-02",
+    name: "Dental Office",
+    category: "professional",
+    description:
+      "Clean front-lit letters with cool white LEDs for dental and medical offices",
+    configuration: {
+      productType: "front-lit-trim-cap",
+      text: "SMILE DENTAL",
+      height: 16,
+      font: "Poppins",
+      lit: "Lit",
+      led: "6000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "-",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "prof-03",
+    name: "Consulting Firm",
+    category: "professional",
+    description:
+      "Sophisticated back-lit letters with warm white for consulting and corporate offices",
+    configuration: {
+      productType: "back-lit",
+      text: "APEX GROUP",
+      height: 14,
+      font: "Montserrat",
+      lit: "Lit",
+      led: "3000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+];

@@ -1,0 +1,70 @@
+import type { SignTemplate } from "@/types/templates";
+
+export const churchTemplates: SignTemplate[] = [
+  {
+    id: "church-01",
+    name: "Traditional Church",
+    category: "church",
+    description:
+      "Warm back-lit letters with a classic serif font for churches and houses of worship",
+    configuration: {
+      productType: "back-lit",
+      text: "GRACE CHURCH",
+      height: 24,
+      font: "Playfair Display",
+      lit: "Lit",
+      led: "3000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway Box",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "church-02",
+    name: "Community Center",
+    category: "church",
+    description:
+      "Welcoming front-lit letters with neutral white for community and recreation centers",
+    configuration: {
+      productType: "front-lit-trim-cap",
+      text: "COMMUNITY CENTER",
+      height: 18,
+      font: "Poppins",
+      lit: "Lit",
+      led: "3500K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "-",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "church-03",
+    name: "Modern Temple",
+    category: "church",
+    description:
+      "Elegant halo-lit letters with warm white for temples and modern worship spaces",
+    configuration: {
+      productType: "halo-lit",
+      text: "TEMPLE SHALOM",
+      height: 20,
+      font: "Raleway",
+      lit: "Lit",
+      led: "3000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+];

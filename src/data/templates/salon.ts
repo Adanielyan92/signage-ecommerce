@@ -1,0 +1,70 @@
+import type { SignTemplate } from "@/types/templates";
+
+export const salonTemplates: SignTemplate[] = [
+  {
+    id: "salon-01",
+    name: "Chic Hair Salon",
+    category: "salon",
+    description:
+      "Elegant halo-lit letters with warm white glow for upscale hair salons",
+    configuration: {
+      productType: "halo-lit",
+      text: "BELLA SALON",
+      height: 16,
+      font: "Abril Fatface",
+      lit: "Lit",
+      led: "3000K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "salon-02",
+    name: "Nail Studio",
+    category: "salon",
+    description:
+      "Vibrant front-lit letters with RGB LEDs for trendy nail salons",
+    configuration: {
+      productType: "front-lit-trim-cap",
+      text: "NAIL STUDIO",
+      height: 14,
+      font: "Poppins",
+      lit: "Lit",
+      led: "RGB",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "-",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+  {
+    id: "salon-03",
+    name: "Day Spa",
+    category: "salon",
+    description:
+      "Serene back-lit letters with neutral white for spas and wellness centers",
+    configuration: {
+      productType: "back-lit",
+      text: "SERENITY SPA",
+      height: 18,
+      font: "Raleway",
+      lit: "Lit",
+      led: "3500K",
+      litSides: "Face Lit",
+      sideDepth: '4"',
+      painting: "Painted",
+      paintingColors: 1,
+      raceway: "Raceway",
+      vinyl: "-",
+      background: "-",
+    },
+  },
+];
