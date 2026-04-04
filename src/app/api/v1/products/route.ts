@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category") ?? undefined;
+    const slug = searchParams.get("slug");
     const activeParam = searchParams.get("active");
     const isActive =
       activeParam === "true" ? true : activeParam === "false" ? false : undefined;
@@ -19,6 +20,7 @@ export async function GET(request: NextRequest) {
       where: {
         tenantId: tenant.id,
         ...(category !== undefined ? { category } : {}),
+        ...(slug ? { slug } : {}),
         ...(isActive !== undefined ? { isActive } : {}),
       },
       include: {
