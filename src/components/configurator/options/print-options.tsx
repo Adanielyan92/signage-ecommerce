@@ -102,7 +102,10 @@ export function PrintOptions() {
 
       {/* Grommets */}
       <div>
-        <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        <label
+          className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500"
+          title="Metal-reinforced holes for hanging or mounting the sign"
+        >
           Grommets
         </label>
         <div className="flex gap-2">
@@ -126,7 +129,10 @@ export function PrintOptions() {
 
       {/* Laminated */}
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        <label
+          className="text-xs font-semibold uppercase tracking-wide text-neutral-500"
+          title="Protective coating that resists scratches and UV fading"
+        >
           Laminated
         </label>
         <Switch

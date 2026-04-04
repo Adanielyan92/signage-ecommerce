@@ -9,6 +9,9 @@ import type {
   LogoPricingParams,
   PrintPricingParams,
   SignPostPricingParams,
+  BladePricingParams,
+  NeonPricingParams,
+  BannerPricingParams,
 } from "@/types/product";
 import type {
   SignConfiguration,
@@ -21,6 +24,10 @@ import type {
   LogoConfiguration,
   PrintConfiguration,
   SignPostConfiguration,
+  LightBoxConfiguration,
+  BladeSignConfiguration,
+  NeonSignConfiguration,
+  VinylBannerConfiguration,
 } from "@/types/configurator";
 import { calculateChannelLetterPrice } from "./channel-letter-pricing";
 import { calculateShapeSignPrice } from "./shape-sign-pricing";
@@ -29,6 +36,10 @@ import { calculateDimensionalPrice } from "./dimensional-pricing";
 import { calculateLogoPrice } from "./logo-pricing";
 import { calculatePrintPrice } from "./print-pricing";
 import { calculateSignPostPrice } from "./sign-post-pricing";
+import { calculateLightBoxPrice } from "./light-box-pricing";
+import { calculateBladePrice } from "./blade-pricing";
+import { calculateNeonPrice } from "./neon-pricing";
+import { calculateBannerPrice } from "./banner-pricing";
 import { getAnyProductBySlug } from "./product-definitions";
 
 export { calculateChannelLetterPrice } from "./channel-letter-pricing";
@@ -159,6 +170,30 @@ export function calculatePriceUnified(
         config as SignPostConfiguration,
         dimensions,
         product.pricingParams as SignPostPricingParams,
+      );
+    case "LIGHT_BOX_SIGNS":
+      return calculateLightBoxPrice(
+        config as LightBoxConfiguration,
+        dimensions,
+        product.pricingParams as SqftPricingParams,
+      );
+    case "BLADE_SIGNS":
+      return calculateBladePrice(
+        config as BladeSignConfiguration,
+        dimensions,
+        product.pricingParams as BladePricingParams,
+      );
+    case "NEON_SIGNS":
+      return calculateNeonPrice(
+        config as NeonSignConfiguration,
+        dimensions,
+        product.pricingParams as NeonPricingParams,
+      );
+    case "VINYL_BANNERS":
+      return calculateBannerPrice(
+        config as VinylBannerConfiguration,
+        dimensions,
+        product.pricingParams as BannerPricingParams,
       );
     default:
       return emptyBreakdown();

@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Products - GatSoft Signs",
+  title: "Products",
   description:
     "Browse our full catalog of channel letters, lit shapes, cabinet signs, dimensional letters, logos, print signs, and sign posts. Design and price any sign in 3D.",
 };
@@ -21,6 +21,7 @@ interface ProductCategoryData {
   color: string;
   hoverColor: string;
   iconLetter: string;
+  image: string;
   items: ProductItem[];
 }
 
@@ -28,11 +29,12 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Channel Letters",
     description:
-      "LED illuminated custom lettering for storefronts. Choose front-lit, back-lit, halo-lit, marquee, trimless, or non-lit styles.",
+      "The #1 choice for storefronts. Your business name in glowing 3D letters, visible day and night. Six styles available.",
     startingPrice: 1360,
     color: "bg-blue-50 border-blue-200",
     hoverColor: "group-hover:bg-blue-100",
     iconLetter: "CL",
+    image: "/images/products/front-lit-trim-cap.png",
     items: [
       { name: "Front-Lit with Trim Cap", slug: "front-lit-trim-cap" },
       { name: "Trimless", slug: "trimless" },
@@ -45,11 +47,12 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Lit Shape Signs",
     description:
-      "Single-piece LED lit shape signs contoured to your design or logo. Great for clouds, custom shapes, and brand icons.",
+      "Your logo or custom shape, illuminated with LEDs. Perfect for bold brand statements.",
     startingPrice: 1500,
     color: "bg-purple-50 border-purple-200",
     hoverColor: "group-hover:bg-purple-100",
     iconLetter: "LS",
+    image: "/images/products/lit-logo.png",
     items: [
       { name: "Cloud Sign", slug: "cloud-sign" },
       { name: "Logo Shape", slug: "logo-shape" },
@@ -58,11 +61,12 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Cabinet Signs",
     description:
-      "Illuminated cabinet signage in single or double face, rectangular or custom-shaped configurations.",
+      "Illuminated sign boxes — clean, bright, and professional. Available single or double-sided.",
     startingPrice: 1500,
     color: "bg-amber-50 border-amber-200",
     hoverColor: "group-hover:bg-amber-100",
     iconLetter: "CS",
+    image: "/images/products/single-face-squared.png",
     items: [
       { name: "Single Face", slug: "single-face-squared" },
       { name: "Double Face", slug: "double-face-squared" },
@@ -73,11 +77,12 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Dimensional Letters",
     description:
-      "Non-illuminated 3D lettering in acrylic, painted metal, brushed metal, or flat-cut aluminum finishes.",
+      "Elegant 3D letters in premium materials. No electricity needed — perfect for lobbies and indoor spaces.",
     startingPrice: 800,
     color: "bg-emerald-50 border-emerald-200",
     hoverColor: "group-hover:bg-emerald-100",
     iconLetter: "DL",
+    image: "/images/products/brushed-metal.png",
     items: [
       { name: "Acrylic", slug: "acrylic" },
       { name: "Painted Metal", slug: "painted-metal" },
@@ -88,11 +93,12 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Logo Signs",
     description:
-      "Custom logo signage, available in LED illuminated or non-lit dimensional finishes built to your exact artwork.",
+      "Your logo, fabricated in 3D. Available illuminated or non-lit, built exactly to your artwork.",
     startingPrice: 800,
     color: "bg-rose-50 border-rose-200",
     hoverColor: "group-hover:bg-rose-100",
     iconLetter: "LG",
+    image: "/images/products/lit-logo.png",
     items: [
       { name: "Lit Logo", slug: "lit-logo" },
       { name: "Non-Lit Logo", slug: "non-lit-logo" },
@@ -101,11 +107,12 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Print Signs",
     description:
-      "Printed signage on durable materials, from ACM panels for outdoor use to lightweight coroplast and foam board for displays.",
+      "Full-color printed signs — durable, affordable, and ready fast. Great for events, real estate, and promotions.",
     startingPrice: 100,
     color: "bg-sky-50 border-sky-200",
     hoverColor: "group-hover:bg-sky-100",
     iconLetter: "PS",
+    image: "/images/products/acm-panel.png",
     items: [
       { name: "ACM Panel", slug: "acm-panel" },
       { name: "Coroplast Sign", slug: "coroplast" },
@@ -115,24 +122,89 @@ const CATALOG: ProductCategoryData[] = [
   {
     title: "Sign Posts",
     description:
-      "Freestanding sign structures including single post, double post, and ground-level monument base signs.",
+      "Freestanding signs on posts or monument bases. Maximum visibility from the street.",
     startingPrice: 600,
     color: "bg-orange-50 border-orange-200",
     hoverColor: "group-hover:bg-orange-100",
     iconLetter: "SP",
+    image: "/images/products/single-post.png",
     items: [
       { name: "Single Post Sign", slug: "single-post" },
       { name: "Double Post Sign", slug: "double-post" },
       { name: "Monument Sign", slug: "monument-base" },
     ],
   },
+  {
+    title: "Light Box Signs",
+    description:
+      "Illuminated sign boxes with glowing translucent or push-through faces.",
+    startingPrice: 1200,
+    color: "bg-cyan-50 border-cyan-200",
+    hoverColor: "group-hover:bg-cyan-100",
+    iconLetter: "LB",
+    image: "/images/products/light-box-single.png",
+    items: [
+      { name: "Single Face Light Box", slug: "light-box-single" },
+      { name: "Double Face Light Box", slug: "light-box-double" },
+      { name: "Push-Through Light Box", slug: "light-box-push-through" },
+    ],
+  },
+  {
+    title: "Blade Signs",
+    description:
+      "Wall-projecting signs on brackets, visible from both directions.",
+    startingPrice: 800,
+    color: "bg-rose-50 border-rose-200",
+    hoverColor: "group-hover:bg-rose-100",
+    iconLetter: "BS",
+    image: "/images/products/blade-rectangular.png",
+    items: [
+      { name: "Rectangular Blade Sign", slug: "blade-rectangular" },
+      { name: "Round Blade Sign", slug: "blade-round" },
+    ],
+  },
+  {
+    title: "LED Neon Signs",
+    description:
+      "Glowing neon-style LED text signs for restaurants, bars, and retail.",
+    startingPrice: 500,
+    color: "bg-pink-50 border-pink-200",
+    hoverColor: "group-hover:bg-pink-100",
+    iconLetter: "NE",
+    image: "/images/products/led-neon.png",
+    items: [
+      { name: "LED Neon Sign", slug: "led-neon" },
+    ],
+  },
+  {
+    title: "Vinyl Banners",
+    description:
+      "Full-color printed banners — durable, affordable, and ready fast.",
+    startingPrice: 50,
+    color: "bg-orange-50 border-orange-200",
+    hoverColor: "group-hover:bg-orange-100",
+    iconLetter: "VB",
+    image: "/images/products/vinyl-banner-13oz.png",
+    items: [
+      { name: "13oz Vinyl Banner", slug: "vinyl-banner-13oz" },
+      { name: "15oz Heavy Duty Banner", slug: "vinyl-banner-15oz" },
+      { name: "Mesh Banner", slug: "mesh-banner" },
+    ],
+  },
 ];
 
 function CategoryCard({ category }: { category: ProductCategoryData }) {
   return (
-    <div className="group rounded-xl border border-neutral-200 bg-white shadow-sm transition-all duration-200 hover:shadow-lg hover:border-neutral-300">
+    <div className="group rounded-xl border border-neutral-200 bg-white shadow-sm transition-all duration-200 hover:shadow-lg hover:border-neutral-300 overflow-hidden">
+      {/* Preview image */}
+      <img
+        src={category.image}
+        alt={category.title}
+        className="h-48 w-full object-cover"
+      />
+
       {/* Header */}
-      <div className={`flex items-start gap-4 rounded-t-xl border-b p-6 transition-colors ${category.color} ${category.hoverColor}`}>
+      <div className={`flex items-start gap-4 border-b p-6 transition-colors ${category.color} ${category.hoverColor}`}>
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-white/70 text-lg font-bold text-neutral-700 shadow-sm">
           {category.iconLetter}
         </div>

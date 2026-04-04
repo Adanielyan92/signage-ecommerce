@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { ShoppingCart, Menu, X, User, LogOut, LayoutTemplate, Image as ImageIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCartStore } from "@/stores/cart-store";
 import { useSession, signOut } from "next-auth/react";
 import { MegaMenuDesktop, MegaMenuMobile } from "@/components/products/mega-menu";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const itemCount = useCartStore((s) => s.getItemCount());
+
+  useEffect(() => setMounted(true), []);
   const { data: session, status } = useSession();
 
   const closeMobile = () => setMobileOpen(false);
@@ -53,7 +56,7 @@ export function Navbar() {
             className="relative flex items-center gap-1 text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
           >
             <ShoppingCart className="h-5 w-5" />
-            {itemCount > 0 && (
+            {mounted && itemCount > 0 && (
               <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
                 {itemCount}
               </span>
@@ -161,7 +164,7 @@ export function Navbar() {
               onClick={closeMobile}
             >
               <ShoppingCart className="h-5 w-5" />
-              Cart {itemCount > 0 && `(${itemCount})`}
+              Cart {mounted && itemCount > 0 && `(${itemCount})`}
             </Link>
             {session ? (
               <>

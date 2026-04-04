@@ -1,12 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, Component, type ReactNode, type ErrorInfo } from "react";
 import type { AnyProduct } from "@/engine/product-definitions";
 import { OptionsPanel } from "./options-panel";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { useCartStore } from "@/stores/cart-store";
+import { useMockupStore } from "@/stores/mockup-store";
 import { formatPrice } from "@/lib/utils";
 import type { UnifiedCartItem } from "@/types/configurator";
 import { captureCanvasScreenshot } from "@/lib/capture-screenshot";
@@ -27,6 +28,40 @@ const Scene = dynamic(() => import("@/components/three/scene"), {
   ),
 });
 
+class SceneErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("3D scene error:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex h-full items-center justify-center bg-neutral-100">
+          <div className="text-center">
+            <p className="text-lg font-medium text-neutral-700">Unable to load 3D preview</p>
+            <button
+              onClick={() => this.setState({ hasError: false })}
+              className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function ConfiguratorLayout({
   product,
 }: {
@@ -38,6 +73,8 @@ export function ConfiguratorLayout({
   const productCategory = useConfiguratorStore((s) => s.productCategory);
   const getActiveConfig = useConfiguratorStore((s) => s.getActiveConfig);
   const addItem = useCartStore((s) => s.addItem);
+  const setMockupSignConfig = useMockupStore((s) => s.setSignConfig);
+  const router = useRouter();
   const { data: session } = useSession();
   const [savingDesign, setSavingDesign] = useState(false);
 
@@ -50,10 +87,20 @@ export function ConfiguratorLayout({
       const activeConfig = getActiveConfig();
       return "text" in activeConfig && activeConfig.text.replace(/\s+/g, "").length > 0;
     }
+    if (productCategory === "NEON_SIGNS") {
+      const activeConfig = getActiveConfig();
+      return "text" in activeConfig && activeConfig.text.replace(/\s+/g, "").length > 0;
+    }
     return true;
   })();
 
   const canAddToCart = hasRequiredInput && breakdown.total > 0;
+
+  const handleWallMockup = () => {
+    const activeConfig = getActiveConfig();
+    setMockupSignConfig(productCategory, product.slug, { ...activeConfig } as Record<string, unknown>);
+    router.push("/mockup");
+  };
 
   const handleAddToCart = () => {
     if (!canAddToCart) return;
@@ -121,7 +168,9 @@ export function ConfiguratorLayout({
     <div className="flex h-[calc(100vh-4rem)] flex-col lg:flex-row">
       {/* 3D Viewport — 60% on desktop, 50vh on mobile */}
       <div className="relative h-[50vh] min-h-[300px] bg-neutral-100 lg:h-full lg:w-[60%]">
-        <Scene />
+        <SceneErrorBoundary>
+          <Scene />
+        </SceneErrorBoundary>
         {/* Product type label */}
         <div className="absolute left-4 top-4 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm backdrop-blur-sm">
           {product.name}
@@ -149,12 +198,57 @@ export function ConfiguratorLayout({
         {hasRequiredInput && breakdown.total > 0 && (
           <div className="hidden border-b border-neutral-100 px-6 py-3 lg:block">
             <div className="mx-auto flex max-w-7xl flex-wrap gap-x-6 gap-y-1 text-xs text-neutral-500">
-              {productCategory === "CHANNEL_LETTERS" && (
+              {(productCategory === "CHANNEL_LETTERS") && (
                 <span>
                   Letters ({config.text.replace(/\s+/g, "").length} x {config.height}&quot;):{" "}
                   {formatPrice(breakdown.letterPrice)}
                 </span>
               )}
+              {productCategory === "DIMENSIONAL_LETTERS" && (() => {
+                const activeConfig = getActiveConfig();
+                if ("text" in activeConfig) {
+                  return (
+                    <span>
+                      Letters ({activeConfig.text.replace(/\s+/g, "").length} x {(activeConfig as { height: number }).height}&quot;):{" "}
+                      {formatPrice(breakdown.letterPrice)}
+                    </span>
+                  );
+                }
+                return null;
+              })()}
+              {(productCategory === "CABINET_SIGNS" || productCategory === "LIT_SHAPES" || productCategory === "PRINT_SIGNS") && (
+                <span>
+                  {dimensions.totalWidthInches}&quot; x {dimensions.heightInches}&quot; ({dimensions.squareFeet.toFixed(1)} sqft):{" "}
+                  {formatPrice(breakdown.letterPrice)}
+                </span>
+              )}
+              {productCategory === "LOGOS" && (
+                <span>
+                  {dimensions.totalWidthInches}&quot; x {dimensions.heightInches}&quot;:{" "}
+                  {formatPrice(breakdown.letterPrice)}
+                </span>
+              )}
+              {["LIGHT_BOX_SIGNS", "BLADE_SIGNS", "VINYL_BANNERS"].includes(productCategory) && (
+                <span>
+                  {dimensions.totalWidthInches}&quot; &times; {dimensions.heightInches}&quot; ({dimensions.squareFeet.toFixed(1)} sqft):{" "}
+                  {formatPrice(breakdown.letterPrice)}
+                </span>
+              )}
+              {productCategory === "NEON_SIGNS" && (
+                <span>
+                  Neon text ({(getActiveConfig() as { text: string }).text.replace(/\s+/g, "").length} letters &times; {(getActiveConfig() as { height: number }).height}&quot;):{" "}
+                  {formatPrice(breakdown.letterPrice)}
+                </span>
+              )}
+              {productCategory === "SIGN_POSTS" && (() => {
+                const activeConfig = getActiveConfig();
+                return (
+                  <span>
+                    Post + {("signWidthInches" in activeConfig ? activeConfig.signWidthInches : dimensions.totalWidthInches)}&quot; x {("signHeightInches" in activeConfig ? activeConfig.signHeightInches : dimensions.heightInches)}&quot; panel:{" "}
+                    {formatPrice(breakdown.letterPrice)}
+                  </span>
+                );
+              })()}
               {breakdown.multipliers.length > 0 && (
                 <span>
                   After options: {formatPrice(breakdown.priceAfterMultipliers)}
@@ -170,7 +264,9 @@ export function ConfiguratorLayout({
                 <span>Vinyl: +{formatPrice(breakdown.vinylPrice)}</span>
               )}
               {breakdown.minOrderApplied && (
-                <span className="text-amber-600">Min order applied</span>
+                <span className="text-amber-600" title="Our minimum order covers setup, materials, and quality assurance for any custom sign project">
+                  Minimum order: {formatPrice(breakdown.total)}
+                </span>
               )}
             </div>
           </div>
@@ -203,14 +299,14 @@ export function ConfiguratorLayout({
               </button>
 
               {/* Wall Mockup */}
-              <Link
-                href="/mockup"
+              <button
+                onClick={handleWallMockup}
                 className="flex items-center gap-1.5 rounded-lg border border-neutral-300 px-3 py-2.5 text-sm font-medium text-neutral-600 transition hover:bg-neutral-50 sm:px-4"
                 title="Wall Mockup"
               >
                 <ImageIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">Wall Mockup</span>
-              </Link>
+              </button>
 
               {/* Add to Cart */}
               <button

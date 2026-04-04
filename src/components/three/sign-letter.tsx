@@ -37,8 +37,8 @@ export function SignLetter({
   const geometry = useMemo(() => {
     const charCode = char.charCodeAt(0);
 
-    // Check cache first
-    const cached = getCachedGeometry(fontName, charCode, depth, curveSegments);
+    // Check cache (now includes bevel in key)
+    const cached = getCachedGeometry(fontName, charCode, depth, curveSegments, bevelEnabled);
     if (cached !== undefined) return cached;
 
     // Create geometry from opentype glyph
@@ -53,7 +53,7 @@ export function SignLetter({
       bevelSize: bevelEnabled ? 0.1 : 0,
     });
 
-    setCachedGeometry(fontName, charCode, depth, curveSegments, geo);
+    setCachedGeometry(fontName, charCode, depth, curveSegments, geo, bevelEnabled);
     return geo;
   }, [char, font, fontSize, depth, curveSegments, fontName, bevelEnabled]);
 

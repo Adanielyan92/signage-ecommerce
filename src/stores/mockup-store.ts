@@ -6,6 +6,7 @@ import type {
   InstallationRect,
   RealWorldDimensions,
 } from "@/types/mockup";
+import type { ProductCategory } from "@/types/product";
 
 interface MockupState {
   mode: "photo" | "scene";
@@ -22,6 +23,11 @@ interface MockupState {
   showHumanRef: boolean;
   showDoorRef: boolean;
 
+  // Sign config transferred from configurator
+  signProductCategory: ProductCategory | null;
+  signProductType: string | null;
+  signConfig: Record<string, unknown> | null;
+
   // Actions
   setMode: (mode: "photo" | "scene") => void;
   setPhotoUrl: (url: string | null) => void;
@@ -32,6 +38,11 @@ interface MockupState {
   setSignPosition: (x: number, y: number) => void;
   setShowHumanRef: (show: boolean) => void;
   setShowDoorRef: (show: boolean) => void;
+  setSignConfig: (
+    category: ProductCategory,
+    productType: string,
+    config: Record<string, unknown>,
+  ) => void;
   resetMockup: () => void;
 }
 
@@ -47,6 +58,9 @@ const defaultState = {
   signPositionY: 0.6,
   showHumanRef: true,
   showDoorRef: false,
+  signProductCategory: null,
+  signProductType: null,
+  signConfig: null,
 };
 
 export const useMockupStore = create<MockupState>((set) => ({
@@ -63,5 +77,7 @@ export const useMockupStore = create<MockupState>((set) => ({
     set({ signPositionX, signPositionY }),
   setShowHumanRef: (showHumanRef) => set({ showHumanRef }),
   setShowDoorRef: (showDoorRef) => set({ showDoorRef }),
+  setSignConfig: (signProductCategory, signProductType, signConfig) =>
+    set({ signProductCategory, signProductType, signConfig }),
   resetMockup: () => set({ ...defaultState }),
 }));

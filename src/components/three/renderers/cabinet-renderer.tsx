@@ -1,7 +1,9 @@
 "use client";
 
 import * as THREE from "three";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useConfiguratorStore } from "@/stores/configurator-store";
+import { getLedColor } from "../utils/led-colors";
 
 interface CabinetRendererProps {
   width: number;
@@ -11,16 +13,6 @@ interface CabinetRendererProps {
   doubleFace: boolean;
 }
 
-const LED_COLORS: Record<string, string> = {
-  "3000K": "#FFB46B",
-  "3500K": "#FFC98E",
-  "6000K": "#E3EEFF",
-  "Red": "#FF0000",
-  "Green": "#00FF00",
-  "Blue": "#0066FF",
-  RGB: "#FF0000",
-};
-
 export function CabinetRenderer({
   width,
   height,
@@ -28,7 +20,23 @@ export function CabinetRenderer({
   led,
   doubleFace,
 }: CabinetRendererProps) {
-  const ledColor = LED_COLORS[led] || "#FFFFFF";
+  const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const prevDims = useRef("");
+
+  useEffect(() => {
+    const key = `${width}:${height}`;
+    if (key === prevDims.current) return;
+    prevDims.current = key;
+    setDimensions({
+      totalWidthInches: width,
+      heightInches: height,
+      squareFeet: (width * height) / 144,
+      linearFeet: ((width + height) * 2) / 12,
+      letterWidths: [],
+    });
+  }, [width, height, setDimensions]);
+
+  const ledColor = getLedColor(led);
 
   const bodyMaterial = useMemo(
     () =>
@@ -55,7 +63,7 @@ export function CabinetRenderer({
   return (
     <group>
       {/* Cabinet body */}
-      <mesh>
+      <mesh castShadow receiveShadow>
         <boxGeometry args={[width, height, depth]} />
         <primitive object={bodyMaterial} attach="material" />
       </mesh>

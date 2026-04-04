@@ -8,7 +8,9 @@ import {
   Bounds,
   useBounds,
   Center,
-  Text,
+  ContactShadows,
+  Html,
+  useProgress,
 } from "@react-three/drei";
 import {
   EffectComposer as PMEffectComposer,
@@ -19,17 +21,41 @@ import {
 import { Suspense, useEffect, useRef } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { WallPlane } from "./wall-plane";
-import { SignAssembly } from "./sign-assembly";
+import { SceneRouter } from "./scene-router";
 import { DAY_LIGHTING, NIGHT_LIGHTING } from "./utils/day-night-lighting";
 
+// ---------------------------------------------------------------------------
+// Loading indicator (shown while fonts/environment/textures load)
+// ---------------------------------------------------------------------------
+
+function Loader() {
+  const { progress } = useProgress();
+  return (
+    <Html center>
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-1 w-32 overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-full rounded-full bg-blue-500 transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <span className="text-xs text-gray-400">
+          {progress.toFixed(0)}%
+        </span>
+      </div>
+    </Html>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Imperative bloom post-processing
+// ---------------------------------------------------------------------------
+
 /**
- * Imperative bloom post-processing.
- *
  * Creates the EffectComposer, RenderPass, and BloomEffect directly from the
- * `postprocessing` library instead of using `@react-three/postprocessing` JSX
- * wrappers. This avoids R3F's reconciler (and Next.js Turbopack HMR) trying to
- * JSON.stringify the effect objects, which fails because KawaseBlurPass contains
- * circular references (resolution <-> resizable).
+ * `postprocessing` library instead of the JSX wrappers.  This avoids R3F's
+ * reconciler (and Next.js Turbopack HMR) trying to JSON.stringify the effect
+ * objects which fails due to circular references in KawaseBlurPass.
  */
 function ImperativeBloom() {
   const gl = useThree((s) => s.gl);
@@ -37,12 +63,10 @@ function ImperativeBloom() {
   const camera = useThree((s) => s.camera);
   const size = useThree((s) => s.size);
   const sceneMode = useConfiguratorStore((s) => s.sceneMode);
-  const target = sceneMode === "night" ? NIGHT_LIGHTING : DAY_LIGHTING;
 
   const composerRef = useRef<PMEffectComposer | null>(null);
   const bloomRef = useRef<BloomEffect | null>(null);
 
-  // Set up the effect composer once, rebuild when gl/scene/camera change
   useEffect(() => {
     const composer = new PMEffectComposer(gl, {
       frameBufferType: THREE.HalfFloatType,
@@ -69,27 +93,20 @@ function ImperativeBloom() {
     };
   }, [gl, scene, camera]);
 
-  // Keep composer in sync with canvas size
   useEffect(() => {
     composerRef.current?.setSize(size.width, size.height);
   }, [size]);
 
-  // Render through the bloom compositor. In night mode, skip the bloom
-  // but still render the scene manually since priority > 0 disables R3F's
-  // default render. The HalfFloat FBOs used by the bloom fail to blit to
-  // screen on some GPU/driver combos, producing a black screen in dark scenes.
+  // Always render through the bloom compositor. In night mode, bloom is
+  // *stronger* (not disabled) -- that's when LED glow matters most.
   useFrame((_state, delta) => {
     const bloom = bloomRef.current;
     const composer = composerRef.current;
-
-    if (sceneMode === "night") {
-      gl.render(scene, camera);
-      return;
-    }
-
     if (!bloom || !composer) return;
 
+    const target = sceneMode === "night" ? NIGHT_LIGHTING : DAY_LIGHTING;
     const speed = 3;
+
     bloom.intensity = THREE.MathUtils.lerp(
       bloom.intensity,
       target.bloomIntensity,
@@ -107,46 +124,83 @@ function ImperativeBloom() {
   return null;
 }
 
-/**
- * Auto-fits the camera to the sign content whenever text, height, or font changes.
- * Must be a child of <Bounds>.
- */
+// ---------------------------------------------------------------------------
+// Auto-fit camera to sign content
+// ---------------------------------------------------------------------------
+
 function AutoFit() {
   const bounds = useBounds();
+  const productCategory = useConfiguratorStore((s) => s.productCategory);
   const config = useConfiguratorStore((s) => s.config);
-  const text = config.text.replace(/\s+/g, "");
-  const height = config.height;
-  const font = config.font;
-  const depth = config.sideDepth;
+  const litShapeConfig = useConfiguratorStore((s) => s.litShapeConfig);
+  const cabinetConfig = useConfiguratorStore((s) => s.cabinetConfig);
+  const dimensionalConfig = useConfiguratorStore((s) => s.dimensionalConfig);
+  const logoConfig = useConfiguratorStore((s) => s.logoConfig);
+  const printConfig = useConfiguratorStore((s) => s.printConfig);
+  const signPostConfig = useConfiguratorStore((s) => s.signPostConfig);
+  const lightBoxConfig = useConfiguratorStore((s) => s.lightBoxConfig);
+  const bladeConfig = useConfiguratorStore((s) => s.bladeConfig);
+  const neonConfig = useConfiguratorStore((s) => s.neonConfig);
+  const bannerConfig = useConfiguratorStore((s) => s.bannerConfig);
   const prevKey = useRef("");
 
+  const key = (() => {
+    switch (productCategory) {
+      case "CHANNEL_LETTERS":
+        return `cl:${config.text}:${config.height}:${config.font}:${config.sideDepth}`;
+      case "DIMENSIONAL_LETTERS":
+        return `dl:${dimensionalConfig.text}:${dimensionalConfig.height}:${dimensionalConfig.font}:${dimensionalConfig.thickness}`;
+      case "CABINET_SIGNS":
+        return `cab:${cabinetConfig.widthInches}:${cabinetConfig.heightInches}:${cabinetConfig.productType}`;
+      case "LIT_SHAPES":
+        return `ls:${litShapeConfig.widthInches}:${litShapeConfig.heightInches}`;
+      case "LOGOS":
+        return `logo:${logoConfig.widthInches}:${logoConfig.heightInches}`;
+      case "PRINT_SIGNS":
+        return `print:${printConfig.widthInches}:${printConfig.heightInches}`;
+      case "SIGN_POSTS":
+        return `post:${signPostConfig.postHeight}:${signPostConfig.signWidthInches}:${signPostConfig.signHeightInches}:${signPostConfig.productType}`;
+      case "LIGHT_BOX_SIGNS":
+        return `lb:${lightBoxConfig.widthInches}:${lightBoxConfig.heightInches}:${lightBoxConfig.shape}`;
+      case "BLADE_SIGNS":
+        return `bl:${bladeConfig.widthInches}:${bladeConfig.heightInches}:${bladeConfig.shape}`;
+      case "NEON_SIGNS":
+        return `neon:${neonConfig.text}:${neonConfig.height}:${neonConfig.font}`;
+      case "VINYL_BANNERS":
+        return `banner:${bannerConfig.widthInches}:${bannerConfig.heightInches}`;
+      default:
+        return "unknown";
+    }
+  })();
+
   useEffect(() => {
-    const key = `${text}:${height}:${font}:${depth}`;
     if (key === prevKey.current) return;
     prevKey.current = key;
-
     const timer = setTimeout(() => {
       bounds.refresh().fit();
-    }, 120);
+    }, 150);
     return () => clearTimeout(timer);
-  }, [text, height, font, depth, bounds]);
+  }, [key, bounds]);
 
   return null;
 }
 
-function SceneContent() {
-  const config = useConfiguratorStore((s) => s.config);
-  const sceneMode = useConfiguratorStore((s) => s.sceneMode);
-  const hasText = config.text.replace(/\s+/g, "").length > 0;
+// ---------------------------------------------------------------------------
+// Scene content: lighting, controls, shadows, sign
+// ---------------------------------------------------------------------------
 
+// Pre-allocated colors to avoid per-frame garbage
+const _targetBg = new THREE.Color();
+
+function SceneContent() {
+  const sceneMode = useConfiguratorStore((s) => s.sceneMode);
   const target = sceneMode === "night" ? NIGHT_LIGHTING : DAY_LIGHTING;
 
   const ambientRef = useRef<THREE.AmbientLight>(null);
-  const dirRef = useRef<THREE.DirectionalLight>(null);
+  const keyRef = useRef<THREE.DirectionalLight>(null);
   const fillRef = useRef<THREE.DirectionalLight>(null);
-  const bgRef = useRef<THREE.Color>(
-    new THREE.Color(DAY_LIGHTING.backgroundColor)
-  );
+  const rimRef = useRef<THREE.DirectionalLight>(null);
+  const bgRef = useRef(new THREE.Color(DAY_LIGHTING.backgroundColor));
 
   useFrame((state, delta) => {
     const speed = 3;
@@ -159,9 +213,9 @@ function SceneContent() {
       );
     }
 
-    if (dirRef.current) {
-      dirRef.current.intensity = THREE.MathUtils.lerp(
-        dirRef.current.intensity,
+    if (keyRef.current) {
+      keyRef.current.intensity = THREE.MathUtils.lerp(
+        keyRef.current.intensity,
         target.directionalIntensity,
         speed * delta
       );
@@ -175,6 +229,14 @@ function SceneContent() {
       );
     }
 
+    if (rimRef.current) {
+      rimRef.current.intensity = THREE.MathUtils.lerp(
+        rimRef.current.intensity,
+        target.rimIntensity,
+        speed * delta
+      );
+    }
+
     // Environment IBL intensity
     state.scene.environmentIntensity = THREE.MathUtils.lerp(
       state.scene.environmentIntensity,
@@ -182,89 +244,119 @@ function SceneContent() {
       speed * delta
     );
 
-    // Background color lerp
-    const targetBg = new THREE.Color(target.backgroundColor);
-    bgRef.current.lerp(targetBg, speed * delta);
+    // Background color lerp (reuse pre-allocated color)
+    _targetBg.set(target.backgroundColor);
+    bgRef.current.lerp(_targetBg, speed * delta);
     state.scene.background = bgRef.current;
   });
 
   return (
     <>
+      {/* Camera controls with damping for smooth feel */}
       <OrbitControls
         makeDefault
+        enableDamping
+        dampingFactor={0.08}
         minDistance={15}
         maxDistance={200}
         enablePan={false}
-        minPolarAngle={Math.PI * 0.3}
-        maxPolarAngle={Math.PI * 0.7}
-        minAzimuthAngle={-Math.PI * 0.35}
-        maxAzimuthAngle={Math.PI * 0.35}
+        minPolarAngle={Math.PI * 0.2}
+        maxPolarAngle={Math.PI * 0.75}
+        minAzimuthAngle={-Math.PI * 0.45}
+        maxAzimuthAngle={Math.PI * 0.45}
       />
 
-      {/* Lighting */}
-      <ambientLight ref={ambientRef} intensity={DAY_LIGHTING.ambientIntensity} />
+      {/* --- Three-point studio lighting --- */}
+
+      {/* Key light: main illumination from upper-right front */}
       <directionalLight
-        ref={dirRef}
-        position={[8, 12, 15]}
+        ref={keyRef}
+        position={[10, 14, 12]}
         intensity={DAY_LIGHTING.directionalIntensity}
         castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-left={-80}
+        shadow-camera-right={80}
+        shadow-camera-top={60}
+        shadow-camera-bottom={-20}
+        shadow-camera-near={0.5}
+        shadow-camera-far={120}
+        shadow-bias={-0.0002}
+        shadow-normalBias={0.02}
       />
+
+      {/* Fill light: softer, opposite side to reduce harsh shadows */}
       <directionalLight
         ref={fillRef}
-        position={[-6, 4, 8]}
+        position={[-8, 6, 8]}
         intensity={DAY_LIGHTING.fillIntensity}
       />
 
-      {/* Environment for metallic reflections */}
+      {/* Rim/back light: edge definition from behind */}
+      <directionalLight
+        ref={rimRef}
+        position={[0, 8, -12]}
+        intensity={DAY_LIGHTING.rimIntensity}
+      />
+
+      {/* Ambient fill for shadow areas */}
+      <ambientLight
+        ref={ambientRef}
+        intensity={DAY_LIGHTING.ambientIntensity}
+      />
+
+      {/* Environment for metallic reflections (studio HDRI) */}
       <Environment preset="studio" />
 
-      {/* Wall behind the letters — outside Bounds so it doesn't affect auto-fit */}
+      {/* Contact shadows for grounding the sign on the wall */}
+      <ContactShadows
+        position={[0, -1, 0]}
+        opacity={0.35}
+        scale={120}
+        blur={2.5}
+        far={40}
+        resolution={512}
+      />
+
+      {/* Wall behind the letters -- outside Bounds so it doesn't affect auto-fit */}
       <WallPlane />
 
-      {/* Sign assembly with auto-framing — only the sign is inside Bounds */}
+      {/* Sign content with auto-framing -- only the sign is inside Bounds */}
       <Bounds fit observe margin={1.8} maxDuration={0.5}>
         <AutoFit />
-        {hasText ? (
-          <Center>
-            <SignAssembly />
-          </Center>
-        ) : (
-          <Center>
-            <Text
-              fontSize={8}
-              color="#9ca3af"
-              anchorX="center"
-              anchorY="middle"
-              fillOpacity={0.2}
-              font="/fonts/Montserrat-Regular.ttf"
-            >
-              YOUR TEXT
-            </Text>
-          </Center>
-        )}
+        <Center>
+          <SceneRouter />
+        </Center>
       </Bounds>
 
-      {/* Imperative bloom — avoids R3F reconciler serialization of circular refs */}
+      {/* Bloom post-processing (active in both day AND night mode) */}
       <ImperativeBloom />
     </>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Canvas wrapper
+// ---------------------------------------------------------------------------
+
 export default function Scene() {
   return (
     <Canvas
       camera={{ position: [0, 0, 60], fov: 40 }}
+      shadows
       gl={{
         antialias: true,
         alpha: false,
         preserveDrawingBuffer: true,
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 0.9,
+        outputColorSpace: THREE.SRGBColorSpace,
       }}
       dpr={[1, 2]}
       className="h-full w-full"
     >
-      <Suspense fallback={null}>
+      <Suspense fallback={<Loader />}>
         <SceneContent />
       </Suspense>
     </Canvas>

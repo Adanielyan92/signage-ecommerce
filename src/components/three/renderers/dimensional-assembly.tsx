@@ -1,12 +1,14 @@
 "use client";
 
-import * as THREE from "three";
 import { useMemo, useRef, useEffect } from "react";
+import * as THREE from "three";
+import { useConfiguratorStore } from "@/stores/configurator-store";
 import { useFont } from "../hooks/use-font";
 import { SignLetter } from "../sign-letter";
 import { clearGeometryCache } from "../utils/geometry-cache";
+import { computeLetterPositions, getTotalWidth } from "../utils/letter-layout";
 
-interface DimensionalRendererProps {
+interface DimensionalAssemblyProps {
   text: string;
   height: number;
   font: string;
@@ -60,16 +62,21 @@ function getDimensionalMaterials(
       };
 
     case "brushed-metal":
+      // Use MeshPhysicalMaterial with anisotropy for realistic brushed finish
       return {
-        face: new THREE.MeshStandardMaterial({
+        face: new THREE.MeshPhysicalMaterial({
           color: "#c8c8c8",
           metalness: 0.95,
           roughness: 0.15,
+          anisotropy: 0.8,
+          anisotropyRotation: 0,
         }),
-        sides: new THREE.MeshStandardMaterial({
+        sides: new THREE.MeshPhysicalMaterial({
           color: "#c0c0c0",
           metalness: 0.9,
           roughness: 0.2,
+          anisotropy: 0.5,
+          anisotropyRotation: Math.PI / 2,
         }),
       };
 
@@ -90,20 +97,21 @@ function getDimensionalMaterials(
   }
 }
 
-export function DimensionalRenderer({
+export function DimensionalAssembly({
   text,
   height,
   font: fontName,
   thickness,
   materialType,
   painting,
-}: DimensionalRendererProps) {
+}: DimensionalAssemblyProps) {
+  const quality = useConfiguratorStore((s) => s.quality);
+  const setDimensions = useConfiguratorStore((s) => s.setDimensions);
   const font = useFont(fontName);
   const prevFontName = useRef(fontName);
 
-  const textNoSpaces = (text || "").replace(/\s+/g, "");
   const depth = parseFloat(thickness) || 1;
-  const curveSegments = QUALITY_MAP["medium"];
+  const curveSegments = QUALITY_MAP[quality] || 8;
 
   // Clear geometry cache when font changes
   useEffect(() => {
@@ -113,39 +121,45 @@ export function DimensionalRenderer({
     }
   }, [fontName]);
 
+  // Materials with proper disposal via effect cleanup
   const materials = useMemo(
     () => getDimensionalMaterials(materialType, painting),
     [materialType, painting]
   );
 
-  // Compute per-character positions using font metrics
-  // Same logic as SignAssembly
+  useEffect(() => {
+    return () => {
+      materials.face.dispose();
+      materials.sides.dispose();
+    };
+  }, [materials]);
+
+  // Compute per-character positions using shared helper
   const letterPositions = useMemo(() => {
-    if (!font || textNoSpaces.length === 0) return [];
-    const scale = height / font.unitsPerEm;
-    const positions: { char: string; x: number; width: number }[] = [];
-    let x = 0;
+    if (!font) return [];
+    return computeLetterPositions(font, text, height);
+  }, [font, text, height]);
 
-    for (let i = 0; i < textNoSpaces.length; i++) {
-      const glyph = font.charToGlyph(textNoSpaces[i]);
-      const advanceWidth =
-        (glyph.advanceWidth || font.unitsPerEm * 0.6) * scale;
-      positions.push({ char: textNoSpaces[i], x, width: advanceWidth });
-      x += advanceWidth;
-
-      if (i < textNoSpaces.length - 1) {
-        const nextGlyph = font.charToGlyph(textNoSpaces[i + 1]);
-        x += font.getKerningValue(glyph, nextGlyph) * scale;
+  // Feed dimensions back to the store for pricing
+  const prevDimsRef = useRef("");
+  useEffect(() => {
+    if (letterPositions.length > 0) {
+      const totalWidth = getTotalWidth(letterPositions);
+      const dimsKey = `${totalWidth}:${height}`;
+      if (dimsKey !== prevDimsRef.current) {
+        prevDimsRef.current = dimsKey;
+        setDimensions({
+          totalWidthInches: totalWidth,
+          heightInches: height,
+          squareFeet: (totalWidth * height) / 144,
+          linearFeet: ((totalWidth + height) * 2) / 12,
+          letterWidths: letterPositions.map((p) => p.width),
+        });
       }
     }
-    return positions;
-  }, [font, textNoSpaces, height]);
+  }, [letterPositions, height, setDimensions]);
 
-  const totalWidth =
-    letterPositions.length > 0
-      ? letterPositions[letterPositions.length - 1].x +
-        letterPositions[letterPositions.length - 1].width
-      : 0;
+  const totalWidth = getTotalWidth(letterPositions);
   const xOffset = -totalWidth / 2;
 
   if (!font) return null;

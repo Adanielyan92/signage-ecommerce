@@ -9,16 +9,8 @@ import { SignLetter } from "./sign-letter";
 import { clearGeometryCache } from "./utils/geometry-cache";
 import { Raceway, RacewayBox, BackgroundPanel, MountingStuds } from "./objects";
 import { DAY_LIGHTING, NIGHT_LIGHTING } from "./utils/day-night-lighting";
-
-const LED_COLORS: Record<string, string> = {
-  "3000K": "#FFB46B",
-  "3500K": "#FFC98E",
-  "6000K": "#E3EEFF",
-  "Red": "#FF0000",
-  "Green": "#00FF00",
-  "Blue": "#0066FF",
-  RGB: "#FF0000",
-};
+import { getLedColor } from "./utils/led-colors";
+import { computeLetterPositions, getTotalWidth } from "./utils/letter-layout";
 
 const QUALITY_MAP: Record<string, number> = {
   low: 4,
@@ -32,7 +24,7 @@ function getLetterMaterials(config: {
   led: string;
   painting: string;
 }) {
-  const ledColor = LED_COLORS[config.led] || "#FFFFFF";
+  const ledColor = getLedColor(config.led);
   const isPainted = config.painting !== "-";
   const paintColor = isPainted ? "#2c3e50" : "#c0c0c0";
 
@@ -109,11 +101,11 @@ export function SignAssembly() {
   const config = useConfiguratorStore((s) => s.config);
   const quality = useConfiguratorStore((s) => s.quality);
   const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const sceneMode = useConfiguratorStore((s) => s.sceneMode);
   const font = useFont(config.font);
   const prevFontName = useRef(config.font);
 
   const text = config.text || "";
-  const textNoSpaces = text.replace(/\s+/g, "");
   const height = config.height;
   const depth = parseFloat(config.sideDepth) || 4;
   const curveSegments = QUALITY_MAP[quality] || 8;
@@ -126,40 +118,31 @@ export function SignAssembly() {
     }
   }, [config.font]);
 
+  // Materials with proper disposal via effect cleanup
   const materials = useMemo(
     () => getLetterMaterials(config),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only these 4 fields affect materials
     [config.productType, config.lit, config.led, config.painting]
   );
 
-  // Compute per-character positions using font metrics
+  useEffect(() => {
+    return () => {
+      materials.face.dispose();
+      materials.sides.dispose();
+    };
+  }, [materials]);
+
+  // Compute per-character positions using shared helper
   const letterPositions = useMemo(() => {
-    if (!font || textNoSpaces.length === 0) return [];
-    const scale = height / font.unitsPerEm;
-    const positions: { char: string; x: number; width: number }[] = [];
-    let x = 0;
-
-    for (let i = 0; i < textNoSpaces.length; i++) {
-      const glyph = font.charToGlyph(textNoSpaces[i]);
-      const advanceWidth =
-        (glyph.advanceWidth || font.unitsPerEm * 0.6) * scale;
-      positions.push({ char: textNoSpaces[i], x, width: advanceWidth });
-      x += advanceWidth;
-
-      if (i < textNoSpaces.length - 1) {
-        const nextGlyph = font.charToGlyph(textNoSpaces[i + 1]);
-        x += font.getKerningValue(glyph, nextGlyph) * scale;
-      }
-    }
-    return positions;
-  }, [font, textNoSpaces, height]);
+    if (!font) return [];
+    return computeLetterPositions(font, text, height);
+  }, [font, text, height]);
 
   // Feed dimensions back to the store for pricing
   const prevDimsRef = useRef("");
   useEffect(() => {
     if (letterPositions.length > 0) {
-      const last = letterPositions[letterPositions.length - 1];
-      const totalWidth = last.x + last.width;
+      const totalWidth = getTotalWidth(letterPositions);
       const dimsKey = `${totalWidth}:${height}`;
       if (dimsKey !== prevDimsRef.current) {
         prevDimsRef.current = dimsKey;
@@ -174,18 +157,13 @@ export function SignAssembly() {
     }
   }, [letterPositions, height, setDimensions]);
 
-  const totalWidth =
-    letterPositions.length > 0
-      ? letterPositions[letterPositions.length - 1].x +
-        letterPositions[letterPositions.length - 1].width
-      : 0;
+  const totalWidth = getTotalWidth(letterPositions);
   const xOffset = -totalWidth / 2;
 
   // Dynamically adjust emissive intensity based on day/night mode
-  const sceneMode = useConfiguratorStore((s) => s.sceneMode);
   useFrame((_state, delta) => {
     if ("emissiveIntensity" in materials.face) {
-      const target =
+      const emissiveTarget =
         config.lit === "Lit"
           ? sceneMode === "night"
             ? 1.5 * NIGHT_LIGHTING.emissiveMultiplier
@@ -193,7 +171,7 @@ export function SignAssembly() {
           : 0;
       materials.face.emissiveIntensity = THREE.MathUtils.lerp(
         materials.face.emissiveIntensity,
-        target,
+        emissiveTarget,
         3 * delta
       );
     }
@@ -221,7 +199,7 @@ export function SignAssembly() {
 
   const isBackLit =
     config.productType === "back-lit" || config.productType === "halo-lit";
-  const ledColorHex = LED_COLORS[config.led] || "#FFFFFF";
+  const ledColorHex = getLedColor(config.led);
   const bevelEnabled = config.productType === "front-lit-trim-cap";
 
   if (!font) return null;
@@ -295,7 +273,7 @@ export function SignAssembly() {
         <BackgroundPanel width={totalWidth} height={height} depth={depth} />
       )}
 
-      {/* Mounting Studs (always visible for non-lit, hidden for back-lit which has glow planes) */}
+      {/* Mounting Studs */}
       {config.productType !== "back-lit" && config.productType !== "halo-lit" && letterPositions.length > 0 && (
         <MountingStuds
           letterPositions={letterPositions}

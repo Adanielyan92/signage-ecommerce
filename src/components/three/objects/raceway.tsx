@@ -11,7 +11,7 @@ export function Raceway({ width, height, depth }: RacewayProps) {
   const racewayDepth = Math.min(depth, 4);
 
   return (
-    <mesh position={[0, -racewayHeight / 2 - 1, -racewayDepth / 2]}>
+    <mesh position={[0, -racewayHeight / 2 - 1, -racewayDepth / 2]} castShadow receiveShadow>
       <boxGeometry args={[width + 4, racewayHeight, racewayDepth]} />
       <meshStandardMaterial
         color="#808080"

@@ -13,6 +13,10 @@ import type {
   LogoConfiguration,
   PrintConfiguration,
   SignPostConfiguration,
+  LightBoxConfiguration,
+  BladeSignConfiguration,
+  NeonSignConfiguration,
+  VinylBannerConfiguration,
 } from "@/types/configurator";
 import type {
   ChannelLetterType,
@@ -106,6 +110,51 @@ const defaultSignPostConfig: SignPostConfiguration = {
   doubleSided: false,
 };
 
+const defaultLightBoxConfig: LightBoxConfiguration = {
+  productCategory: "LIGHT_BOX_SIGNS",
+  productType: "light-box-single",
+  widthInches: 48,
+  heightInches: 24,
+  depth: "5",
+  led: "3000K",
+  faceType: "translucent",
+  shape: "rectangular",
+  mounting: "wall",
+};
+
+const defaultBladeConfig: BladeSignConfiguration = {
+  productCategory: "BLADE_SIGNS",
+  productType: "blade-rectangular",
+  widthInches: 24,
+  heightInches: 36,
+  depth: "2",
+  illuminated: false,
+  led: "3000K",
+  doubleSided: true,
+  shape: "rectangular",
+};
+
+const defaultNeonConfig: NeonSignConfiguration = {
+  productCategory: "NEON_SIGNS",
+  productType: "led-neon",
+  text: "",
+  height: 12,
+  font: "Standard",
+  neonColor: "warm-white",
+  backer: "clear-acrylic",
+  backerShape: "rectangular",
+};
+
+const defaultBannerConfig: VinylBannerConfiguration = {
+  productCategory: "VINYL_BANNERS",
+  productType: "vinyl-banner-13oz",
+  widthInches: 72,
+  heightInches: 36,
+  material: "13oz",
+  finishing: "hem-grommets",
+  doubleSided: false,
+};
+
 // ---------------------------------------------------------------------------
 // Empty defaults
 // ---------------------------------------------------------------------------
@@ -179,6 +228,10 @@ function getDimensionsForCategoryConfig(
     | "logoConfig"
     | "printConfig"
     | "signPostConfig"
+    | "lightBoxConfig"
+    | "bladeConfig"
+    | "neonConfig"
+    | "bannerConfig"
   >,
 ): Dimensions {
   switch (cat) {
@@ -213,6 +266,27 @@ function getDimensionsForCategoryConfig(
         state.signPostConfig.signWidthInches,
         state.signPostConfig.signHeightInches,
       );
+    case "LIGHT_BOX_SIGNS":
+      return estimateCategoryDimensions(
+        state.lightBoxConfig.widthInches,
+        state.lightBoxConfig.heightInches,
+      );
+    case "BLADE_SIGNS":
+      return estimateCategoryDimensions(
+        state.bladeConfig.widthInches,
+        state.bladeConfig.heightInches,
+      );
+    case "NEON_SIGNS":
+      return estimateTextDimensions(
+        state.neonConfig.text,
+        state.neonConfig.height,
+        state.neonConfig.font,
+      );
+    case "VINYL_BANNERS":
+      return estimateCategoryDimensions(
+        state.bannerConfig.widthInches,
+        state.bannerConfig.heightInches,
+      );
     default:
       return emptyDimensions;
   }
@@ -229,6 +303,10 @@ function getCategoryConfig(
     | "logoConfig"
     | "printConfig"
     | "signPostConfig"
+    | "lightBoxConfig"
+    | "bladeConfig"
+    | "neonConfig"
+    | "bannerConfig"
   >,
 ): AnySignConfiguration | null {
   switch (cat) {
@@ -244,6 +322,14 @@ function getCategoryConfig(
       return state.printConfig;
     case "SIGN_POSTS":
       return state.signPostConfig;
+    case "LIGHT_BOX_SIGNS":
+      return state.lightBoxConfig;
+    case "BLADE_SIGNS":
+      return state.bladeConfig;
+    case "NEON_SIGNS":
+      return state.neonConfig;
+    case "VINYL_BANNERS":
+      return state.bannerConfig;
     default:
       return null;
   }
@@ -280,6 +366,10 @@ interface ConfiguratorState {
   logoConfig: LogoConfiguration;
   printConfig: PrintConfiguration;
   signPostConfig: SignPostConfiguration;
+  lightBoxConfig: LightBoxConfiguration;
+  bladeConfig: BladeSignConfiguration;
+  neonConfig: NeonSignConfiguration;
+  bannerConfig: VinylBannerConfiguration;
 
   // --- Channel letter setters (backward compatible) ---
   setProductType: (type: ChannelLetterType) => void;
@@ -340,6 +430,10 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   logoConfig: { ...defaultLogoConfig },
   printConfig: { ...defaultPrintConfig },
   signPostConfig: { ...defaultSignPostConfig },
+  lightBoxConfig: { ...defaultLightBoxConfig },
+  bladeConfig: { ...defaultBladeConfig },
+  neonConfig: { ...defaultNeonConfig },
+  bannerConfig: { ...defaultBannerConfig },
 
   // --- Channel letter setters (unchanged for backward compat) ---
 
@@ -447,6 +541,10 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       logoConfig: { ...defaultLogoConfig },
       printConfig: { ...defaultPrintConfig },
       signPostConfig: { ...defaultSignPostConfig },
+      lightBoxConfig: { ...defaultLightBoxConfig },
+      bladeConfig: { ...defaultBladeConfig },
+      neonConfig: { ...defaultNeonConfig },
+      bannerConfig: { ...defaultBannerConfig },
     });
   },
 
@@ -527,6 +625,30 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
             productType: productType as SignPostConfiguration["productType"],
           };
           break;
+        case "LIGHT_BOX_SIGNS":
+          updates.lightBoxConfig = {
+            ...get().lightBoxConfig,
+            productType: productType as LightBoxConfiguration["productType"],
+          };
+          break;
+        case "BLADE_SIGNS":
+          updates.bladeConfig = {
+            ...get().bladeConfig,
+            productType: productType as BladeSignConfiguration["productType"],
+          };
+          break;
+        case "NEON_SIGNS":
+          updates.neonConfig = {
+            ...get().neonConfig,
+            productType: productType as NeonSignConfiguration["productType"],
+          };
+          break;
+        case "VINYL_BANNERS":
+          updates.bannerConfig = {
+            ...get().bannerConfig,
+            productType: productType as VinylBannerConfiguration["productType"],
+          };
+          break;
       }
     }
 
@@ -572,6 +694,26 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       case "SIGN_POSTS":
         set((s) => ({
           signPostConfig: { ...s.signPostConfig, [key]: value },
+        }));
+        break;
+      case "LIGHT_BOX_SIGNS":
+        set((s) => ({
+          lightBoxConfig: { ...s.lightBoxConfig, [key]: value } as LightBoxConfiguration,
+        }));
+        break;
+      case "BLADE_SIGNS":
+        set((s) => ({
+          bladeConfig: { ...s.bladeConfig, [key]: value } as BladeSignConfiguration,
+        }));
+        break;
+      case "NEON_SIGNS":
+        set((s) => ({
+          neonConfig: { ...s.neonConfig, [key]: value } as NeonSignConfiguration,
+        }));
+        break;
+      case "VINYL_BANNERS":
+        set((s) => ({
+          bannerConfig: { ...s.bannerConfig, [key]: value } as VinylBannerConfiguration,
         }));
         break;
     }

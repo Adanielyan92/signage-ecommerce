@@ -13,6 +13,10 @@ import type {
   LogoType,
   PrintSignType,
   SignPostType,
+  LightBoxType,
+  BladeSignType,
+  NeonSignType,
+  VinylBannerType,
   ProductCategory,
   ProductTypeSlug,
 } from "./product";
@@ -135,6 +139,51 @@ export interface SignPostConfiguration {
   doubleSided: boolean;
 }
 
+export interface LightBoxConfiguration {
+  productCategory: "LIGHT_BOX_SIGNS";
+  productType: LightBoxType;
+  widthInches: number;
+  heightInches: number;
+  depth: "4" | "5" | "6";
+  led: LEDColor;
+  faceType: "translucent" | "push-through";
+  shape: "rectangular" | "round";
+  mounting: "wall" | "hanging";
+}
+
+export interface BladeSignConfiguration {
+  productCategory: "BLADE_SIGNS";
+  productType: BladeSignType;
+  widthInches: number;
+  heightInches: number;
+  depth: "2" | "3" | "4";
+  illuminated: boolean;
+  led: LEDColor;
+  doubleSided: boolean;
+  shape: "rectangular" | "round";
+}
+
+export interface NeonSignConfiguration {
+  productCategory: "NEON_SIGNS";
+  productType: NeonSignType;
+  text: string;
+  height: number;
+  font: FontStyle;
+  neonColor: "warm-white" | "cool-white" | "pink" | "red" | "blue" | "green" | "rgb";
+  backer: "clear-acrylic" | "black-acrylic" | "none";
+  backerShape: "rectangular" | "contour";
+}
+
+export interface VinylBannerConfiguration {
+  productCategory: "VINYL_BANNERS";
+  productType: VinylBannerType;
+  widthInches: number;
+  heightInches: number;
+  material: "13oz" | "15oz" | "mesh";
+  finishing: "hem-grommets" | "pole-pockets" | "wind-slits";
+  doubleSided: boolean;
+}
+
 // --- Union of all configuration types ---
 
 export type AnySignConfiguration =
@@ -144,7 +193,11 @@ export type AnySignConfiguration =
   | DimensionalLetterConfiguration
   | LogoConfiguration
   | PrintConfiguration
-  | SignPostConfiguration;
+  | SignPostConfiguration
+  | LightBoxConfiguration
+  | BladeSignConfiguration
+  | NeonSignConfiguration
+  | VinylBannerConfiguration;
 
 // --- Unified cart item type ---
 

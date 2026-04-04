@@ -1,7 +1,9 @@
 "use client";
 
 import * as THREE from "three";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useConfiguratorStore } from "@/stores/configurator-store";
+import { getLedColor } from "../utils/led-colors";
 
 interface LogoRendererProps {
   width: number;
@@ -10,16 +12,6 @@ interface LogoRendererProps {
   led?: string;
   painting: string;
 }
-
-const LED_COLORS: Record<string, string> = {
-  "3000K": "#FFB46B",
-  "3500K": "#FFC98E",
-  "6000K": "#E3EEFF",
-  "Red": "#FF0000",
-  "Green": "#00FF00",
-  "Blue": "#0066FF",
-  RGB: "#FF0000",
-};
 
 /**
  * Placeholder renderer for logo signs.
@@ -33,8 +25,24 @@ export function LogoRenderer({
   led,
   painting,
 }: LogoRendererProps) {
+  const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const prevDims = useRef("");
+
+  useEffect(() => {
+    const key = `${width}:${height}`;
+    if (key === prevDims.current) return;
+    prevDims.current = key;
+    setDimensions({
+      totalWidthInches: width,
+      heightInches: height,
+      squareFeet: (width * height) / 144,
+      linearFeet: ((width + height) * 2) / 12,
+      letterWidths: [],
+    });
+  }, [width, height, setDimensions]);
+
   const isLit = !!led && led !== "-";
-  const ledColor = isLit ? (LED_COLORS[led!] || "#FFFFFF") : "#000000";
+  const ledColor = isLit ? getLedColor(led!) : "#000000";
   const isPainted = painting !== "-";
 
   const bodyMaterial = useMemo(
@@ -68,7 +76,7 @@ export function LogoRenderer({
   return (
     <group>
       {/* Logo body -- placeholder rectangle */}
-      <mesh position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]} castShadow receiveShadow>
         <boxGeometry args={[width, height, depth]} />
         <primitive object={bodyMaterial} attach="material" />
       </mesh>

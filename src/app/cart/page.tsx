@@ -8,37 +8,108 @@ import type { UnifiedCartItem } from "@/types/configurator";
 
 function getItemSummary(item: UnifiedCartItem): { title: string; specs: string[] } {
   const config = item.configuration;
+  const cat = item.productCategory;
 
-  if ("text" in config && "height" in config && "led" in config) {
-    // Channel letters or dimensional letters
+  if (cat === "CHANNEL_LETTERS" && "text" in config && "height" in config) {
     return {
       title: `"${config.text}" - ${config.height}" tall`,
       specs: [
-        "lit" in config ? config.lit : "",
         "led" in config ? String(config.led) : "",
-        "font" in config ? config.font : "",
+        "font" in config ? String(config.font) : "",
       ].filter(Boolean),
     };
   }
 
-  if ("widthInches" in config && "heightInches" in config) {
-    // Lit shapes, cabinets, logos, prints
+  if (cat === "DIMENSIONAL_LETTERS" && "text" in config && "height" in config) {
     return {
-      title: `${config.widthInches}" × ${config.heightInches}"`,
+      title: `"${config.text}" - ${config.height}" tall`,
+      specs: [
+        "productType" in config ? String(config.productType) : "",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "CABINET_SIGNS" && "widthInches" in config && "heightInches" in config) {
+    return {
+      title: `${config.widthInches}" x ${config.heightInches}"`,
       specs: [
         "led" in config && config.led ? String(config.led) : "",
-        "mounting" in config ? String(config.mounting) : "",
       ].filter(Boolean),
     };
   }
 
-  if ("signWidthInches" in config) {
-    // Sign posts
+  if (cat === "LIT_SHAPES" && "widthInches" in config && "heightInches" in config) {
     return {
-      title: `${config.signWidthInches}" × ${config.signHeightInches}" sign`,
+      title: `${config.widthInches}" x ${config.heightInches}"`,
       specs: [
-        config.doubleSided ? "Double sided" : "Single sided",
+        "led" in config && config.led ? String(config.led) : "",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "LOGOS" && "widthInches" in config && "heightInches" in config) {
+    return {
+      title: `${config.widthInches}" x ${config.heightInches}"`,
+      specs: [
+        "led" in config && config.led ? "Lit" : "Non-lit",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "PRINT_SIGNS" && "widthInches" in config && "heightInches" in config) {
+    return {
+      title: `${config.widthInches}" x ${config.heightInches}"`,
+      specs: [
+        "productType" in config ? String(config.productType) : "",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "SIGN_POSTS" && "signWidthInches" in config && "signHeightInches" in config && "postHeight" in config) {
+    return {
+      title: `${config.signWidthInches}" x ${config.signHeightInches}" panel`,
+      specs: [
+        `${config.postHeight}" post`,
       ],
+    };
+  }
+
+  if (cat === "LIGHT_BOX_SIGNS" && "widthInches" in config && "heightInches" in config) {
+    return {
+      title: `${config.widthInches}" x ${config.heightInches}"`,
+      specs: [
+        "led" in config ? String(config.led) : "",
+        "faceType" in config ? String(config.faceType) : "",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "BLADE_SIGNS" && "widthInches" in config && "heightInches" in config) {
+    return {
+      title: `${config.widthInches}" x ${config.heightInches}"`,
+      specs: [
+        "illuminated" in config && config.illuminated ? "Illuminated" : "Non-lit",
+        "doubleSided" in config && config.doubleSided ? "Double sided" : "Single sided",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "NEON_SIGNS" && "text" in config && "height" in config) {
+    return {
+      title: `"${config.text}" - ${config.height}" tall`,
+      specs: [
+        "neonColor" in config ? String(config.neonColor) : "",
+      ].filter(Boolean),
+    };
+  }
+
+  if (cat === "VINYL_BANNERS" && "widthInches" in config && "heightInches" in config) {
+    return {
+      title: `${config.widthInches}" x ${config.heightInches}"`,
+      specs: [
+        "material" in config ? String(config.material) : "",
+        "finishing" in config ? String(config.finishing) : "",
+      ].filter(Boolean),
     };
   }
 

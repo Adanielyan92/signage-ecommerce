@@ -38,7 +38,11 @@ export type ProductCategory =
   | "LOGOS"
   | "PRINT_SIGNS"
   | "SIGN_POSTS"
-  | "ACCESSORIES";
+  | "ACCESSORIES"
+  | "LIGHT_BOX_SIGNS"
+  | "BLADE_SIGNS"
+  | "NEON_SIGNS"
+  | "VINYL_BANNERS";
 
 export type ChannelLetterType =
   | "front-lit-trim-cap"
@@ -68,6 +72,11 @@ export type PrintSignType = "acm-panel" | "coroplast" | "foam-board";
 
 export type SignPostType = "single-post" | "double-post" | "monument-base";
 
+export type LightBoxType = "light-box-single" | "light-box-double" | "light-box-push-through";
+export type BladeSignType = "blade-rectangular" | "blade-round";
+export type NeonSignType = "led-neon";
+export type VinylBannerType = "vinyl-banner-13oz" | "vinyl-banner-15oz" | "mesh-banner";
+
 export type ProductTypeSlug =
   | ChannelLetterType
   | LitShapeType
@@ -75,7 +84,11 @@ export type ProductTypeSlug =
   | DimensionalLetterType
   | LogoType
   | PrintSignType
-  | SignPostType;
+  | SignPostType
+  | LightBoxType
+  | BladeSignType
+  | NeonSignType
+  | VinylBannerType;
 
 export type LitOption = "Lit" | "Non-Lit";
 export type LEDColor = "3000K" | "3500K" | "6000K" | "Red" | "Green" | "Blue" | "RGB";
@@ -126,6 +139,26 @@ export interface PrintPricingParams {
 export interface SignPostPricingParams {
   basePrice: number;
   pricePerSqftSign: number;
+  minOrderPrice: number;
+}
+
+export interface BladePricingParams {
+  basePricePerSqft: number;
+  litPricePerSqft: number;
+  minSqft: number;
+  minOrderPrice: number;
+}
+
+export interface NeonPricingParams {
+  pricePerInch: number;
+  minHeightForPrice: number;
+  minOrderPrice: number;
+  backerClearPerSqft: number;
+  backerBlackPerSqft: number;
+}
+
+export interface BannerPricingParams {
+  tiers: { maxSqft: number; pricePerSqft: number }[];
   minOrderPrice: number;
 }
 

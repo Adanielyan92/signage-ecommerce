@@ -60,6 +60,33 @@ const PRODUCT_CATEGORIES = [
       { name: "Monument Sign", slug: "monument-base" },
     ],
   },
+  {
+    title: "Light Boxes",
+    description: "Illuminated sign boxes",
+    items: [
+      { name: "Single Face Light Box", slug: "light-box-single" },
+      { name: "Double Face Light Box", slug: "light-box-double" },
+      { name: "Push-Through Light Box", slug: "light-box-push-through" },
+    ],
+  },
+  {
+    title: "Blade Signs",
+    description: "Wall-projecting signs",
+    items: [
+      { name: "Rectangular Blade", slug: "blade-rectangular" },
+      { name: "Round Blade", slug: "blade-round" },
+    ],
+  },
+  {
+    title: "Neon & Banners",
+    description: "LED neon and vinyl banners",
+    items: [
+      { name: "LED Neon Sign", slug: "led-neon" },
+      { name: "13oz Vinyl Banner", slug: "vinyl-banner-13oz" },
+      { name: "15oz Heavy Duty Banner", slug: "vinyl-banner-15oz" },
+      { name: "Mesh Banner", slug: "mesh-banner" },
+    ],
+  },
 ];
 
 export { PRODUCT_CATEGORIES };
@@ -123,8 +150,8 @@ export function MegaMenuDesktop() {
             : "pointer-events-none -translate-y-2 opacity-0"
         )}
       >
-        <div className="w-[800px] rounded-xl border border-neutral-200 bg-white p-6 shadow-xl">
-          <div className="grid grid-cols-5 gap-6">
+        <div className="w-[1050px] rounded-xl border border-neutral-200 bg-white p-6 shadow-xl">
+          <div className="grid grid-cols-8 gap-6">
             {PRODUCT_CATEGORIES.map((category) => (
               <div key={category.title}>
                 <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-400">

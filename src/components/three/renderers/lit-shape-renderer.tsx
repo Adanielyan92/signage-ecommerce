@@ -1,7 +1,9 @@
 "use client";
 
 import * as THREE from "three";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useConfiguratorStore } from "@/stores/configurator-store";
+import { getLedColor } from "../utils/led-colors";
 
 interface LitShapeRendererProps {
   width: number;
@@ -11,16 +13,6 @@ interface LitShapeRendererProps {
   painting: string;
 }
 
-const LED_COLORS: Record<string, string> = {
-  "3000K": "#FFB46B",
-  "3500K": "#FFC98E",
-  "6000K": "#E3EEFF",
-  "Red": "#FF0000",
-  "Green": "#00FF00",
-  "Blue": "#0066FF",
-  RGB: "#FF0000",
-};
-
 export function LitShapeRenderer({
   width,
   height,
@@ -28,7 +20,23 @@ export function LitShapeRenderer({
   led,
   painting,
 }: LitShapeRendererProps) {
-  const ledColor = LED_COLORS[led] || "#FFFFFF";
+  const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const prevDims = useRef("");
+
+  useEffect(() => {
+    const key = `${width}:${height}`;
+    if (key === prevDims.current) return;
+    prevDims.current = key;
+    setDimensions({
+      totalWidthInches: width,
+      heightInches: height,
+      squareFeet: (width * height) / 144,
+      linearFeet: ((width + height) * 2) / 12,
+      letterWidths: [],
+    });
+  }, [width, height, setDimensions]);
+
+  const ledColor = getLedColor(led);
   const isPainted = painting !== "-";
 
   const bodyMaterial = useMemo(
@@ -57,7 +65,7 @@ export function LitShapeRenderer({
   return (
     <group>
       {/* Sign body */}
-      <mesh position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]} castShadow receiveShadow>
         <boxGeometry args={[width, height, depth]} />
         <primitive object={bodyMaterial} attach="material" />
       </mesh>

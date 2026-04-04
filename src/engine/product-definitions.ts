@@ -1,7 +1,9 @@
 import type {
   PricingParams, ChannelLetterType, ProductOption,
   LitShapeType, CabinetSignType, DimensionalLetterType, LogoType, PrintSignType, SignPostType,
+  LightBoxType, BladeSignType, NeonSignType, VinylBannerType,
   SqftPricingParams, LogoPricingParams, PrintPricingParams, SignPostPricingParams,
+  BladePricingParams, NeonPricingParams, BannerPricingParams,
 } from "@/types/product";
 
 export interface ChannelLetterProduct {
@@ -608,6 +610,153 @@ export const signPostProducts: SignPostProduct[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Light Box Products
+// ---------------------------------------------------------------------------
+
+export interface LightBoxProduct {
+  slug: LightBoxType;
+  name: string;
+  description: string;
+  category: "LIGHT_BOX_SIGNS";
+  pricingParams: SqftPricingParams;
+}
+
+export const lightBoxProducts: LightBoxProduct[] = [
+  {
+    slug: "light-box-single",
+    name: "Single Face Light Box",
+    description: "Single-sided illuminated light box sign.",
+    category: "LIGHT_BOX_SIGNS",
+    pricingParams: { basePricePerSqft: 85, minSqft: 4, minOrderPrice: 1200 },
+  },
+  {
+    slug: "light-box-double",
+    name: "Double Face Light Box",
+    description: "Double-sided illuminated light box sign.",
+    category: "LIGHT_BOX_SIGNS",
+    pricingParams: { basePricePerSqft: 120, minSqft: 4, minOrderPrice: 1800 },
+  },
+  {
+    slug: "light-box-push-through",
+    name: "Push-Through Light Box",
+    description: "Light box with push-through dimensional letters.",
+    category: "LIGHT_BOX_SIGNS",
+    pricingParams: { basePricePerSqft: 120, minSqft: 4, minOrderPrice: 1500 },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Blade Sign Products
+// ---------------------------------------------------------------------------
+
+export interface BladeProduct {
+  slug: BladeSignType;
+  name: string;
+  description: string;
+  category: "BLADE_SIGNS";
+  pricingParams: BladePricingParams;
+}
+
+export const bladeProducts: BladeProduct[] = [
+  {
+    slug: "blade-rectangular",
+    name: "Rectangular Blade Sign",
+    description: "Rectangular projecting blade sign.",
+    category: "BLADE_SIGNS",
+    pricingParams: {
+      basePricePerSqft: 60,
+      litPricePerSqft: 90,
+      minSqft: 2,
+      minOrderPrice: 800,
+    },
+  },
+  {
+    slug: "blade-round",
+    name: "Round Blade Sign",
+    description: "Round projecting blade sign.",
+    category: "BLADE_SIGNS",
+    pricingParams: {
+      basePricePerSqft: 60,
+      litPricePerSqft: 90,
+      minSqft: 2,
+      minOrderPrice: 800,
+    },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Neon Sign Products
+// ---------------------------------------------------------------------------
+
+export interface NeonProduct {
+  slug: NeonSignType;
+  name: string;
+  description: string;
+  category: "NEON_SIGNS";
+  pricingParams: NeonPricingParams;
+}
+
+export const neonProducts: NeonProduct[] = [
+  {
+    slug: "led-neon",
+    name: "LED Neon Sign",
+    description: "Custom LED neon sign with flexible neon tubes.",
+    category: "NEON_SIGNS",
+    pricingParams: {
+      pricePerInch: 12,
+      minHeightForPrice: 8,
+      minOrderPrice: 500,
+      backerClearPerSqft: 15,
+      backerBlackPerSqft: 20,
+    },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Vinyl Banner Products
+// ---------------------------------------------------------------------------
+
+export interface BannerProduct {
+  slug: VinylBannerType;
+  name: string;
+  description: string;
+  category: "VINYL_BANNERS";
+  pricingParams: BannerPricingParams;
+}
+
+const bannerTiers = [
+  { maxSqft: 10, pricePerSqft: 8 },
+  { maxSqft: 30, pricePerSqft: 5.4 },
+  { maxSqft: 50, pricePerSqft: 4.5 },
+  { maxSqft: 100, pricePerSqft: 3.5 },
+  { maxSqft: Infinity, pricePerSqft: 2.55 },
+];
+
+export const bannerProducts: BannerProduct[] = [
+  {
+    slug: "vinyl-banner-13oz",
+    name: "13oz Vinyl Banner",
+    description: "Standard 13oz vinyl banner.",
+    category: "VINYL_BANNERS",
+    pricingParams: { tiers: bannerTiers, minOrderPrice: 50 },
+  },
+  {
+    slug: "vinyl-banner-15oz",
+    name: "15oz Heavy Duty Banner",
+    description: "Heavy duty 15oz vinyl banner.",
+    category: "VINYL_BANNERS",
+    pricingParams: { tiers: bannerTiers, minOrderPrice: 50 },
+  },
+  {
+    slug: "mesh-banner",
+    name: "Mesh Banner",
+    description: "Wind-resistant mesh banner.",
+    category: "VINYL_BANNERS",
+    pricingParams: { tiers: bannerTiers, minOrderPrice: 50 },
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Unified Lookup
 // ---------------------------------------------------------------------------
 
@@ -618,7 +767,11 @@ export type AnyProduct =
   | DimensionalProduct
   | LogoProduct
   | PrintProduct
-  | SignPostProduct;
+  | SignPostProduct
+  | LightBoxProduct
+  | BladeProduct
+  | NeonProduct
+  | BannerProduct;
 
 export function getAnyProductBySlug(slug: string): AnyProduct | undefined {
   return (
@@ -628,6 +781,10 @@ export function getAnyProductBySlug(slug: string): AnyProduct | undefined {
     (dimensionalProducts as AnyProduct[]).find((p) => p.slug === slug) ||
     (logoProducts as AnyProduct[]).find((p) => p.slug === slug) ||
     (printProducts as AnyProduct[]).find((p) => p.slug === slug) ||
-    (signPostProducts as AnyProduct[]).find((p) => p.slug === slug)
+    (signPostProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (lightBoxProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (bladeProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (neonProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (bannerProducts as AnyProduct[]).find((p) => p.slug === slug)
   );
 }

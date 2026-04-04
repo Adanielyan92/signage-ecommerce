@@ -1,5 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
+import * as THREE from "three";
+
 interface MountingStudsProps {
   letterPositions: { x: number; width: number }[];
   height: number;
@@ -7,9 +10,22 @@ interface MountingStudsProps {
   xOffset: number;
 }
 
+const STUD_RADIUS = 0.15;
+const STUD_LENGTH = 1.2;
+const STUD_SEGMENTS = 6;
+
 export function MountingStuds({ letterPositions, height, depth, xOffset }: MountingStudsProps) {
-  const studRadius = 0.15;
-  const studLength = 1.2;
+  // Single shared material for all studs (avoids per-stud allocation)
+  const studMaterial = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: "#b0b0b0", metalness: 0.85, roughness: 0.25 }),
+    []
+  );
+
+  // Single shared geometry for all studs
+  const studGeometry = useMemo(
+    () => new THREE.CylinderGeometry(STUD_RADIUS, STUD_RADIUS, STUD_LENGTH, STUD_SEGMENTS),
+    []
+  );
 
   return (
     <group>
@@ -17,20 +33,20 @@ export function MountingStuds({ letterPositions, height, depth, xOffset }: Mount
         <group key={`studs-${i}`}>
           {/* Top stud */}
           <mesh
-            position={[lp.x + xOffset + lp.width / 2, height * 0.75, -(depth + studLength / 2)]}
+            geometry={studGeometry}
+            material={studMaterial}
+            position={[lp.x + xOffset + lp.width / 2, height * 0.75, -(depth + STUD_LENGTH / 2)]}
             rotation={[Math.PI / 2, 0, 0]}
-          >
-            <cylinderGeometry args={[studRadius, studRadius, studLength, 6]} />
-            <meshStandardMaterial color="#b0b0b0" metalness={0.85} roughness={0.25} />
-          </mesh>
+            castShadow
+          />
           {/* Bottom stud */}
           <mesh
-            position={[lp.x + xOffset + lp.width / 2, height * 0.25, -(depth + studLength / 2)]}
+            geometry={studGeometry}
+            material={studMaterial}
+            position={[lp.x + xOffset + lp.width / 2, height * 0.25, -(depth + STUD_LENGTH / 2)]}
             rotation={[Math.PI / 2, 0, 0]}
-          >
-            <cylinderGeometry args={[studRadius, studRadius, studLength, 6]} />
-            <meshStandardMaterial color="#b0b0b0" metalness={0.85} roughness={0.25} />
-          </mesh>
+            castShadow
+          />
         </group>
       ))}
     </group>

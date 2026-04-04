@@ -94,6 +94,11 @@ export function ChannelLetterOptions() {
             <button
               key={p.slug}
               onClick={() => setProductType(p.slug as ChannelLetterType)}
+              title={
+                p.slug === "front-lit-trim-cap"
+                  ? "Decorative aluminum border around each letter face"
+                  : undefined
+              }
               className={`rounded-lg border px-3 py-2 text-left text-xs font-medium transition ${
                 config.productType === p.slug
                   ? "border-blue-600 bg-blue-50 text-blue-700"
@@ -244,6 +249,11 @@ export function ChannelLetterOptions() {
                 onClick={() =>
                   setLitSides(v.value as typeof config.litSides)
                 }
+                title={
+                  v.value === "Duo Lit"
+                    ? "LED lighting on both front face and behind the letter"
+                    : undefined
+                }
                 className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition ${
                   config.litSides === v.value
                     ? "border-blue-600 bg-blue-50 text-blue-700"
@@ -284,7 +294,10 @@ export function ChannelLetterOptions() {
       {/* Raceway */}
       {hasOption("raceway") && (
         <div>
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <label
+            className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500"
+            title="Metal channel that holds and hides wiring behind the letters"
+          >
             Raceway
           </label>
           <select
@@ -306,7 +319,10 @@ export function ChannelLetterOptions() {
       {/* Vinyl */}
       {hasOption("vinyl") && isVisible("vinyl") && (
         <div>
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <label
+            className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500"
+            title="Translucent colored film applied over the letter face"
+          >
             Vinyl
           </label>
           <select
@@ -317,7 +333,15 @@ export function ChannelLetterOptions() {
             className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           >
             {getOption("vinyl")?.possibleValues?.map((v) => (
-              <option key={v.value} value={v.value}>
+              <option
+                key={v.value}
+                value={v.value}
+                title={
+                  v.value === "Perforated"
+                    ? "One-way vision material — graphics visible outside, see-through inside"
+                    : undefined
+                }
+              >
                 {v.value === "-" ? "None" : v.value}
               </option>
             ))}

@@ -1,7 +1,8 @@
 "use client";
 
 import * as THREE from "three";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useConfiguratorStore } from "@/stores/configurator-store";
 
 interface PrintSignRendererProps {
   width: number;
@@ -42,6 +43,22 @@ export function PrintSignRenderer({
   height,
   materialType,
 }: PrintSignRendererProps) {
+  const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const prevDims = useRef("");
+
+  useEffect(() => {
+    const key = `${width}:${height}`;
+    if (key === prevDims.current) return;
+    prevDims.current = key;
+    setDimensions({
+      totalWidthInches: width,
+      heightInches: height,
+      squareFeet: (width * height) / 144,
+      linearFeet: ((width + height) * 2) / 12,
+      letterWidths: [],
+    });
+  }, [width, height, setDimensions]);
+
   const appearance = getPanelAppearance(materialType);
 
   const panelMaterial = useMemo(
@@ -79,7 +96,7 @@ export function PrintSignRenderer({
   return (
     <group>
       {/* Panel body */}
-      <mesh position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]} castShadow receiveShadow>
         <boxGeometry args={[width, height, appearance.thickness]} />
         <primitive object={edgeMaterial} attach="material" />
       </mesh>

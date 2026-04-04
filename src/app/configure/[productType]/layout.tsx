@@ -25,7 +25,7 @@ export async function generateMetadata({
 
   if (!product) {
     return {
-      title: "Product Not Found | GatSoft Signs",
+      title: "Product Not Found",
       description: "The requested product could not be found.",
     };
   }
@@ -33,7 +33,7 @@ export async function generateMetadata({
   const startingPrice = `$${product.pricingParams.minOrderPrice.toLocaleString()}`;
 
   return {
-    title: `Configure ${product.name} | GatSoft Signs`,
+    title: `Configure ${product.name}`,
     description: product.description,
     openGraph: {
       title: `Configure ${product.name} | GatSoft Signs`,

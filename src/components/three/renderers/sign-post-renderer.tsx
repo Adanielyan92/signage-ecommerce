@@ -1,7 +1,8 @@
 "use client";
 
 import * as THREE from "three";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useConfiguratorStore } from "@/stores/configurator-store";
 
 interface SignPostRendererProps {
   postType: string; // single-post, double-post, monument-base
@@ -27,6 +28,22 @@ export function SignPostRenderer({
   signHeight,
   doubleSided,
 }: SignPostRendererProps) {
+  const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const prevDims = useRef("");
+
+  useEffect(() => {
+    const key = `${signWidth}:${signHeight}`;
+    if (key === prevDims.current) return;
+    prevDims.current = key;
+    setDimensions({
+      totalWidthInches: signWidth,
+      heightInches: signHeight,
+      squareFeet: (signWidth * signHeight) / 144,
+      linearFeet: ((signWidth + signHeight) * 2) / 12,
+      letterWidths: [],
+    });
+  }, [signWidth, signHeight, setDimensions]);
+
   const postMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -79,7 +96,7 @@ export function SignPostRenderer({
       {/* Posts */}
       {isMonument ? (
         // Monument base: wide rectangular column
-        <mesh position={[0, postHeight / 2, 0]}>
+        <mesh position={[0, postHeight / 2, 0]} castShadow receiveShadow>
           <boxGeometry
             args={[
               signWidth + MONUMENT_WIDTH_PAD * 2,
@@ -92,25 +109,25 @@ export function SignPostRenderer({
       ) : isDoublePost ? (
         // Double posts: two cylindrical posts spaced apart
         <>
-          <mesh position={[-(signWidth / 2 - POST_RADIUS * 2), postHeight / 2, 0]}>
+          <mesh position={[-(signWidth / 2 - POST_RADIUS * 2), postHeight / 2, 0]} castShadow>
             <cylinderGeometry args={[POST_RADIUS, POST_RADIUS, postHeight, 16]} />
             <primitive object={postMaterial} attach="material" />
           </mesh>
-          <mesh position={[(signWidth / 2 - POST_RADIUS * 2), postHeight / 2, 0]}>
+          <mesh position={[(signWidth / 2 - POST_RADIUS * 2), postHeight / 2, 0]} castShadow>
             <cylinderGeometry args={[POST_RADIUS, POST_RADIUS, postHeight, 16]} />
             <primitive object={postMaterial} attach="material" />
           </mesh>
         </>
       ) : (
         // Single post: one cylindrical post centered
-        <mesh position={[0, postHeight / 2, 0]}>
+        <mesh position={[0, postHeight / 2, 0]} castShadow>
           <cylinderGeometry args={[POST_RADIUS, POST_RADIUS, postHeight, 16]} />
           <primitive object={postMaterial} attach="material" />
         </mesh>
       )}
 
       {/* Sign panel frame (edge) */}
-      <mesh position={[0, signCenterY, 0]}>
+      <mesh position={[0, signCenterY, 0]} castShadow receiveShadow>
         <boxGeometry args={[signWidth, signHeight, panelThickness]} />
         <primitive object={signEdgeMaterial} attach="material" />
       </mesh>
@@ -133,7 +150,7 @@ export function SignPostRenderer({
       )}
 
       {/* Ground plane indicator */}
-      <mesh position={[0, -0.05, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -0.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry
           args={[
             isMonument ? signWidth + MONUMENT_WIDTH_PAD * 2 + 4 : signWidth + 8,

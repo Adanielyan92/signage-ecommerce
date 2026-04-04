@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import {
   Type,
@@ -22,62 +23,114 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const categories = [
+interface Category {
+  name: string;
+  description: string;
+  startingPrice: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  image: string;
+}
+
+const categories: Category[] = [
   {
     name: "Channel Letters",
     description:
-      "Illuminated 3D letters with LED lighting — the most popular storefront sign type.",
+      "The #1 choice for storefronts. Your business name in glowing 3D letters, visible day and night.",
     startingPrice: "$1,360+",
     href: "/configure/front-lit-trim-cap",
     icon: Type,
+    image: "/images/products/front-lit-trim-cap.png",
   },
   {
     name: "Lit Shape Signs",
     description:
-      "Custom LED lit shapes and contoured logo signs for bold brand statements.",
+      "Your logo or custom shape, illuminated with LEDs. Perfect for bold brand statements.",
     startingPrice: "$1,500+",
     href: "/configure/cloud-sign",
     icon: Lightbulb,
+    image: "/images/products/lit-logo.png",
   },
   {
     name: "Cabinet Signs",
     description:
-      "Illuminated box signs with printed or vinyl faces, single or double sided.",
+      "Illuminated sign boxes — clean, bright, and professional. Available single or double-sided.",
     startingPrice: "$1,500+",
     href: "/configure/single-face-squared",
     icon: SquareAsterisk,
+    image: "/images/products/single-face-squared.png",
   },
   {
     name: "Dimensional Letters",
     description:
-      "Non-illuminated 3D letters in acrylic, painted metal, or brushed aluminum.",
+      "Elegant 3D letters in premium materials. No electricity needed — perfect for lobbies and indoor spaces.",
     startingPrice: "$800+",
     href: "/configure/acrylic",
     icon: Boxes,
+    image: "/images/products/brushed-metal.png",
   },
   {
     name: "Logo Signs",
     description:
-      "Custom-fabricated logo signs, available lit or non-lit, built to your artwork.",
+      "Your logo, fabricated in 3D. Available illuminated or non-lit, built exactly to your artwork.",
     startingPrice: "$800+",
     href: "/configure/lit-logo",
     icon: Stamp,
+    image: "/images/products/lit-logo.png",
   },
   {
     name: "Print Signs",
     description:
-      "Full-color printed signs on ACM panels, coroplast, or foam board.",
+      "Full-color printed signs — durable, affordable, and ready fast. Great for events, real estate, and promotions.",
     startingPrice: "$100+",
     href: "/configure/acm-panel",
     icon: Printer,
+    image: "/images/products/acm-panel.png",
   },
   {
     name: "Sign Posts",
     description:
-      "Freestanding post-mounted and monument base signs for maximum visibility.",
+      "Freestanding signs on posts or monument bases. Maximum visibility from the street.",
     startingPrice: "$600+",
     href: "/configure/single-post",
     icon: Signpost,
+    image: "/images/products/single-post.png",
+  },
+  {
+    name: "Light Box Signs",
+    description:
+      "Illuminated sign boxes with glowing translucent or push-through faces. Clean, bright, and professional.",
+    startingPrice: "$1,200+",
+    href: "/configure/light-box-single",
+    icon: SquareAsterisk,
+    image: "/images/products/light-box-single.png",
+  },
+  {
+    name: "Blade Signs",
+    description:
+      "Wall-projecting signs on a bracket — visible from both directions down the street.",
+    startingPrice: "$800+",
+    href: "/configure/blade-rectangular",
+    icon: Signpost,
+    image: "/images/products/blade-rectangular.png",
+  },
+  {
+    name: "LED Neon Signs",
+    description:
+      "Your text in glowing neon-style LED tubes. Perfect for restaurants, bars, and retail.",
+    startingPrice: "$500+",
+    href: "/configure/led-neon",
+    icon: Lightbulb,
+    image: "/images/products/led-neon.png",
+  },
+  {
+    name: "Vinyl Banners",
+    description:
+      "Full-color printed banners — durable, affordable, and ready fast. Great for events and promotions.",
+    startingPrice: "$50+",
+    href: "/configure/vinyl-banner-13oz",
+    icon: Flag,
+    image: "/images/products/vinyl-banner-13oz.png",
   },
 ];
 
@@ -186,25 +239,34 @@ export default function Home() {
                 <Link
                   key={cat.name}
                   href={cat.href}
-                  className="group flex flex-col rounded-xl border border-neutral-200 bg-white p-6 transition hover:border-blue-300 hover:shadow-lg"
+                  className="group flex flex-col rounded-xl border border-neutral-200 bg-white overflow-hidden transition hover:border-blue-300 hover:shadow-lg"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition group-hover:bg-blue-100">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-neutral-900">
-                    {cat.name}
-                  </h3>
-                  <p className="mt-1.5 flex-1 text-sm leading-relaxed text-neutral-500">
-                    {cat.description}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-blue-600">
-                      {cat.startingPrice}
-                    </span>
-                    <span className="inline-flex items-center gap-1 text-sm font-medium text-neutral-500 transition group-hover:text-blue-600">
-                      Design &amp; Price
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </span>
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="h-40 w-full object-cover"
+                  />
+                  <div className="flex flex-col flex-1 p-5">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 transition group-hover:bg-blue-100">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <h3 className="text-base font-semibold text-neutral-900">
+                        {cat.name}
+                      </h3>
+                    </div>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-500">
+                      {cat.description}
+                    </p>
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {cat.startingPrice}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-neutral-500 transition group-hover:text-blue-600">
+                        Design &amp; Price
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </span>
+                    </div>
                   </div>
                 </Link>
               );
