@@ -9,6 +9,7 @@ import type { SignConfiguration } from "@/types/configurator";
 import { ConfiguratorLayout } from "@/components/configurator/configurator-layout";
 import type { AnyProduct } from "@/engine/product-definitions";
 import { getTemplateById } from "@/data/templates";
+import { useProduct } from "@/hooks/use-product";
 
 /**
  * Determine the ProductCategory for a given AnyProduct.
@@ -46,6 +47,8 @@ function ConfigurePageInner() {
   const initializedSlug = useRef<string | null>(null);
 
   const product = getAnyProductBySlug(productType);
+  const { product: apiProduct } = useProduct(productType);
+  const setApiProductId = useConfiguratorStore((s) => s.setApiProductId);
 
   // Set the correct product category and type on mount or when slug changes
   useEffect(() => {
@@ -64,6 +67,12 @@ function ConfigurePageInner() {
       setProductCategory(category, productType as ProductTypeSlug);
     }
   }, [productType, product, currentType, currentCategory, setProductType, setProductCategory]);
+
+  useEffect(() => {
+    if (apiProduct?.id) {
+      setApiProductId(apiProduct.id);
+    }
+  }, [apiProduct?.id, setApiProductId]);
 
   // Load saved design if ?design= query param is present
   useEffect(() => {
