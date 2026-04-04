@@ -25,6 +25,7 @@ import type {
 } from "@/types/product";
 import { calculatePrice, calculatePriceUnified } from "@/engine/pricing";
 import { getProductBySlug } from "@/engine/product-definitions";
+import type { ApiPriceBreakdown } from "@/lib/api-client";
 
 type QualityLevel = "low" | "medium" | "high";
 
@@ -335,6 +336,31 @@ function getCategoryConfig(
   }
 }
 
+function buildOptionValues(state: ConfiguratorState): Record<string, unknown> {
+  if (state.productCategory === "CHANNEL_LETTERS") {
+    const c = state.config;
+    return {
+      text: c.text,
+      height: c.height,
+      font: c.font,
+      lit: c.lit,
+      led: c.led,
+      litSides: c.litSides,
+      sideDepth: c.sideDepth,
+      painting: c.painting,
+      paintingColors: c.paintingColors,
+      raceway: c.raceway,
+      vinyl: c.vinyl,
+      background: c.background,
+      letterCount: c.text.replace(/\s+/g, "").length,
+    };
+  }
+  // For other categories, use getCategoryConfig which is already defined in this file
+  const activeConfig = getCategoryConfig(state.productCategory, state);
+  if (!activeConfig) return {};
+  return { ...activeConfig } as Record<string, unknown>;
+}
+
 function recalculate(
   config: SignConfiguration,
   dimensions: Dimensions,
@@ -409,6 +435,13 @@ interface ConfiguratorState {
    * For other categories, returns the category-specific config.
    */
   getActiveConfig: () => AnySignConfiguration;
+
+  // --- API-based pricing ---
+  apiProductId: string | null;
+  apiPriceLoading: boolean;
+  apiPriceBreakdown: ApiPriceBreakdown | null;
+  setApiProductId: (id: string) => void;
+  fetchApiPrice: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -727,5 +760,48 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       return state.config;
     }
     return getCategoryConfig(state.productCategory, state) ?? state.config;
+  },
+
+  // --- API-based pricing ---
+
+  apiProductId: null,
+  apiPriceLoading: false,
+  apiPriceBreakdown: null,
+
+  setApiProductId: (id) => set({ apiProductId: id }),
+
+  fetchApiPrice: () => {
+    const state = get();
+    if (!state.apiProductId) return;
+
+    set({ apiPriceLoading: true });
+
+    const optionValues = buildOptionValues(state);
+    const dimensions = {
+      widthInches: state.dimensions.totalWidthInches,
+      heightInches: state.dimensions.heightInches,
+    };
+
+    fetch("/api/v1/pricing/calculate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId: state.apiProductId,
+        optionValues,
+        dimensions,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.breakdown) {
+          set({
+            apiPriceBreakdown: data.breakdown,
+            apiPriceLoading: false,
+          });
+        }
+      })
+      .catch(() => {
+        set({ apiPriceLoading: false });
+      });
   },
 }));
