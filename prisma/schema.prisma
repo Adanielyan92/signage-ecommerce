@@ -61,64 +61,104 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// ─── Tenants ────────────────────────────────────
+
+model Tenant {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  plan        TenantPlan @default(FREE)
+
+  logoUrl      String?
+  primaryColor String?
+  accentColor  String?
+  customDomain String?  @unique
+
+  currency String @default("USD")
+  locale   String @default("en-US")
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products        Product[]
+  pricingFormulas PricingFormula[]
+  orders          Order[]
+  cartItems       CartItem[]
+  savedDesigns    SavedDesign[]
+  apiKeys         ApiKey[]
+}
+
+enum TenantPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model ApiKey {
+  id        String   @id @default(cuid())
+  tenantId  String
+  key       String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model PricingFormula {
+  id          String      @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  type        FormulaType @default(PRESET)
+  presetId    String?
+  formulaAst  Json?
+  scriptBody  String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products Product[]
+
+  @@unique([tenantId, name])
+}
+
+enum FormulaType {
+  PRESET
+  VISUAL
+  SCRIPT
+}
+
 // ─── Products ────────────────────────────────────
 
 model Product {
-  id          String          @id @default(cuid())
-  slug        String          @unique
+  id          String  @id @default(cuid())
+  tenantId    String
+  slug        String
   name        String
   description String?
-  category    ProductCategory
+  category    String
   imageUrl    String?
-  isActive    Boolean         @default(true)
-  sortOrder   Int             @default(0)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
+  isActive    Boolean @default(true)
+  sortOrder   Int     @default(0)
 
-  pricingParams ProductPricingParams?
-  options       ProductOptionDef[]
-  orderItems    OrderItem[]
-  cartItems     CartItem[]
-  savedDesigns  SavedDesign[]
-}
+  productSchema Json?
+  pricingParams Json?
+  renderConfig  Json?
 
-enum ProductCategory {
-  CHANNEL_LETTERS
-  DIMENSIONAL_LETTERS
-  BANNERS
-  PRINTS
-  ACCESSORIES
-}
+  pricingFormulaId String?
 
-model ProductPricingParams {
-  id                    String @id @default(cuid())
-  productId             String @unique
-  calculationType       String
-  basePricePerInch      Float
-  largeSizeThreshold    Float?
-  largeSizePricePerInch Float?
-  minHeightForPrice     Float?
-  minOrderPrice         Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-}
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  pricingFormula PricingFormula? @relation(fields: [pricingFormulaId], references: [id])
+  orderItems     OrderItem[]
+  cartItems      CartItem[]
+  savedDesigns   SavedDesign[]
 
-model ProductOptionDef {
-  id             String  @id @default(cuid())
-  productId      String
-  optionKey      String
-  label          String
-  inputType      String
-  defaultValue   String?
-  possibleValues Json?
-  dependsOn      Json?
-  sortOrder      Int     @default(0)
-  isRequired     Boolean @default(false)
-  isReadonly     Boolean @default(false)
-
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([productId, optionKey])
+  @@unique([tenantId, slug])
 }
 
 // ─── Address ─────────────────────────────────────
@@ -143,6 +183,7 @@ model Address {
 
 model CartItem {
   id            String   @id @default(cuid())
+  tenantId      String
   userId        String
   productId     String
   configuration Json
@@ -152,6 +193,7 @@ model CartItem {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 }
@@ -161,6 +203,7 @@ model CartItem {
 model Order {
   id                String      @id @default(cuid())
   orderNumber       String      @unique
+  tenantId          String
   userId            String
   shippingAddressId String?
   status            OrderStatus @default(PENDING)
@@ -174,6 +217,7 @@ model Order {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
+  tenant          Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user            User       @relation(fields: [userId], references: [id])
   shippingAddress Address?   @relation(fields: [shippingAddressId], references: [id])
   items           OrderItem[]
@@ -189,14 +233,15 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id            String @id @default(cuid())
-  orderId       String
-  productId     String
-  configuration Json
-  thumbnailUrl  String?
-  quantity      Int
-  unitPrice     Float
-  totalPrice    Float
+  id             String  @id @default(cuid())
+  orderId        String
+  productId      String
+  configuration  Json
+  configSnapshot Json?
+  thumbnailUrl   String?
+  quantity       Int
+  unitPrice      Float
+  totalPrice     Float
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
@@ -206,6 +251,7 @@ model OrderItem {
 
 model SavedDesign {
   id            String   @id @default(cuid())
+  tenantId      String
   userId        String
   productId     String
   name          String
@@ -214,6 +260,7 @@ model SavedDesign {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 }
