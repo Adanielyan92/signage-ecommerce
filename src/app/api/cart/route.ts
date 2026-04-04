@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         const productType = item.productType || item.configuration?.productType;
         if (!productType) continue;
 
-        const product = await tx.product.findUnique({
+        const product = await tx.product.findFirst({
           where: { slug: productType },
         });
 
@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
 
         await tx.cartItem.create({
           data: {
+            tenantId: product.tenantId,
             userId: session.user.id,
             productId: product.id,
             configuration: item.configuration ?? {},

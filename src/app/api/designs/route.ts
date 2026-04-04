@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     const { name, configuration, dimensions, thumbnail } = parsed.data;
 
     // Look up the product by slug to get the product ID
-    const product = await prisma.product.findUnique({
+    const product = await prisma.product.findFirst({
       where: { slug: configuration.productType },
     });
 
@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
 
     const design = await prisma.savedDesign.create({
       data: {
+        tenantId: product.tenantId,
         userId: session.user.id,
         productId: product.id,
         name,

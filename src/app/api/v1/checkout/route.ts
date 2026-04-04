@@ -6,9 +6,9 @@ import { evaluateFormulaDefinition, type VariableMap } from "@/engine/schema-pri
 import { getPresetFormula } from "@/engine/formula-presets";
 import type { FormulaDefinition } from "@/engine/formula-types";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2026-01-28.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
 interface CheckoutItem {
   productId: string;
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
     const orderItemsJson = JSON.stringify(serializedItems);
 
     // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode: "payment",
       line_items: lineItems,
       ...(customerEmail ? { customer_email: customerEmail } : {}),

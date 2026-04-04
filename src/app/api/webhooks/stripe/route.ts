@@ -3,16 +3,14 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
-  apiVersion: "2026-01-28.clover",
-});
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+}
 
-/** Raw body is required for Stripe signature verification */
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+/**
+ * In App Router, raw body is read via request.text() — no config needed.
+ * (The Pages Router `config.api.bodyParser` pattern does not apply here.)
+ */
 
 interface SerializedOrderItem {
   productId: string;
@@ -40,7 +38,7 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    event = getStripe().webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err) {
     console.error("Stripe webhook signature verification failed:", err);
     return NextResponse.json(
