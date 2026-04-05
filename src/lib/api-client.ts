@@ -36,6 +36,37 @@ export interface CheckoutItem {
   description?: string;
 }
 
+export interface ApiTenant {
+  id: string;
+  slug: string;
+  name: string;
+  plan: string;
+  logoUrl: string | null;
+  primaryColor: string | null;
+  accentColor: string | null;
+  customDomain: string | null;
+  currency: string;
+  locale: string;
+}
+
+export interface ApiFormula {
+  id: string;
+  tenantId: string;
+  name: string;
+  description: string | null;
+  type: string;
+  presetId: string | null;
+  formulaAst: unknown;
+  scriptBody: string | null;
+}
+
+export interface ApiPresetInfo {
+  id: string;
+  name: string;
+  description: string;
+  variables: Array<{ name: string; label: string; source: string; description: string }>;
+}
+
 // ---------------------------------------------------------------------------
 // ApiError
 // ---------------------------------------------------------------------------
@@ -167,6 +198,89 @@ export const api = {
           method: "POST",
           body: JSON.stringify({ items, successUrl, cancelUrl, customerEmail }),
         },
+        options,
+      );
+    },
+  },
+
+  admin: {
+    /**
+     * GET /api/v1/admin/tenant
+     */
+    getTenant(options?: FetchOptions): Promise<{ tenant: ApiTenant }> {
+      return apiFetch<{ tenant: ApiTenant }>("/admin/tenant", {}, options);
+    },
+
+    /**
+     * PATCH /api/v1/admin/tenant
+     */
+    updateTenant(
+      data: Partial<Omit<ApiTenant, "id" | "slug">>,
+      options?: FetchOptions,
+    ): Promise<{ tenant: ApiTenant }> {
+      return apiFetch<{ tenant: ApiTenant }>(
+        "/admin/tenant",
+        { method: "PATCH", body: JSON.stringify(data) },
+        options,
+      );
+    },
+  },
+
+  formulas: {
+    /**
+     * GET /api/v1/formulas
+     */
+    list(options?: FetchOptions): Promise<{ formulas: ApiFormula[]; presets: ApiPresetInfo[] }> {
+      return apiFetch<{ formulas: ApiFormula[]; presets: ApiPresetInfo[] }>(
+        "/formulas",
+        {},
+        options,
+      );
+    },
+
+    /**
+     * GET /api/v1/formulas/:id
+     */
+    get(formulaId: string, options?: FetchOptions): Promise<{ formula: ApiFormula }> {
+      return apiFetch<{ formula: ApiFormula }>(`/formulas/${formulaId}`, {}, options);
+    },
+
+    /**
+     * POST /api/v1/formulas
+     */
+    create(
+      data: Omit<ApiFormula, "id" | "tenantId">,
+      options?: FetchOptions,
+    ): Promise<{ formula: ApiFormula }> {
+      return apiFetch<{ formula: ApiFormula }>(
+        "/formulas",
+        { method: "POST", body: JSON.stringify(data) },
+        options,
+      );
+    },
+
+    /**
+     * PATCH /api/v1/formulas/:id
+     */
+    update(
+      formulaId: string,
+      data: Partial<Omit<ApiFormula, "id" | "tenantId">>,
+      options?: FetchOptions,
+    ): Promise<{ formula: ApiFormula }> {
+      return apiFetch<{ formula: ApiFormula }>(
+        `/formulas/${formulaId}`,
+        { method: "PATCH", body: JSON.stringify(data) },
+        options,
+      );
+    },
+
+    /**
+     * DELETE /api/v1/formulas/:id
+     */
+    delete(formulaId: string, options?: FetchOptions): Promise<{ success: boolean }> {
+      return apiFetch<{ success: boolean }>(
+        `/formulas/${formulaId}`,
+        { method: "DELETE" },
         options,
       );
     },
