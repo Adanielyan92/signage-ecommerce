@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
+import { generateProductionFiles } from "@/lib/production-files";
+import type { SignConfiguration, Dimensions } from "@/types/configurator";
+import { estimateDimensions } from "@/engine/pricing";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -120,6 +123,52 @@ export async function POST(request: NextRequest) {
       console.error("Failed to create order in DB for session", session.id, ":", err);
       // Return 500 so Stripe retries the webhook
       return NextResponse.json({ error: "Failed to persist order" }, { status: 500 });
+    }
+
+    // --- Trigger production file generation (non-blocking) ---
+    // We intentionally do not await this -- file generation runs in the background
+    // and failures should not cause the webhook to fail.
+    const createdOrder = await prisma.order.findUnique({
+      where: { orderNumber },
+      include: { items: true },
+    });
+
+    if (createdOrder) {
+      for (const item of createdOrder.items) {
+        const config = item.configuration as unknown as SignConfiguration;
+        const dims = estimateDimensions(config);
+
+        generateProductionFiles({
+          orderId: createdOrder.id,
+          orderItemId: item.id,
+          orderNumber: createdOrder.orderNumber,
+          productName: (item.configSnapshot as Record<string, unknown>)?.productName as string ?? "Unknown Product",
+          config,
+          dimensions: dims,
+          unitPrice: item.unitPrice,
+          quantity: item.quantity,
+        })
+          .then(async (files) => {
+            // Persist file metadata to DB
+            for (const file of files) {
+              await prisma.productionFile.create({
+                data: {
+                  orderItemId: item.id,
+                  fileType: file.fileType,
+                  fileName: file.fileName,
+                  storageKey: file.storageKey,
+                  url: file.url,
+                  sizeBytes: file.sizeBytes,
+                  contentType: file.contentType,
+                },
+              });
+            }
+            console.log(`Generated ${files.length} production files for order item ${item.id}`);
+          })
+          .catch((err) => {
+            console.error(`Production file generation failed for order item ${item.id}:`, err);
+          });
+      }
     }
   }
 
