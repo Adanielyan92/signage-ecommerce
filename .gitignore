@@ -60,3 +60,6 @@ next-env.d.ts
 
 # Uploaded 3D models (local dev storage)
 public/uploads/models/
+
+# Uploaded production files (dev only)
+public/uploads/
