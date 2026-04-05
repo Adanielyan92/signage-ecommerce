@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       data: {
         tenantId: tenant.id,
         name,
-        type,
+        type: type as "PRESET" | "VISUAL" | "SCRIPT",
         ...(description !== undefined ? { description } : {}),
         ...(presetId !== undefined ? { presetId } : {}),
         ...(formulaAst !== undefined ? { formulaAst } : {}),
