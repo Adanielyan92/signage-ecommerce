@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Plus, Pencil } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { getAllPresetFormulas } from "@/engine/formula-presets";
@@ -40,18 +42,46 @@ export default async function AdminFormulasPage() {
     Promise.resolve(getAllPresetFormulas()),
   ]);
 
+  async function createVisualFormula() {
+    "use server";
+    const { prisma: db } = await import("@/lib/prisma");
+    const { redirect } = await import("next/navigation");
+
+    const newFormula = await db.pricingFormula.create({
+      data: {
+        tenantId: admin.tenantId,
+        name: `Custom Formula ${Date.now().toString(36).slice(-4)}`,
+        type: "VISUAL",
+        description: "Visual formula created in the editor",
+      },
+    });
+
+    redirect(`/admin/formulas/${newFormula.id}/edit`);
+  }
+
   return (
     <div className="space-y-10">
       {/* ── Header ──────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">
-          Pricing Formulas
-        </h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          {formulas.length} configured formula
-          {formulas.length !== 1 ? "s" : ""} · {presets.length} available
-          presets
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-neutral-900">
+            Pricing Formulas
+          </h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            {formulas.length} configured formula
+            {formulas.length !== 1 ? "s" : ""} · {presets.length} available
+            presets
+          </p>
+        </div>
+        <form action={createVisualFormula}>
+          <button
+            type="submit"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+          >
+            <Plus className="h-4 w-4" />
+            New Visual Formula
+          </button>
+        </form>
       </div>
 
       {/* ── Section 1: Configured Formulas ─────────── */}
@@ -105,7 +135,18 @@ export default async function AdminFormulasPage() {
                       className="transition-colors hover:bg-neutral-50"
                     >
                       <td className="px-4 py-3 font-medium text-neutral-900">
-                        {formula.name}
+                        <div className="flex items-center gap-2">
+                          <span>{formula.name}</span>
+                          {formula.type === "VISUAL" && (
+                            <Link
+                              href={`/admin/formulas/${formula.id}/edit`}
+                              className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-indigo-600 hover:bg-indigo-50"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              Edit
+                            </Link>
+                          )}
+                        </div>
                         {formula.description && (
                           <p className="mt-0.5 text-xs font-normal text-neutral-400">
                             {formula.description}
