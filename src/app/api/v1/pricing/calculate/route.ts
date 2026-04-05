@@ -3,6 +3,7 @@ import { resolveTenant } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
 import { evaluateFormulaDefinition } from "@/engine/schema-pricing";
 import { getPresetFormula } from "@/engine/formula-presets";
+import { executeScript } from "@/engine/script-sandbox";
 import type { FormulaDefinition } from "@/engine/formula-types";
 
 export async function POST(request: NextRequest) {
@@ -34,8 +35,44 @@ export async function POST(request: NextRequest) {
     }
 
     // Resolve the formula definition
-    let formulaDef: FormulaDefinition;
-    if (product.pricingFormula?.type === "PRESET" && product.pricingFormula.presetId) {
+    let formulaDef: FormulaDefinition | null = null;
+    let scriptResult: { price: number } | null = null;
+
+    if (product.pricingFormula?.type === "SCRIPT" && product.pricingFormula.scriptBody) {
+      // Layer 3: Sandboxed script execution
+      const text = (optionValues.text as string) ?? "";
+      const letterCount = text.replace(/\s+/g, "").length;
+      const widthInches = dimensions?.widthInches ?? optionValues.widthInches ?? 0;
+      const heightInches =
+        dimensions?.heightInches ?? optionValues.height ?? optionValues.heightInches ?? 0;
+      const sqft = widthInches && heightInches ? (widthInches * heightInches) / 144 : 0;
+
+      const pricingParams = (product.pricingParams as Record<string, number>) ?? {};
+      const opts: Record<string, number | string> = {
+        ...flattenOptionValues(optionValues),
+        widthInches,
+        heightInches,
+        sqft,
+        letterCount,
+        charCount: letterCount,
+      };
+
+      const result = await executeScript({
+        scriptBody: product.pricingFormula.scriptBody,
+        opts,
+        params: pricingParams,
+        timeoutMs: 3000,
+      });
+
+      if (!result.success) {
+        return NextResponse.json(
+          { error: `Script pricing error: ${result.error}` },
+          { status: 400 },
+        );
+      }
+
+      scriptResult = { price: result.price! };
+    } else if (product.pricingFormula?.type === "PRESET" && product.pricingFormula.presetId) {
       formulaDef = getPresetFormula(product.pricingFormula.presetId);
     } else if (product.pricingFormula?.formulaAst) {
       formulaDef = product.pricingFormula.formulaAst as unknown as FormulaDefinition;
@@ -46,7 +83,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build variable map
+    // Return script result directly (it bypasses AST evaluation)
+    if (scriptResult) {
+      return NextResponse.json({
+        breakdown: {
+          basePrice: scriptResult.price,
+          appliedMultipliers: [],
+          priceAfterMultipliers: scriptResult.price,
+          lineItems: [],
+          subtotal: scriptResult.price,
+          total: scriptResult.price,
+          minOrderApplied: false,
+        },
+      });
+    }
+
+    // Build variable map for PRESET / VISUAL formulas
     const pricingParams = (product.pricingParams as Record<string, number>) ?? {};
     const text = (optionValues.text as string) ?? "";
     const letterCount = text.replace(/\s+/g, "").length;
@@ -65,7 +117,7 @@ export async function POST(request: NextRequest) {
       ...pricingParams,
     };
 
-    const breakdown = evaluateFormulaDefinition(formulaDef, vars);
+    const breakdown = evaluateFormulaDefinition(formulaDef!, vars);
 
     return NextResponse.json({ breakdown });
   } catch (error) {
