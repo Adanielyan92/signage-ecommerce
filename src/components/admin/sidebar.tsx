@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Calculator, Settings, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Package, Calculator, Settings, ArrowLeft, ShoppingCart, LayoutTemplate } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/products", label: "Products", icon: Package, exact: false },
+  { href: "/admin/orders", label: "Orders", icon: ShoppingCart, exact: false },
+  { href: "/admin/templates", label: "Templates", icon: LayoutTemplate, exact: false },
   { href: "/admin/formulas", label: "Pricing Formulas", icon: Calculator, exact: false },
   { href: "/admin/settings", label: "Settings", icon: Settings, exact: false },
 ];
