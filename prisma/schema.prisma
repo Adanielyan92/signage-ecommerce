@@ -92,6 +92,9 @@ model Tenant {
   savedDesigns    SavedDesign[]
   apiKeys         ApiKey[]
   productTemplates ProductTemplate[]
+  stockParts       StockPart[]
+  materialPresets  MaterialPreset[]
+  tenantFonts      TenantFont[]
 }
 
 enum TenantPlan {
@@ -313,4 +316,81 @@ model ProductTemplate {
   updatedAt     DateTime @updatedAt
 
   tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+// ─── Stock 3D Parts Library ─────────────────────
+
+model StockPart {
+  id            String   @id @default(cuid())
+  tenantId      String?  // null = platform-level (available to all tenants)
+  name          String
+  slug          String
+  category      StockPartCategory
+  description   String?
+  previewImageUrl String?
+  glbUrl        String?
+  metadata      Json?    // dimensions, poly count, configurable regions, etc.
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}
+
+enum StockPartCategory {
+  MOUNTING
+  POSTS
+  CABINETS
+  LIGHTING
+  ACCESSORIES
+  BACKGROUNDS
+}
+
+// ─── Material Presets ───────────────────────────
+
+model MaterialPreset {
+  id            String   @id @default(cuid())
+  tenantId      String?  // null = platform-level
+  name          String
+  slug          String
+  description   String?
+  materialType  String   // "MeshPhysicalMaterial", "MeshStandardMaterial", "MeshBasicMaterial"
+  properties    Json     // { metalness, roughness, color, transmission, emissive, normalMapUrl, ... }
+  previewImageUrl String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}
+
+// ─── Font Management ────────────────────────────
+
+model TenantFont {
+  id            String   @id @default(cuid())
+  tenantId      String?  // null = platform-level (shared across all tenants)
+  name          String   // Display name: "Bebas Neue"
+  slug          String   // URL-safe: "bebas-neue"
+  fileName      String   // File in storage: "BebasNeue-Regular.ttf"
+  fileUrl       String?  // Full URL or storage key
+  source        FontSource @default(CUSTOM)
+  isCurved      Boolean  @default(false) // affects fabrication multiplier
+  cssFamily     String?  // CSS font-family for UI preview
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+}
+
+enum FontSource {
+  PLATFORM   // Shipped with platform (the 15 in font-map.ts)
+  GOOGLE     // Downloaded from Google Fonts
+  CUSTOM     // Uploaded TTF by tenant
 }
