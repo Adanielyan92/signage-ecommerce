@@ -1,3 +1,4 @@
+// src/types/order.ts
 import type { SignConfiguration } from "./configurator";
 
 export type OrderStatus =
@@ -8,6 +9,23 @@ export type OrderStatus =
   | "DELIVERED"
   | "CANCELLED";
 
+export type ProductionFileType =
+  | "svg_cut"
+  | "bom_json"
+  | "spec_pdf"
+  | "thumbnail_png";
+
+export interface ProductionFile {
+  id: string;
+  orderItemId: string;
+  fileType: ProductionFileType;
+  fileName: string;
+  url: string;
+  sizeBytes: number;
+  contentType: string;
+  createdAt: string;
+}
+
 export interface OrderItem {
   id: string;
   productId: string;
@@ -17,6 +35,7 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice: number;
+  productionFiles?: ProductionFile[];
 }
 
 export interface Order {

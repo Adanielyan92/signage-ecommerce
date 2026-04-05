@@ -91,6 +91,7 @@ model Tenant {
   cartItems       CartItem[]
   savedDesigns    SavedDesign[]
   apiKeys         ApiKey[]
+  productTemplates ProductTemplate[]
 }
 
 enum TenantPlan {
@@ -254,6 +255,25 @@ model OrderItem {
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
+  productionFiles ProductionFile[]
+}
+
+// ─── Production Files ───────────────────────────
+
+model ProductionFile {
+  id          String   @id @default(cuid())
+  orderItemId String
+  fileType    String   // "svg_cut", "bom_json", "spec_pdf", "thumbnail_png"
+  fileName    String
+  storageKey  String
+  url         String
+  sizeBytes   Int
+  contentType String
+  createdAt   DateTime @default(now())
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@index([orderItemId])
 }
 
 // ─── Saved Designs ───────────────────────────────
@@ -272,4 +292,25 @@ model SavedDesign {
   tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
+}
+
+// ─── Product Templates ──────────────────────────
+
+model ProductTemplate {
+  id            String   @id @default(cuid())
+  tenantId      String?
+  name          String
+  description   String?
+  category      String
+  slug          String   @unique
+  productSchema Json?
+  pricingParams Json?
+  renderConfig  Json?
+  defaultConfig Json?
+  thumbnailUrl  String?
+  isPublic      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
