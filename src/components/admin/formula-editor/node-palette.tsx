@@ -55,7 +55,7 @@ export function NodePalette() {
       </p>
       <div className="mt-1 flex flex-col gap-1.5">
         {PALETTE_ITEMS.map((item) => {
-          const Icon = ICONS[item.kind];
+          const Icon = ICONS[item.kind] as React.ComponentType<{ className?: string }>;
           return (
             <div
               key={item.kind}

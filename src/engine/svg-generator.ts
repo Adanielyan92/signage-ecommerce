@@ -151,22 +151,22 @@ function opentypePathToSvgPath(
     switch (cmd.type) {
       case "M":
         commands.push(
-          `M ${round(cmd.x * scale + offsetX)} ${round(cmd.y * scale)}`
+          `M ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
         );
         break;
       case "L":
         commands.push(
-          `L ${round(cmd.x * scale + offsetX)} ${round(cmd.y * scale)}`
+          `L ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
         );
         break;
       case "Q":
         commands.push(
-          `Q ${round(cmd.x1 * scale + offsetX)} ${round(cmd.y1 * scale)} ${round(cmd.x * scale + offsetX)} ${round(cmd.y * scale)}`
+          `Q ${round((cmd.x1 ?? 0) * scale + offsetX)} ${round((cmd.y1 ?? 0) * scale)} ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
         );
         break;
       case "C":
         commands.push(
-          `C ${round(cmd.x1 * scale + offsetX)} ${round(cmd.y1 * scale)} ${round(cmd.x2 * scale + offsetX)} ${round(cmd.y2 * scale)} ${round(cmd.x * scale + offsetX)} ${round(cmd.y * scale)}`
+          `C ${round((cmd.x1 ?? 0) * scale + offsetX)} ${round((cmd.y1 ?? 0) * scale)} ${round((cmd.x2 ?? 0) * scale + offsetX)} ${round((cmd.y2 ?? 0) * scale)} ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
         );
         break;
       case "Z":

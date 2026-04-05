@@ -17,6 +17,7 @@ import { registerPort } from "./connection-lines";
 import type {
   EditorNode,
   EditorNodeData,
+  MultiplierChainNodeData,
   PortDef,
   BinaryOp,
   UnaryFn,
@@ -216,6 +217,7 @@ function NodeBody({ node }: { node: EditorNode }) {
       );
 
     case "multiplierChain": {
+      const chainData = node.data as MultiplierChainNodeData;
       const addMultiplier = () => {
         const newMult: MultiplierEntry = {
           id: `mult-${Date.now()}`,
@@ -225,25 +227,25 @@ function NodeBody({ node }: { node: EditorNode }) {
           compareOp: "==",
         };
         updateNodeData(node.id, {
-          multipliers: [...node.data.multipliers, newMult],
+          multipliers: [...chainData.multipliers, newMult],
         } as Partial<EditorNodeData>);
       };
 
       const updateMultiplier = (idx: number, partial: Partial<MultiplierEntry>) => {
-        const updated = node.data.multipliers.map((m, i) =>
+        const updated = chainData.multipliers.map((m, i) =>
           i === idx ? { ...m, ...partial } : m
         );
         updateNodeData(node.id, { multipliers: updated } as Partial<EditorNodeData>);
       };
 
       const removeMultiplier = (idx: number) => {
-        const updated = node.data.multipliers.filter((_, i) => i !== idx);
+        const updated = chainData.multipliers.filter((_, i) => i !== idx);
         updateNodeData(node.id, { multipliers: updated } as Partial<EditorNodeData>);
       };
 
       return (
         <div className="space-y-2">
-          {node.data.multipliers.map((m, i) => (
+          {chainData.multipliers.map((m, i) => (
             <div key={m.id} className="space-y-1 rounded border border-neutral-200 bg-white p-1.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-medium text-neutral-600">
@@ -319,7 +321,7 @@ interface FormulaNodeProps {
 
 export function FormulaNodeComponent({ node }: FormulaNodeProps) {
   const style = NODE_STYLES[node.data.kind];
-  const Icon = style.icon;
+  const Icon = style.icon as React.ComponentType<{ className?: string }>;
   const ports = getPortsForNode(node);
   const inputPorts = ports.filter((p) => p.direction === "input");
   const outputPorts = ports.filter((p) => p.direction === "output");
