@@ -1,0 +1,404 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { FormulaPicker } from "./formula-picker";
+import { OptionBuilder } from "./option-builder";
+import type { OptionDef } from "./option-editor";
+import type { ProductCategory } from "@/types/product";
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface TenantFormula {
+  id: string;
+  name: string;
+  type: string;
+  presetId: string | null;
+}
+
+interface Preset {
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface ProductFormProps {
+  productId?: string;
+  initialData?: {
+    name: string;
+    slug: string;
+    description: string;
+    category: string;
+    isActive: boolean;
+    options: OptionDef[];
+    pricingFormulaId: string | null;
+    pricingParams: Record<string, number>;
+    renderPipeline: string;
+  };
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const CATEGORIES: { value: ProductCategory; label: string }[] = [
+  { value: "CHANNEL_LETTERS", label: "Channel Letters" },
+  { value: "LIT_SHAPES", label: "Lit Shapes" },
+  { value: "CABINET_SIGNS", label: "Cabinet Signs" },
+  { value: "DIMENSIONAL_LETTERS", label: "Dimensional Letters" },
+  { value: "LOGOS", label: "Logos" },
+  { value: "PRINT_SIGNS", label: "Print Signs" },
+  { value: "SIGN_POSTS", label: "Sign Posts" },
+  { value: "LIGHT_BOX_SIGNS", label: "Light Box Signs" },
+  { value: "BLADE_SIGNS", label: "Blade Signs" },
+  { value: "NEON_SIGNS", label: "Neon Signs" },
+  { value: "VINYL_BANNERS", label: "Vinyl Banners" },
+  { value: "ACCESSORIES", label: "Accessories" },
+];
+
+const RENDER_PIPELINES = [
+  { value: "text-to-3d", label: "Text to 3D" },
+  { value: "part-assembly", label: "Part Assembly" },
+  { value: "flat-2d", label: "Flat 2D" },
+];
+
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export function ProductForm({ productId, initialData }: ProductFormProps) {
+  const router = useRouter();
+  const isEditing = Boolean(productId);
+
+  // Form state
+  const [name, setName] = useState(initialData?.name ?? "");
+  const [slug, setSlug] = useState(initialData?.slug ?? "");
+  const [description, setDescription] = useState(initialData?.description ?? "");
+  const [category, setCategory] = useState<string>(
+    initialData?.category ?? "CHANNEL_LETTERS"
+  );
+  const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
+  const [renderPipeline, setRenderPipeline] = useState(
+    initialData?.renderPipeline ?? "text-to-3d"
+  );
+  const [pricingFormulaId, setPricingFormulaId] = useState<string | null>(
+    initialData?.pricingFormulaId ?? null
+  );
+  const [pricingParamsJson, setPricingParamsJson] = useState(
+    initialData?.pricingParams
+      ? JSON.stringify(initialData.pricingParams, null, 2)
+      : "{}"
+  );
+  const [options, setOptions] = useState<OptionDef[]>(
+    initialData?.options ?? []
+  );
+
+  // Formula data
+  const [tenantFormulas, setTenantFormulas] = useState<TenantFormula[]>([]);
+  const [presets, setPresets] = useState<Preset[]>([]);
+
+  // UI state
+  const [saving, setSaving] = useState(false);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(isEditing);
+
+  // Auto-generate slug from name when creating
+  useEffect(() => {
+    if (!slugManuallyEdited && !isEditing) {
+      setSlug(slugify(name));
+    }
+  }, [name, slugManuallyEdited, isEditing]);
+
+  // Load formulas on mount
+  const loadFormulas = useCallback(async () => {
+    try {
+      const res = await fetch("/api/v1/formulas");
+      if (!res.ok) return;
+      const data = await res.json();
+      setTenantFormulas(data.formulas ?? []);
+      setPresets(data.presets ?? []);
+    } catch {
+      // Non-critical — form still usable without formula data
+    }
+  }, []);
+
+  useEffect(() => {
+    loadFormulas();
+  }, [loadFormulas]);
+
+  // Create a formula from a preset and assign it
+  async function handleCreateFromPreset(presetId: string, presetName: string) {
+    try {
+      const res = await fetch("/api/v1/formulas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: presetName,
+          type: presetId,
+          presetId,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error ?? "Failed to create formula");
+        return;
+      }
+
+      const data = await res.json();
+      const newFormula: TenantFormula = {
+        id: data.formula.id,
+        name: data.formula.name,
+        type: data.formula.type,
+        presetId: data.formula.presetId,
+      };
+      setTenantFormulas((prev) => [...prev, newFormula]);
+      setPricingFormulaId(newFormula.id);
+      toast.success(`Formula "${presetName}" created and assigned`);
+    } catch {
+      toast.error("Failed to create formula from preset");
+    }
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+
+    // Validate pricingParams JSON
+    let pricingParams: Record<string, number>;
+    try {
+      pricingParams = JSON.parse(pricingParamsJson);
+    } catch {
+      toast.error("Pricing params must be valid JSON");
+      return;
+    }
+
+    // Build productSchema from options
+    const productSchema = {
+      options: options.map((opt) => ({
+        id: opt.id,
+        type: opt.type,
+        label: opt.label,
+        required: opt.required,
+        defaultValue: opt.defaultValue,
+        values: opt.values,
+        dependsOn: opt.dependsOn,
+      })),
+    };
+
+    const payload = {
+      name,
+      slug,
+      description,
+      category,
+      isActive,
+      pricingFormulaId: pricingFormulaId ?? undefined,
+      pricingParams,
+      productSchema,
+      renderConfig: { pipeline: renderPipeline },
+    };
+
+    setSaving(true);
+    try {
+      const url = isEditing
+        ? `/api/v1/products/${productId}`
+        : "/api/v1/products";
+      const method = isEditing ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error ?? "Failed to save product");
+        return;
+      }
+
+      toast.success(isEditing ? "Product updated" : "Product created");
+      router.push("/admin/products");
+    } catch {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSave} className="space-y-8">
+      {/* ── Section 1: Basic Info ──────────────────────────────────────── */}
+      <section className="rounded-xl border border-neutral-200 bg-white p-6">
+        <h2 className="mb-5 text-base font-semibold text-neutral-900">
+          Basic Info
+        </h2>
+
+        <div className="grid gap-5 sm:grid-cols-2">
+          {/* Name */}
+          <div className="sm:col-span-2">
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              Product Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Front-Lit Channel Letters"
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          {/* Slug */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              Slug <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={slug}
+              onChange={(e) => {
+                setSlugManuallyEdited(true);
+                setSlug(e.target.value);
+              }}
+              placeholder="front-lit-channel-letters"
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 font-mono text-sm text-neutral-900 placeholder-neutral-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              Category <span className="text-red-500">*</span>
+            </label>
+            <select
+              required
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              {CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Description */}
+          <div className="sm:col-span-2">
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short product description shown to customers"
+              className="w-full resize-none rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          {/* Render Pipeline */}
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              Render Pipeline
+            </label>
+            <select
+              value={renderPipeline}
+              onChange={(e) => setRenderPipeline(e.target.value)}
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              {RENDER_PIPELINES.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Active toggle */}
+          <div className="flex items-center gap-3 sm:justify-end">
+            <label
+              htmlFor="isActive"
+              className="text-sm font-medium text-neutral-700"
+            >
+              Active (visible in store)
+            </label>
+            <input
+              id="isActive"
+              type="checkbox"
+              checked={isActive}
+              onChange={(e) => setIsActive(e.target.checked)}
+              className="h-4 w-4 rounded border-neutral-300 accent-blue-600"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 2: Pricing ────────────────────────────────────────── */}
+      <section className="rounded-xl border border-neutral-200 bg-white p-6">
+        <h2 className="mb-5 text-base font-semibold text-neutral-900">
+          Pricing
+        </h2>
+
+        <div className="space-y-5">
+          <FormulaPicker
+            value={pricingFormulaId}
+            onChange={setPricingFormulaId}
+            tenantFormulas={tenantFormulas}
+            presets={presets}
+            onCreateFromPreset={handleCreateFromPreset}
+          />
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
+              Pricing Params{" "}
+              <span className="font-normal text-neutral-400">(JSON)</span>
+            </label>
+            <textarea
+              rows={6}
+              value={pricingParamsJson}
+              onChange={(e) => setPricingParamsJson(e.target.value)}
+              spellCheck={false}
+              className="w-full resize-y rounded-lg border border-neutral-300 px-3 py-2 font-mono text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section 3: Configurator Options ───────────────────────────── */}
+      <section className="rounded-xl border border-neutral-200 bg-white p-6">
+        <h2 className="mb-5 text-base font-semibold text-neutral-900">
+          Configurator Options
+        </h2>
+        <OptionBuilder options={options} onChange={setOptions} />
+      </section>
+
+      {/* ── Save / Cancel ─────────────────────────────────────────────── */}
+      <div className="flex items-center justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => router.push("/admin/products")}
+          className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={saving}
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-60"
+        >
+          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isEditing ? "Save Changes" : "Create Product"}
+        </button>
+      </div>
+    </form>
+  );
+}
