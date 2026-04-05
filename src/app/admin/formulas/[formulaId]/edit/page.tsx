@@ -30,7 +30,29 @@ export default async function EditFormulaPage({
     description: formula.description,
     type: formula.type,
     formulaAst: formula.formulaAst as FormulaDefinition | null,
+    scriptBody: formula.scriptBody,
   };
+
+  if (formula.type === "SCRIPT") {
+    const { ScriptEditor } = await import("@/components/admin/script-editor");
+    return (
+      <div className="container max-w-4xl py-8">
+        <h1 className="text-2xl font-bold mb-6">{formula.name}</h1>
+        <ScriptEditor
+          formulaId={formulaId}
+          initialScript={formula.scriptBody ?? ""}
+          onSave={async (scriptBody: string) => {
+            "use server";
+            const { prisma: db } = await import("@/lib/prisma");
+            await db.pricingFormula.update({
+              where: { id: formulaId },
+              data: { scriptBody },
+            });
+          }}
+        />
+      </div>
+    );
+  }
 
   return <FormulaEditor formulaId={formulaId} initialFormula={initialFormula} />;
 }
