@@ -18,7 +18,10 @@ model User {
   phone        String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+  role         UserRole  @default(USER)
+  tenantId     String?
 
+  tenant       Tenant?   @relation(fields: [tenantId], references: [id])
   orders       Order[]
   cartItems    CartItem[]
   savedDesigns SavedDesign[]
@@ -81,6 +84,7 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  admins          User[]
   products        Product[]
   pricingFormulas PricingFormula[]
   orders          Order[]
@@ -93,6 +97,11 @@ enum TenantPlan {
   FREE
   PRO
   ENTERPRISE
+}
+
+enum UserRole {
+  USER
+  ADMIN
 }
 
 model ApiKey {
