@@ -58,7 +58,7 @@ function makeConfig(
     text: "HELLO",
     height: 12,
     font: "Standard",
-    thickness: "1",
+    thickness: "0.25",
     painting: "-",
     paintingColors: 1,
     mounting: "stud",
@@ -100,35 +100,43 @@ describe("calculateDimensionalPrice", () => {
     expect(result.letterPrice).toBe(480);
   });
 
-  it("applies thickness multiplier for 1.5 inch (1.1x)", () => {
+  it("applies thickness multiplier for 3/4 inch (1.1x)", () => {
     // 5 letters * 24" * $8/inch = $960, * 1.1 = $1056
     const result = calculateDimensionalPrice(
-      makeConfig({ height: 24, thickness: "1.5" }),
+      makeConfig({ height: 24, thickness: "0.75" }),
       defaultDimensions,
       acrylicParams
     );
     expect(result.letterPrice).toBe(960);
     expect(result.priceAfterMultipliers).toBeCloseTo(1056);
     expect(result.multipliers).toContainEqual(
-      expect.objectContaining({ name: "Thickness 1.5\"", value: 1.1 })
+      expect.objectContaining({ name: 'Thickness 3/4"', value: 1.1 })
     );
   });
 
-  it("applies thickness multiplier for 2 inch (1.2x)", () => {
+  it("applies thickness multiplier for 1 inch (1.2x)", () => {
     // 5 letters * 24" * $8/inch = $960, * 1.2 = $1152
     const result = calculateDimensionalPrice(
-      makeConfig({ height: 24, thickness: "2" }),
+      makeConfig({ height: 24, thickness: "1" }),
       defaultDimensions,
       acrylicParams
     );
     expect(result.letterPrice).toBe(960);
     expect(result.priceAfterMultipliers).toBeCloseTo(1152);
     expect(result.multipliers).toContainEqual(
-      expect.objectContaining({ name: "Thickness 2\"", value: 1.2 })
+      expect.objectContaining({ name: 'Thickness 1"', value: 1.2 })
     );
   });
 
-  it("does not apply thickness multiplier for 0.5 inch or 1 inch", () => {
+  it("does not apply thickness multiplier for 1/4 inch or 1/2 inch", () => {
+    const result025 = calculateDimensionalPrice(
+      makeConfig({ height: 24, thickness: "0.25" }),
+      defaultDimensions,
+      acrylicParams
+    );
+    expect(result025.multipliers.filter((m) => m.name.startsWith("Thickness"))).toHaveLength(0);
+    expect(result025.priceAfterMultipliers).toBe(960);
+
     const result05 = calculateDimensionalPrice(
       makeConfig({ height: 24, thickness: "0.5" }),
       defaultDimensions,
@@ -136,14 +144,6 @@ describe("calculateDimensionalPrice", () => {
     );
     expect(result05.multipliers.filter((m) => m.name.startsWith("Thickness"))).toHaveLength(0);
     expect(result05.priceAfterMultipliers).toBe(960);
-
-    const result1 = calculateDimensionalPrice(
-      makeConfig({ height: 24, thickness: "1" }),
-      defaultDimensions,
-      acrylicParams
-    );
-    expect(result1.multipliers.filter((m) => m.name.startsWith("Thickness"))).toHaveLength(0);
-    expect(result1.priceAfterMultipliers).toBe(960);
   });
 
   it("applies curved font multiplier (1.2x)", () => {
@@ -197,12 +197,12 @@ describe("calculateDimensionalPrice", () => {
 
   it("stacks multipliers (thickness + curved + painted)", () => {
     // 5 letters * 24" * $8/inch = $960
-    // Multipliers: 1.1 (thickness 1.5") * 1.2 (curved) * 1.2 (painted) = 1.584
+    // Multipliers: 1.1 (thickness 3/4") * 1.2 (curved) * 1.2 (painted) = 1.584
     // 960 * 1.584 = $1520.64
     const result = calculateDimensionalPrice(
       makeConfig({
         height: 24,
-        thickness: "1.5",
+        thickness: "0.75",
         font: "Curved",
         painting: "Painted",
       }),
