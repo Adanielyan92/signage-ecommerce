@@ -146,10 +146,17 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: presetName,
-          type: presetId,
+          type: "PRESET",
           presetId,
         }),
       });
+
+      if (res.status === 409) {
+        // Formula already exists — reload formulas and try to find it
+        await loadFormulas();
+        toast.info("Formula already exists — assigning it");
+        return;
+      }
 
       if (!res.ok) {
         const data = await res.json();

@@ -33,6 +33,21 @@ export function FormulaPicker({
 }: FormulaPickerProps) {
   const [showPresets, setShowPresets] = useState(false);
 
+  // Find the currently selected formula to highlight its preset
+  const activeFormula = tenantFormulas.find((f) => f.id === value);
+
+  function handlePresetClick(presetId: string, presetName: string) {
+    // Check if a tenant formula already exists for this preset
+    const existing = tenantFormulas.find((f) => f.presetId === presetId);
+    if (existing) {
+      // Just assign the existing formula — don't create a duplicate
+      onChange(existing.id);
+    } else {
+      // Create a new formula from the preset
+      onCreateFromPreset(presetId, presetName);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Existing formula selector */}
@@ -67,26 +82,47 @@ export function FormulaPicker({
             />
             {showPresets
               ? "Hide presets"
-              : "Or create from a different preset"}
+              : "Or choose a different pricing formula"}
           </button>
 
           {showPresets && (
             <div className="mt-3 grid grid-cols-2 gap-2">
-              {presets.map((preset) => (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => onCreateFromPreset(preset.id, preset.name)}
-                  className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                >
-                  <p className="text-sm font-medium text-neutral-900">
-                    {preset.name}
-                  </p>
-                  <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500">
-                    {preset.description}
-                  </p>
-                </button>
-              ))}
+              {presets.map((preset) => {
+                const existingFormula = tenantFormulas.find(
+                  (f) => f.presetId === preset.id,
+                );
+                const isActive = activeFormula?.presetId === preset.id;
+
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => handlePresetClick(preset.id, preset.name)}
+                    className={`rounded-lg border px-3 py-2.5 text-left transition focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                      isActive
+                        ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
+                        : "border-neutral-200 bg-white hover:border-blue-400 hover:bg-blue-50"
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-neutral-900">
+                      {preset.name}
+                    </p>
+                    <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500">
+                      {preset.description}
+                    </p>
+                    {existingFormula && (
+                      <p className="mt-1 text-xs text-blue-600">
+                        {isActive ? "Currently assigned" : "Click to assign"}
+                      </p>
+                    )}
+                    {!existingFormula && (
+                      <p className="mt-1 text-xs text-neutral-400">
+                        Click to create & assign
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
