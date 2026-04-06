@@ -6,6 +6,7 @@ import type { ChannelLetterProduct } from "@/engine/product-definitions";
 import type { ChannelLetterType } from "@/types/product";
 import { channelLetterProducts } from "@/engine/product-definitions";
 import { FONT_CSS_MAP } from "@/engine/font-map";
+import { validateTextInput, validateHeight } from "@/lib/validation";
 
 const LED_SWATCHES: Record<string, string> = {
   "3000K": "#FFB46B",
@@ -63,6 +64,9 @@ export function ChannelLetterOptions() {
   useEffect(() => {
     return () => clearTimeout(textTimerRef.current);
   }, []);
+
+  const textErrors = localText.length > 0 ? validateTextInput(localText) : [];
+  const heightErrors = validateHeight(config.height);
 
   const hasOption = (key: string) =>
     product.options.some((o) => o.optionKey === key);
@@ -123,6 +127,9 @@ export function ChannelLetterOptions() {
           placeholder="Enter your sign text..."
           className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
+        {textErrors.length > 0 && (
+          <p className="mt-1 text-xs text-red-500">{textErrors[0].message}</p>
+        )}
       </div>
 
       {/* Height */}
@@ -146,6 +153,9 @@ export function ChannelLetterOptions() {
           <span>6&quot;</span>
           <span>72&quot;</span>
         </div>
+        {heightErrors.length > 0 && (
+          <p className="mt-1 text-xs text-red-500">{heightErrors[0].message}</p>
+        )}
       </div>
 
       {/* Font */}

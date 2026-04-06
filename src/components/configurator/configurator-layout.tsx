@@ -11,6 +11,7 @@ import { useMockupStore } from "@/stores/mockup-store";
 import { formatPrice } from "@/lib/utils";
 import type { UnifiedCartItem } from "@/types/configurator";
 import { captureCanvasScreenshot } from "@/lib/capture-screenshot";
+import { validateChannelLetterConfig } from "@/lib/validation";
 import { useSession } from "next-auth/react";
 import { DayNightToggle } from "./day-night-toggle";
 import { Save, Image as ImageIcon, ShoppingCart, RotateCw } from "lucide-react";
@@ -120,7 +121,23 @@ export function ConfiguratorLayout({
     return true;
   })();
 
-  const canAddToCart = hasRequiredInput && breakdown.total > 0;
+  const canAddToCart = (() => {
+    if (!hasRequiredInput || breakdown.total <= 0) return false;
+    if (productCategory === "CHANNEL_LETTERS") {
+      return validateChannelLetterConfig(config).valid;
+    }
+    if (productCategory === "DIMENSIONAL_LETTERS" || productCategory === "NEON_SIGNS") {
+      const active = getActiveConfig();
+      if ("text" in active && "height" in active) {
+        return validateChannelLetterConfig(active as { text: string; height: number }).valid;
+      }
+    }
+    // Panel-based: check dimensions are valid
+    if (dimensions.totalWidthInches >= 4 && dimensions.heightInches >= 6) {
+      return true;
+    }
+    return false;
+  })();
 
   const handleWallMockup = () => {
     const activeConfig = getActiveConfig();

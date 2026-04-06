@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { FONT_CSS_MAP } from "@/engine/font-map";
+import { validateTextInput, validateHeight } from "@/lib/validation";
 import type { FontStyle } from "@/types/product";
 import { Separator } from "@/components/ui/separator";
 
@@ -98,6 +99,9 @@ export function NeonOptions() {
     return () => clearTimeout(textTimerRef.current);
   }, []);
 
+  const textErrors = localText.length > 0 ? validateTextInput(localText) : [];
+  const heightErrors = validateHeight(config.height);
+
   return (
     <div className="space-y-6">
       {/* Text Input */}
@@ -112,6 +116,9 @@ export function NeonOptions() {
           placeholder="Enter your neon text..."
           className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
         />
+        {textErrors.length > 0 && (
+          <p className="mt-1 text-xs text-red-500">{textErrors[0].message}</p>
+        )}
       </div>
 
       {/* Height */}
@@ -137,6 +144,9 @@ export function NeonOptions() {
           <span>6&quot;</span>
           <span>48&quot;</span>
         </div>
+        {heightErrors.length > 0 && (
+          <p className="mt-1 text-xs text-red-500">{heightErrors[0].message}</p>
+        )}
       </div>
 
       <Separator />
