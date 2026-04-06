@@ -63,3 +63,7 @@ public/uploads/models/
 
 # Uploaded production files (dev only)
 public/uploads/
+
+# Widget build artifacts
+widget/dist/
+widget/node_modules/
