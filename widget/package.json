@@ -1,0 +1,25 @@
+{
+  "name": "@gatsoft/configurator-widget",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch"
+  },
+  "dependencies": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "three": "^0.183.1",
+    "@react-three/fiber": "^9.5.0",
+    "@react-three/drei": "^10.7.7",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/three": "^0.183.1",
+    "typescript": "^5.8.0"
+  }
+}
