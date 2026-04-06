@@ -51,9 +51,13 @@ export default async function EditProductPage({
     };
   });
 
-  // Extract renderPipeline from renderConfig JSON
-  const renderConfig = product.renderConfig as { pipeline?: string } | null;
-  const renderPipeline = renderConfig?.pipeline ?? "text-to-3d";
+  // Extract renderPipeline, modelUrl, and extra fields from renderConfig JSON
+  const renderConfig = product.renderConfig as Record<string, unknown> | null;
+  const renderPipeline = (renderConfig?.pipeline as string) ?? "text-to-3d";
+  const modelUrl = (renderConfig?.modelUrl as string) ?? null;
+
+  // Preserve extra renderConfig fields (meshBindings, assemblyBindings, etc.)
+  const { pipeline: _p, modelUrl: _m, ...renderConfigExtra } = renderConfig ?? {};
 
   // Extract pricingParams and pricingRules
   const rawPricingParams =
@@ -86,6 +90,8 @@ export default async function EditProductPage({
     pricingParams,
     pricingRules,
     renderPipeline,
+    modelUrl,
+    renderConfigExtra,
   };
 
   return (

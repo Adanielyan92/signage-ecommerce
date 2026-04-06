@@ -8,6 +8,7 @@ import { FormulaPicker } from "./formula-picker";
 import { PricingParamsEditor } from "./pricing-params-editor";
 import { OptionPricingEditor } from "./option-pricing-editor";
 import { OptionBuilder } from "./option-builder";
+import { ModelPreviewSection } from "./model-preview-section";
 import type { OptionDef } from "./option-editor";
 import type { ProductCategory, OptionPricingRule } from "@/types/product";
 
@@ -47,6 +48,9 @@ interface ProductFormProps {
     pricingParams: Record<string, number>;
     pricingRules: OptionPricingRule[];
     renderPipeline: string;
+    modelUrl: string | null;
+    /** Extra renderConfig fields (meshBindings, assemblyBindings, etc.) to preserve on save */
+    renderConfigExtra?: Record<string, unknown>;
   };
 }
 
@@ -97,6 +101,9 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
   const [isActive, setIsActive] = useState(initialData?.isActive ?? true);
   const [renderPipeline, setRenderPipeline] = useState(
     initialData?.renderPipeline ?? "text-to-3d"
+  );
+  const [modelUrl, setModelUrl] = useState<string | null>(
+    initialData?.modelUrl ?? null
   );
   const [pricingFormulaId, setPricingFormulaId] = useState<string | null>(
     initialData?.pricingFormulaId ?? null
@@ -209,7 +216,11 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
       pricingFormulaId: pricingFormulaId ?? undefined,
       pricingParams: { ...pricingParams, rules: pricingRules },
       productSchema,
-      renderConfig: { pipeline: renderPipeline },
+      renderConfig: {
+        ...(initialData?.renderConfigExtra ?? {}),
+        pipeline: renderPipeline,
+        ...(modelUrl ? { modelUrl } : {}),
+      },
     };
 
     setSaving(true);
@@ -333,23 +344,6 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
             </select>
           </div>
 
-          {/* 3D Model Builder link (only for part-assembly pipeline on existing products) */}
-          {isEditing && renderPipeline === "part-assembly" && (
-            <div className="sm:col-span-2">
-              <a
-                href={`/admin/products/${productId}/model`}
-                className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                  <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                  <line x1="12" y1="22.08" x2="12" y2="12" />
-                </svg>
-                Configure 3D Model
-              </a>
-            </div>
-          )}
-
           {/* Active toggle */}
           <div className="flex items-center gap-3 sm:justify-end">
             <label
@@ -442,7 +436,16 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
         />
       </section>
 
-      {/* ── Section 4: Configurator Options ───────────────────────────── */}
+      {/* ── Section 4: 3D Model & Preview ──────────────────────────────── */}
+      <ModelPreviewSection
+        productId={productId}
+        slug={slug}
+        renderPipeline={renderPipeline}
+        modelUrl={modelUrl}
+        onModelUrlChange={setModelUrl}
+      />
+
+      {/* ── Section 5: Configurator Options ───────────────────────────── */}
       <section className="rounded-xl border border-neutral-200 bg-white p-6">
         <h2 className="mb-5 text-base font-semibold text-neutral-900">
           Configurator Options
