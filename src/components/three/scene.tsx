@@ -371,7 +371,7 @@ export default function Scene() {
   return (
     <Canvas
       camera={{ position: [0, 0, 60], fov: 40 }}
-      shadows
+      shadows={{ type: THREE.PCFShadowMap }}
       gl={{
         antialias: true,
         alpha: false,
