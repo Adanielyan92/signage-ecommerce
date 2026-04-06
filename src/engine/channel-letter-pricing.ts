@@ -4,7 +4,7 @@ import type {
   Dimensions,
   PriceBreakdown,
 } from "@/types/configurator";
-import { calculateMultipliers, getCombinedMultiplier } from "./multipliers";
+import { calculateMultipliers, getCombinedMultiplier, evaluateAdditiveRules } from "./multipliers";
 
 /**
  * Calculate the full price breakdown for a channel letter sign configuration.
@@ -20,7 +20,8 @@ import { calculateMultipliers, getCombinedMultiplier } from "./multipliers";
  *   4. Add multicolor painting surcharge: letterCount * 300 * (colorCount - 1)
  *   5. Add raceway: width * $50/12 (linear) or sqft * $50 (box)
  *   6. Add vinyl: sqft * $5 (regular) or sqft * $10 (perforated)
- *   7. Enforce minimum order price
+ *   7. Add any additive custom rules (fixed_add, per_unit_add, per_sqft_add)
+ *   8. Enforce minimum order price
  */
 export function calculateChannelLetterPrice(
   config: SignConfiguration,
@@ -33,6 +34,7 @@ export function calculateChannelLetterPrice(
     largeSizePricePerInch,
     minHeightForPrice,
     minOrderPrice,
+    rules,
   } = params;
 
   // Count letters (no spaces)
@@ -56,12 +58,12 @@ export function calculateChannelLetterPrice(
   const perLetterPrice = heightUsedForPrice * pricePerInch;
   const letterPrice = letterCount * perLetterPrice;
 
-  // Multipliers
-  const multipliers = calculateMultipliers(config);
+  // Multipliers — pass custom rules if available
+  const multipliers = calculateMultipliers(config, rules);
   const combinedMultiplier = getCombinedMultiplier(multipliers);
   const priceAfterMultipliers = letterPrice * combinedMultiplier;
 
-  // Multicolor painting surcharge
+  // Multicolor painting surcharge (always uses hardcoded formula)
   let paintingExtra = 0;
   if (
     config.painting === "Painted Multicolor" &&
@@ -89,8 +91,19 @@ export function calculateChannelLetterPrice(
     vinylPrice = dimensions.squareFeet * 10;
   }
 
+  // Additive custom rules (fixed_add, per_unit_add, per_sqft_add)
+  let customAdditives = 0;
+  if (rules && rules.length > 0) {
+    customAdditives = evaluateAdditiveRules(
+      config,
+      rules,
+      letterCount,
+      dimensions.squareFeet
+    );
+  }
+
   const subtotal =
-    priceAfterMultipliers + paintingExtra + racewayPrice + vinylPrice;
+    priceAfterMultipliers + paintingExtra + racewayPrice + vinylPrice + customAdditives;
   const total = Math.max(subtotal, minOrderPrice);
   const minOrderApplied = subtotal < minOrderPrice;
 

@@ -1,9 +1,19 @@
+export interface OptionPricingRule {
+  id: string;
+  optionId: string;       // Which option (e.g., "lit", "led", "painting")
+  optionValue: string;    // Which value triggers this rule (e.g., "Non-Lit", "RGB", "Painted")
+  effectType: "multiplier" | "fixed_add" | "per_unit_add" | "per_sqft_add";
+  effectValue: number;    // e.g., 0.75 for multiplier, 300 for fixed add
+  label: string;          // Human readable: "Non-Lit Discount", "RGB LED Premium"
+}
+
 export interface PricingParams {
   basePricePerInch: number;
   largeSizeThreshold: number;
   largeSizePricePerInch: number;
   minHeightForPrice: number;
   minOrderPrice: number;
+  rules?: OptionPricingRule[];
 }
 
 export interface ProductOption {

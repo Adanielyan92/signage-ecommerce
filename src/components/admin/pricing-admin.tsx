@@ -31,8 +31,11 @@ const SAMPLE_DIMENSIONS: Dimensions = {
   letterWidths: [10, 13, 13, 12, 10, 7],
 };
 
+/** Numeric-only keys from PricingParams (excludes `rules`) */
+type NumericPricingKey = Exclude<keyof PricingParams, "rules">;
+
 interface PricingParamField {
-  key: keyof PricingParams;
+  key: NumericPricingKey;
   label: string;
   description: string;
   unit: string;

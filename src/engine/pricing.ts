@@ -61,7 +61,13 @@ import { calculatePushThroughPrice } from "./push-through-pricing";
 import { getAnyProductBySlug } from "./product-definitions";
 
 export { calculateChannelLetterPrice } from "./channel-letter-pricing";
-export { calculateMultipliers, getCombinedMultiplier } from "./multipliers";
+export {
+  calculateMultipliers,
+  getCombinedMultiplier,
+  evaluateCustomRules,
+  evaluateAdditiveRules,
+  DEFAULT_CHANNEL_LETTER_RULES,
+} from "./multipliers";
 
 /**
  * Calculate price for any channel letter product type.

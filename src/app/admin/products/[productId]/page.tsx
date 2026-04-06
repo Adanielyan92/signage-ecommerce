@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { ProductForm } from "@/components/admin/product-form";
 import type { OptionDef } from "@/components/admin/option-editor";
+import type { OptionPricingRule } from "@/types/product";
 
 export default async function EditProductPage({
   params,
@@ -52,13 +53,25 @@ export default async function EditProductPage({
   const renderConfig = product.renderConfig as { pipeline?: string } | null;
   const renderPipeline = renderConfig?.pipeline ?? "text-to-3d";
 
-  // Extract pricingParams
-  const pricingParams =
+  // Extract pricingParams and pricingRules
+  const rawPricingParams =
     product.pricingParams &&
     typeof product.pricingParams === "object" &&
     !Array.isArray(product.pricingParams)
-      ? (product.pricingParams as Record<string, number>)
+      ? (product.pricingParams as Record<string, unknown>)
       : {};
+
+  // Separate rules from numeric params
+  const pricingRules: OptionPricingRule[] = Array.isArray(rawPricingParams.rules)
+    ? (rawPricingParams.rules as OptionPricingRule[])
+    : [];
+
+  const pricingParams: Record<string, number> = {};
+  for (const [key, val] of Object.entries(rawPricingParams)) {
+    if (key !== "rules" && typeof val === "number") {
+      pricingParams[key] = val;
+    }
+  }
 
   const initialData = {
     name: product.name,
@@ -69,6 +82,7 @@ export default async function EditProductPage({
     options,
     pricingFormulaId: product.pricingFormulaId ?? null,
     pricingParams,
+    pricingRules,
     renderPipeline,
   };
 

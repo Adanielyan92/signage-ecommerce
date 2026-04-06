@@ -6,9 +6,10 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { FormulaPicker } from "./formula-picker";
 import { PricingParamsEditor } from "./pricing-params-editor";
+import { OptionPricingEditor } from "./option-pricing-editor";
 import { OptionBuilder } from "./option-builder";
 import type { OptionDef } from "./option-editor";
-import type { ProductCategory } from "@/types/product";
+import type { ProductCategory, OptionPricingRule } from "@/types/product";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,6 +45,7 @@ interface ProductFormProps {
     options: OptionDef[];
     pricingFormulaId: string | null;
     pricingParams: Record<string, number>;
+    pricingRules: OptionPricingRule[];
     renderPipeline: string;
   };
 }
@@ -104,6 +106,9 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
   );
   const [options, setOptions] = useState<OptionDef[]>(
     initialData?.options ?? []
+  );
+  const [pricingRules, setPricingRules] = useState<OptionPricingRule[]>(
+    initialData?.pricingRules ?? []
   );
 
   // Formula data
@@ -202,7 +207,7 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
       category,
       isActive,
       pricingFormulaId: pricingFormulaId ?? undefined,
-      pricingParams,
+      pricingParams: { ...pricingParams, rules: pricingRules },
       productSchema,
       renderConfig: { pipeline: renderPipeline },
     };
@@ -421,7 +426,23 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
         </div>
       </section>
 
-      {/* ── Section 3: Configurator Options ───────────────────────────── */}
+      {/* ── Section 3: Option Pricing Rules ─────────────────────────── */}
+      <section className="rounded-xl border border-neutral-200 bg-white p-6">
+        <h2 className="mb-5 text-base font-semibold text-neutral-900">
+          Option Pricing Rules
+        </h2>
+        <p className="mb-4 text-sm text-neutral-500">
+          Configure how each option value affects the final price. Rules are
+          evaluated in order when calculating the price.
+        </p>
+        <OptionPricingEditor
+          rules={pricingRules}
+          onChange={setPricingRules}
+          options={options}
+        />
+      </section>
+
+      {/* ── Section 4: Configurator Options ───────────────────────────── */}
       <section className="rounded-xl border border-neutral-200 bg-white p-6">
         <h2 className="mb-5 text-base font-semibold text-neutral-900">
           Configurator Options
