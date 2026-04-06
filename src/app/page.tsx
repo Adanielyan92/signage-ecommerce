@@ -189,21 +189,22 @@ export default function Home() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-700">
+      <section className="relative overflow-hidden bg-gradient-to-br from-brand-navy to-brand-accent">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
         <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Custom Signs, Designed in 3D
+            <h1 className="font-heading text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              Custom Business Signs,<br />Designed in Real-Time 3D
             </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">
-              Design your perfect sign with our real-time 3D configurator. See
-              exactly what you&apos;ll get before you order.
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-white/80">
+              The fastest way to design, price, and order professional signage.
+              Channel letters, cabinet signs, neon, and more --
+              ready to install in 2-3 weeks.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-brand-accent shadow-lg transition hover:bg-brand-bg"
               >
                 Design Your Sign
                 <ArrowRight className="h-4 w-4" />
@@ -219,14 +220,36 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Social Proof Strip */}
+      <div className="border-b border-brand-muted bg-white py-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-8 px-4 text-center text-sm text-brand-text-secondary sm:gap-16">
+          <div>
+            <span className="block font-heading text-2xl font-bold text-brand-navy">2,500+</span>
+            Signs Delivered
+          </div>
+          <div>
+            <span className="block font-heading text-2xl font-bold text-brand-navy">500+</span>
+            Businesses Served
+          </div>
+          <div>
+            <span className="block font-heading text-2xl font-bold text-brand-navy">4.9/5</span>
+            Customer Rating
+          </div>
+          <div>
+            <span className="block font-heading text-2xl font-bold text-brand-navy">30+</span>
+            Sign Types
+          </div>
+        </div>
+      </div>
+
       {/* Product Categories Section */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">
               Every Type of Sign You Need
             </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-600">
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-brand-text-secondary">
               From illuminated channel letters to printed panels — design and
               price any sign type online.
             </p>
@@ -239,7 +262,7 @@ export default function Home() {
                 <Link
                   key={cat.name}
                   href={cat.href}
-                  className="group flex flex-col rounded-xl border border-neutral-200 bg-white overflow-hidden transition hover:border-blue-300 hover:shadow-lg"
+                  className="group flex flex-col rounded-xl border border-brand-muted bg-white overflow-hidden transition hover:border-brand-accent hover:shadow-lg"
                 >
                   <img
                     src={cat.image}
@@ -248,21 +271,21 @@ export default function Home() {
                   />
                   <div className="flex flex-col flex-1 p-5">
                     <div className="flex items-center gap-2">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-50 text-blue-600 transition group-hover:bg-blue-100">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-brand-accent/10 text-brand-accent transition group-hover:bg-brand-accent/15">
                         <Icon className="h-4 w-4" />
                       </div>
-                      <h3 className="text-base font-semibold text-neutral-900">
+                      <h3 className="text-base font-semibold text-brand-navy">
                         {cat.name}
                       </h3>
                     </div>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-neutral-500">
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-brand-text-secondary">
                       {cat.description}
                     </p>
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-sm font-semibold text-blue-600">
+                      <span className="text-sm font-semibold text-brand-accent">
                         {cat.startingPrice}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-sm font-medium text-neutral-500 transition group-hover:text-blue-600">
+                      <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-text-secondary transition group-hover:text-brand-accent-light">
                         Design &amp; Price
                         <ArrowRight className="h-3.5 w-3.5" />
                       </span>
@@ -276,13 +299,13 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-neutral-50 py-20">
+      <section className="bg-brand-bg py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">
               How It Works
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-600">
+            <p className="mx-auto mt-4 max-w-xl text-lg text-brand-text-secondary">
               Three simple steps from design to delivery.
             </p>
           </div>
@@ -292,16 +315,16 @@ export default function Home() {
               const Icon = step.icon;
               return (
                 <div key={step.number} className="relative text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-200">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-accent text-white shadow-lg shadow-brand-accent/20">
                     <Icon className="h-7 w-7" />
                   </div>
-                  <div className="absolute -top-2 left-1/2 flex h-7 w-7 -translate-x-1/2 translate-x-6 items-center justify-center rounded-full bg-indigo-500 text-xs font-bold text-white">
+                  <div className="absolute -top-2 left-1/2 flex h-7 w-7 -translate-x-1/2 translate-x-6 items-center justify-center rounded-full bg-brand-accent-light text-xs font-bold text-white">
                     {step.number}
                   </div>
-                  <h3 className="mt-6 text-lg font-semibold text-neutral-900">
+                  <h3 className="mt-6 text-lg font-semibold text-brand-navy">
                     {step.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+                  <p className="mt-2 text-sm leading-relaxed text-brand-text-secondary">
                     {step.description}
                   </p>
                 </div>
@@ -315,10 +338,10 @@ export default function Home() {
       <section className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+            <h2 className="font-heading text-3xl font-bold tracking-tight text-brand-navy sm:text-4xl">
               Why Choose GatSoft Signs
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-600">
+            <p className="mx-auto mt-4 max-w-xl text-lg text-brand-text-secondary">
               Tools and features that make ordering custom signage effortless.
             </p>
           </div>
@@ -329,15 +352,15 @@ export default function Home() {
               return (
                 <div
                   key={feature.title}
-                  className="rounded-xl border border-neutral-200 bg-white p-6 transition hover:shadow-md"
+                  className="rounded-xl border border-brand-muted bg-white p-6 transition hover:shadow-md"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-accent/10 text-brand-accent">
                     <Icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-4 text-base font-semibold text-neutral-900">
+                  <h3 className="mt-4 text-base font-semibold text-brand-navy">
                     {feature.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+                  <p className="mt-2 text-sm leading-relaxed text-brand-text-secondary">
                     {feature.description}
                   </p>
                 </div>
@@ -348,19 +371,19 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-indigo-700 py-20">
+      <section className="bg-gradient-to-br from-brand-navy to-brand-accent py-20">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Ready to Create Your Sign?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-blue-100">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-white/70">
             Start designing your custom sign today with our free 3D configurator.
             No account required.
           </p>
           <div className="mt-8">
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-blue-700 shadow-lg transition hover:bg-blue-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3.5 text-sm font-semibold text-brand-accent shadow-lg transition hover:bg-brand-accent/10"
             >
               Start Designing Now
               <ArrowRight className="h-4 w-4" />
@@ -369,15 +392,15 @@ export default function Home() {
 
           {/* Trust signals */}
           <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row sm:gap-12">
-            <div className="flex items-center gap-2 text-blue-100">
+            <div className="flex items-center gap-2 text-white/70">
               <Truck className="h-5 w-5" />
               <span className="text-sm font-medium">Free Shipping</span>
             </div>
-            <div className="flex items-center gap-2 text-blue-100">
+            <div className="flex items-center gap-2 text-white/70">
               <Flag className="h-5 w-5" />
               <span className="text-sm font-medium">Made in USA</span>
             </div>
-            <div className="flex items-center gap-2 text-blue-100">
+            <div className="flex items-center gap-2 text-white/70">
               <Clock className="h-5 w-5" />
               <span className="text-sm font-medium">2-3 Week Production</span>
             </div>
