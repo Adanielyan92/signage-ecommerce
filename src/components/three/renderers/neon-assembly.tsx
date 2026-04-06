@@ -7,6 +7,7 @@ import { useConfiguratorStore } from "@/stores/configurator-store";
 import { useFont } from "../hooks/use-font";
 import { SignLetter } from "../sign-letter";
 import { clearGeometryCache } from "../utils/geometry-cache";
+import { createContourBackerShape } from "../utils/contour-backer";
 
 interface NeonAssemblyProps {
   text: string;
@@ -164,6 +165,22 @@ export function NeonAssembly({
     return null;
   }, [backer]);
 
+  // Contour backer geometry (pill shape following text bounds)
+  const contourBackerGeometry = useMemo(() => {
+    if (backerShape !== "contour" || letterPositions.length === 0) return null;
+    const contourShape = createContourBackerShape(
+      letterPositions.map((lp) => ({
+        x: lp.x + xOffset,
+        width: lp.width,
+        height,
+      })),
+      height,
+      BACKER_PADDING,
+    );
+    const geo = new THREE.ShapeGeometry(contourShape, 16);
+    return geo;
+  }, [backerShape, letterPositions, height, xOffset]);
+
   if (!font) return null;
 
   return (
@@ -187,10 +204,19 @@ export function NeonAssembly({
 
       {/* Backer panel */}
       {backer !== "none" && backerMaterial && totalWidth > 0 && (
-        <mesh position={[0, height / 2, -(NEON_DEPTH + 0.5)]}>
-          <planeGeometry args={[backerWidth, backerHeight]} />
-          <primitive object={backerMaterial} attach="material" />
-        </mesh>
+        backerShape === "contour" && contourBackerGeometry ? (
+          <mesh
+            geometry={contourBackerGeometry}
+            position={[0, 0, -(NEON_DEPTH + 0.5)]}
+          >
+            <primitive object={backerMaterial} attach="material" />
+          </mesh>
+        ) : (
+          <mesh position={[0, height / 2, -(NEON_DEPTH + 0.5)]}>
+            <planeGeometry args={[backerWidth, backerHeight]} />
+            <primitive object={backerMaterial} attach="material" />
+          </mesh>
+        )
       )}
     </group>
   );
