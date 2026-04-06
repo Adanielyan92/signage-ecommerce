@@ -47,8 +47,8 @@ export function parseSvgToShapes(svgString: string): ParsedSvgShapes {
         curve.v2.sub(center);
       }
       if ("v" in curve && curve.v instanceof THREE.Vector2) {
-        (curve as THREE.LineCurve).v1.sub(center);
-        (curve as THREE.LineCurve).v2.sub(center);
+        (curve as unknown as THREE.LineCurve).v1.sub(center);
+        (curve as unknown as THREE.LineCurve).v2.sub(center);
       }
     });
     shape.currentPoint.sub(center);

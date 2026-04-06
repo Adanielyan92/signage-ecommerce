@@ -47,7 +47,7 @@ const PARAM_FIELDS: PricingParamField[] = [
 ];
 
 export function PricingAdmin() {
-  const [selectedProduct, setSelectedProduct] = useState(channelLetterProducts[0].slug);
+  const [selectedProduct, setSelectedProduct] = useState<string>(channelLetterProducts[0].slug);
   const product = channelLetterProducts.find((p) => p.slug === selectedProduct)!;
 
   const [overrides, setOverrides] = useState<Partial<PricingParams>>({});
@@ -59,7 +59,7 @@ export function PricingAdmin() {
 
   // Live preview calculation
   const sampleBreakdown = calculatePrice(
-    { ...SAMPLE_CONFIG, productType: product.slug as SignConfiguration["productType"] },
+    { ...SAMPLE_CONFIG, productType: product.slug as SignConfiguration["productType"] } as SignConfiguration,
     SAMPLE_DIMENSIONS,
     effectiveParams,
   );
