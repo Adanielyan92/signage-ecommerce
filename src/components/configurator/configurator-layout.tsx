@@ -17,6 +17,8 @@ import { DayNightToggle } from "./day-night-toggle";
 import { WizardProvider } from "./wizard/wizard-context";
 import { StepIndicator } from "./wizard/step-indicator";
 import { WizardNavigation } from "./wizard/wizard-navigation";
+import { MobileConfigurator } from "./mobile-configurator";
+import { PriceDisplay } from "./price-display";
 import { Save, Image as ImageIcon, ShoppingCart, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { ArButton } from "./ar-button";
@@ -220,9 +222,18 @@ export function ConfiguratorLayout({
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col lg:flex-row">
-      {/* 3D Viewport — 60% on desktop, 50vh on mobile */}
-      <div className="relative h-[50vh] min-h-[300px] bg-neutral-100 lg:h-full lg:w-[60%]">
+    <>
+    {/* Mobile layout */}
+    <MobileConfigurator
+      sceneElement={<SceneErrorBoundary><Scene /></SceneErrorBoundary>}
+      optionsElement={<OptionsPanel />}
+      priceElement={<PriceDisplay />}
+    />
+
+    {/* Desktop layout */}
+    <div className="hidden h-[calc(100vh-4rem)] lg:flex">
+      {/* 3D Viewport — 60% on desktop */}
+      <div className="relative h-full w-[60%] bg-neutral-100">
         <SceneErrorBoundary>
           <Scene />
         </SceneErrorBoundary>
@@ -397,5 +408,6 @@ export function ConfiguratorLayout({
         </div>
       </div>
     </div>
+    </>
   );
 }
