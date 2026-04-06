@@ -87,6 +87,60 @@ const PRODUCT_CATEGORIES = [
       { name: "Mesh Banner", slug: "mesh-banner" },
     ],
   },
+  {
+    title: "A-Frame Signs",
+    description: "Portable sidewalk signs",
+    items: [
+      { name: "Standard A-Frame", slug: "a-frame-standard" },
+      { name: "Metal A-Frame", slug: "a-frame-metal" },
+      { name: "Plastic A-Frame", slug: "a-frame-plastic" },
+    ],
+  },
+  {
+    title: "Yard Signs",
+    description: "Campaign & real estate signs",
+    items: [
+      { name: "Coroplast Yard Sign", slug: "yard-sign-coroplast" },
+      { name: "Aluminum Yard Sign", slug: "yard-sign-aluminum" },
+    ],
+  },
+  {
+    title: "Plaques & Awards",
+    description: "Recognition & office signage",
+    items: [
+      { name: "Aluminum Plaque", slug: "plaque-aluminum" },
+      { name: "Acrylic Plaque", slug: "plaque-acrylic" },
+      { name: "Wood Plaque", slug: "plaque-wood" },
+      { name: "Brass Plaque", slug: "plaque-brass" },
+    ],
+  },
+  {
+    title: "Vinyl Graphics",
+    description: "Walls, windows & vehicles",
+    items: [
+      { name: "Wall Graphic", slug: "vinyl-wall-graphic" },
+      { name: "Window Graphic", slug: "vinyl-window-graphic" },
+      { name: "Floor Graphic", slug: "vinyl-floor-graphic" },
+      { name: "Vehicle Wrap", slug: "vinyl-vehicle-wrap" },
+    ],
+  },
+  {
+    title: "Wayfinding & ADA",
+    description: "ADA-compliant & directional",
+    items: [
+      { name: "ADA Compliant Sign", slug: "wayfinding-ada" },
+      { name: "Directional Sign", slug: "wayfinding-directional" },
+      { name: "Room ID Sign", slug: "wayfinding-room-id" },
+    ],
+  },
+  {
+    title: "Push-Through Signs",
+    description: "Dimensional illuminated letters",
+    items: [
+      { name: "Single Face Push-Through", slug: "push-through-single" },
+      { name: "Double Face Push-Through", slug: "push-through-double" },
+    ],
+  },
 ];
 
 export { PRODUCT_CATEGORIES };
@@ -150,8 +204,8 @@ export function MegaMenuDesktop() {
             : "pointer-events-none -translate-y-2 opacity-0"
         )}
       >
-        <div className="w-[1050px] rounded-xl border border-neutral-200 bg-white p-6 shadow-xl">
-          <div className="grid grid-cols-8 gap-6">
+        <div className="w-350 rounded-xl border border-neutral-200 bg-white p-6 shadow-xl">
+          <div className="grid grid-cols-7 gap-5">
             {PRODUCT_CATEGORIES.map((category) => (
               <div key={category.title}>
                 <h3 className="mb-1 text-xs font-semibold uppercase tracking-wider text-neutral-400">

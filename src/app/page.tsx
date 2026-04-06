@@ -21,6 +21,12 @@ import {
   Flag,
   Clock,
   ArrowRight,
+  PanelTop,
+  Leaf,
+  Award,
+  Layers,
+  Map,
+  ChevronsRight,
 } from "lucide-react";
 
 interface Category {
@@ -131,6 +137,60 @@ const categories: Category[] = [
     href: "/configure/vinyl-banner-13oz",
     icon: Flag,
     image: "/images/products/vinyl-banner-13oz.png",
+  },
+  {
+    name: "A-Frame Signs",
+    description:
+      "Portable sidewalk signs. Perfect for restaurants, retail stores, and events. Easy to move and double-sided for maximum visibility.",
+    startingPrice: "$150+",
+    href: "/configure/a-frame-standard",
+    icon: PanelTop,
+    image: "/images/products/a-frame.png",
+  },
+  {
+    name: "Yard Signs",
+    description:
+      "Campaign and real estate signs. Lightweight, affordable, and easy to install with H-stakes. Bulk pricing available.",
+    startingPrice: "$50+",
+    href: "/configure/yard-sign-coroplast",
+    icon: Leaf,
+    image: "/images/products/yard-sign.png",
+  },
+  {
+    name: "Plaques & Awards",
+    description:
+      "Professional recognition plaques and office signage. Available in aluminum, acrylic, wood, and brass with custom engraving.",
+    startingPrice: "$100+",
+    href: "/configure/plaque-aluminum",
+    icon: Award,
+    image: "/images/products/plaque.png",
+  },
+  {
+    name: "Vinyl Graphics",
+    description:
+      "Custom vinyl for walls, windows, floors, and vehicles. Full-color printed graphics with professional installation.",
+    startingPrice: "$75+",
+    href: "/configure/vinyl-wall-graphic",
+    icon: Layers,
+    image: "/images/products/vinyl-graphic.png",
+  },
+  {
+    name: "Wayfinding & ADA",
+    description:
+      "ADA-compliant signs with tactile text and braille. Directional signage, room identification, and custom pictograms.",
+    startingPrice: "$100+",
+    href: "/configure/wayfinding-ada",
+    icon: Map,
+    image: "/images/products/wayfinding.png",
+  },
+  {
+    name: "Push-Through Signs",
+    description:
+      "Illuminated signs with letters physically pushed through the face panel. Premium look with dimensional depth and backlighting.",
+    startingPrice: "$1,200+",
+    href: "/configure/push-through-single",
+    icon: ChevronsRight,
+    image: "/images/products/push-through.png",
   },
 ];
 

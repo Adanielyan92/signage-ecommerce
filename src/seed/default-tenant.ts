@@ -20,6 +20,12 @@ import {
   logoProducts,
   printProducts,
   signPostProducts,
+  aFrameProducts,
+  yardSignProducts,
+  plaqueProducts,
+  vinylGraphicProducts,
+  wayfindingProducts,
+  pushThroughProducts,
 } from "../engine/product-definitions";
 
 // Prisma v7 requires a driver adapter; workaround for seed context without one
@@ -323,6 +329,198 @@ async function main() {
           rules: [],
           renderConfig: { pipeline: "part-assembly" },
           pricingFormulaId: basePlusSqftFormulaId,
+          pricingParams: product.pricingParams,
+        }),
+      },
+    });
+    productCount++;
+  }
+
+  // 3h. A-Frame Products
+  for (const product of aFrameProducts) {
+    await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: tenant.id, slug: product.slug },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        pricingFormulaId: perSqftFormulaId,
+        pricingParams: toJson(product.pricingParams),
+        renderConfig: toJson({ pipeline: "flat-2d" }),
+        productSchema: toJson({
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          category: product.category,
+          options: [],
+          rules: [],
+          renderConfig: { pipeline: "flat-2d" },
+          pricingFormulaId: perSqftFormulaId,
+          pricingParams: product.pricingParams,
+        }),
+      },
+    });
+    productCount++;
+  }
+
+  // 3i. Yard Sign Products
+  for (const product of yardSignProducts) {
+    await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: tenant.id, slug: product.slug },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        pricingFormulaId: perSqftFormulaId,
+        pricingParams: toJson(product.pricingParams),
+        renderConfig: toJson({ pipeline: "flat-2d" }),
+        productSchema: toJson({
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          category: product.category,
+          options: [],
+          rules: [],
+          renderConfig: { pipeline: "flat-2d" },
+          pricingFormulaId: perSqftFormulaId,
+          pricingParams: product.pricingParams,
+        }),
+      },
+    });
+    productCount++;
+  }
+
+  // 3j. Plaque Products
+  for (const product of plaqueProducts) {
+    await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: tenant.id, slug: product.slug },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        pricingFormulaId: perSqInchFormulaId,
+        pricingParams: toJson(product.pricingParams),
+        renderConfig: toJson({ pipeline: "flat-2d" }),
+        productSchema: toJson({
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          category: product.category,
+          options: [],
+          rules: [],
+          renderConfig: { pipeline: "flat-2d" },
+          pricingFormulaId: perSqInchFormulaId,
+          pricingParams: product.pricingParams,
+        }),
+      },
+    });
+    productCount++;
+  }
+
+  // 3k. Vinyl Graphic Products
+  for (const product of vinylGraphicProducts) {
+    await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: tenant.id, slug: product.slug },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        pricingFormulaId: perSqftFormulaId,
+        pricingParams: toJson(product.pricingParams),
+        renderConfig: toJson({ pipeline: "flat-2d" }),
+        productSchema: toJson({
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          category: product.category,
+          options: [],
+          rules: [],
+          renderConfig: { pipeline: "flat-2d" },
+          pricingFormulaId: perSqftFormulaId,
+          pricingParams: product.pricingParams,
+        }),
+      },
+    });
+    productCount++;
+  }
+
+  // 3l. Wayfinding Products
+  for (const product of wayfindingProducts) {
+    await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: tenant.id, slug: product.slug },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        pricingFormulaId: perSqftFormulaId,
+        pricingParams: toJson(product.pricingParams),
+        renderConfig: toJson({ pipeline: "flat-2d" }),
+        productSchema: toJson({
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          category: product.category,
+          options: [],
+          rules: [],
+          renderConfig: { pipeline: "flat-2d" },
+          pricingFormulaId: perSqftFormulaId,
+          pricingParams: product.pricingParams,
+        }),
+      },
+    });
+    productCount++;
+  }
+
+  // 3m. Push-Through Products
+  for (const product of pushThroughProducts) {
+    await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: tenant.id, slug: product.slug },
+      },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        slug: product.slug,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        pricingFormulaId: perSqftFormulaId,
+        pricingParams: toJson(product.pricingParams),
+        renderConfig: toJson({ pipeline: "part-assembly" }),
+        productSchema: toJson({
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          category: product.category,
+          options: [],
+          rules: [],
+          renderConfig: { pipeline: "part-assembly" },
+          pricingFormulaId: perSqftFormulaId,
           pricingParams: product.pricingParams,
         }),
       },
