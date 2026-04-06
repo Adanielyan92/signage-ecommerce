@@ -9,6 +9,7 @@ import { getFileStorage, type StoredFile } from "@/lib/file-storage";
 import { generateSvgCutFile } from "@/engine/svg-generator";
 import { generateBOM, type BOMResult } from "@/engine/bom-generator";
 import { generateDxfFromSvgPaths } from "@/engine/dxf-generator";
+import { nestLettersOnSheet, type LetterBounds } from "@/engine/svg-nesting";
 import type { SignConfiguration, Dimensions } from "@/types/configurator";
 import type { ProductionFileType } from "@/types/order";
 import { formatPrice } from "@/lib/utils";
@@ -98,6 +99,51 @@ export async function generateProductionFiles(
       }
     } catch (dxfErr) {
       console.error(`Failed to generate DXF for order item ${input.orderItemId}:`, dxfErr);
+    }
+
+    // Generate nested SVG (sheet stock optimization)
+    try {
+      const svgPathRegex2 = /<path[^>]*id="([^"]*)"[^>]*d="([^"]*)"[^>]*\/>/g;
+      const nestPaths: { id: string; d: string }[] = [];
+      let nestMatch;
+      while ((nestMatch = svgPathRegex2.exec(svgContent)) !== null) {
+        nestPaths.push({ id: nestMatch[1], d: nestMatch[2] });
+      }
+
+      if (nestPaths.length > 0) {
+        const textChars = input.config.text.replace(/\s+/g, "");
+        const letterBounds: LetterBounds[] = nestPaths.map((p, i) => ({
+          id: p.id,
+          char: textChars[i] ?? "?",
+          widthInches: input.dimensions.letterWidths?.[i] ?? 8,
+          heightInches: input.config.height,
+          svgPathData: p.d,
+        }));
+
+        const nestingResult = nestLettersOnSheet({
+          letters: letterBounds,
+          sheetWidthInches: 48,  // standard 4ft sheet
+          sheetHeightInches: 96, // standard 8ft sheet
+          spacingInches: 0.25,
+        });
+
+        const nestedSvgFile = await storage.write(
+          `${basePath}/nested-layout.svg`,
+          nestingResult.nestedSvg,
+          "image/svg+xml"
+        );
+
+        results.push({
+          fileType: "nested_svg" as ProductionFileType,
+          fileName: `${input.orderNumber}-nested-layout.svg`,
+          storageKey: nestedSvgFile.key,
+          url: nestedSvgFile.url,
+          sizeBytes: nestedSvgFile.sizeBytes,
+          contentType: "image/svg+xml",
+        });
+      }
+    } catch (nestErr) {
+      console.error(`Failed to generate nested SVG for order item ${input.orderItemId}:`, nestErr);
     }
   } catch (err) {
     console.error(`Failed to generate SVG for order item ${input.orderItemId}:`, err);
