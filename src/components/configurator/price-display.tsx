@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { formatPrice } from "@/lib/utils";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export function PriceDisplay() {
   const [expanded, setExpanded] = useState(false);
@@ -68,9 +69,14 @@ export function PriceDisplay() {
           <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-text-secondary">
             Estimated Total
           </p>
-          <p className="font-heading text-2xl font-bold text-brand-navy">
-            {hasPrice ? formatPrice(breakdown.total) : "--"}
-          </p>
+          {hasPrice ? (
+            <AnimatedNumber
+              value={breakdown.total}
+              className="font-heading text-2xl font-bold text-brand-navy"
+            />
+          ) : (
+            <p className="font-heading text-2xl font-bold text-brand-navy">--</p>
+          )}
         </div>
 
         {hasPrice && lineItems.length > 0 && (
