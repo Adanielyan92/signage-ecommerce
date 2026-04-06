@@ -78,7 +78,7 @@ export function SignPostRenderer({
   const monumentMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: MATERIALS.CONCRETE.color,
+        color: "#7a7a72",
         metalness: MATERIALS.CONCRETE.metalness,
         roughness: MATERIALS.CONCRETE.roughness,
       }),
@@ -90,23 +90,50 @@ export function SignPostRenderer({
   const panelThickness = 0.5;
 
   const isMonument = postType === "monument-base";
+  const isPylon = postType === "pylon";
   const isDoublePost = postType === "double-post";
 
   return (
     <group>
       {/* Posts */}
       {isMonument ? (
-        // Monument base: wide rectangular column
-        <mesh position={[0, postHeight / 2, 0]} castShadow receiveShadow>
-          <boxGeometry
-            args={[
-              signWidth + MONUMENT_WIDTH_PAD * 2,
-              postHeight,
-              POST_RECT_DEPTH * 2,
-            ]}
-          />
-          <primitive object={monumentMaterial} attach="material" />
-        </mesh>
+        // Monument base: stone/concrete column with cap
+        <>
+          <mesh position={[0, postHeight / 2, 0]} castShadow receiveShadow>
+            <boxGeometry
+              args={[
+                signWidth + MONUMENT_WIDTH_PAD * 2,
+                postHeight,
+                POST_RECT_DEPTH * 2,
+              ]}
+            />
+            <primitive object={monumentMaterial} attach="material" />
+          </mesh>
+          {/* Cap stone on top of monument */}
+          <mesh position={[0, postHeight + 0.75, 0]} castShadow>
+            <boxGeometry
+              args={[
+                signWidth + MONUMENT_WIDTH_PAD * 2 + 2,
+                1.5,
+                POST_RECT_DEPTH * 2 + 1,
+              ]}
+            />
+            <primitive object={monumentMaterial} attach="material" />
+          </mesh>
+        </>
+      ) : isPylon ? (
+        // Pylon: tall narrow pole with flared base
+        <>
+          <mesh position={[0, postHeight / 2, 0]} castShadow>
+            <boxGeometry args={[POST_RECT_WIDTH, postHeight, POST_RECT_DEPTH]} />
+            <primitive object={postMaterial} attach="material" />
+          </mesh>
+          {/* Flared base for pylon */}
+          <mesh position={[0, 2, 0]} castShadow>
+            <boxGeometry args={[POST_RECT_WIDTH * 2, 4, POST_RECT_DEPTH * 2]} />
+            <primitive object={monumentMaterial} attach="material" />
+          </mesh>
+        </>
       ) : isDoublePost ? (
         // Double posts: two cylindrical posts spaced apart
         <>
