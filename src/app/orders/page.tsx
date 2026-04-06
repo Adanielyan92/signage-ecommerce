@@ -56,7 +56,7 @@ export default async function OrdersPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold">My Orders</h1>
+      <h1 className="mb-8 font-heading text-3xl font-bold text-brand-navy">My Orders</h1>
 
       {orders.length === 0 ? (
         <Card>

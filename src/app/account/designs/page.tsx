@@ -29,7 +29,7 @@ export default async function SavedDesignsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Saved Designs</h2>
+          <h2 className="font-heading text-2xl font-bold text-brand-navy">Saved Designs</h2>
           <p className="text-sm text-muted-foreground">
             {designs.length} {designs.length === 1 ? "design" : "designs"} saved
           </p>
