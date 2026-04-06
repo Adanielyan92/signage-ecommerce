@@ -15,6 +15,8 @@ import { useSession } from "next-auth/react";
 import { DayNightToggle } from "./day-night-toggle";
 import { Save, Image as ImageIcon, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
+import { ArButton } from "./ar-button";
+import { getSignGroupRef } from "@/components/three/scene-ref";
 
 const Scene = dynamic(() => import("@/components/three/scene"), {
   ssr: false,
@@ -307,6 +309,12 @@ export function ConfiguratorLayout({
                 <ImageIcon className="h-4 w-4" />
                 <span className="hidden sm:inline">Wall Mockup</span>
               </button>
+
+              {/* AR Preview */}
+              <ArButton
+                getSceneObject={getSignGroupRef}
+                disabled={!hasRequiredInput}
+              />
 
               {/* Add to Cart */}
               <button

@@ -23,6 +23,7 @@ import { useConfiguratorStore } from "@/stores/configurator-store";
 import { WallPlane } from "./wall-plane";
 import { SceneRouter } from "./scene-router";
 import { DAY_LIGHTING, NIGHT_LIGHTING } from "./utils/day-night-lighting";
+import { setSignGroupRef } from "./scene-ref";
 
 // ---------------------------------------------------------------------------
 // Loading indicator (shown while fonts/environment/textures load)
@@ -326,7 +327,9 @@ function SceneContent() {
       <Bounds fit observe margin={1.8} maxDuration={0.5}>
         <AutoFit />
         <Center>
-          <SceneRouter />
+          <group ref={(ref) => { if (ref) setSignGroupRef(ref); }}>
+            <SceneRouter />
+          </group>
         </Center>
       </Bounds>
 
