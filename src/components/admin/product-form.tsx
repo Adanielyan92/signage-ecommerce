@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { FormulaPicker } from "./formula-picker";
+import { PricingParamsEditor } from "./pricing-params-editor";
 import { OptionBuilder } from "./option-builder";
 import type { OptionDef } from "./option-editor";
 import type { ProductCategory } from "@/types/product";
@@ -18,10 +19,18 @@ interface TenantFormula {
   presetId: string | null;
 }
 
+interface FormulaVariable {
+  name: string;
+  label: string;
+  source: string;
+  description: string;
+}
+
 interface Preset {
   id: string;
   name: string;
   description: string;
+  variables: FormulaVariable[];
 }
 
 interface ProductFormProps {
@@ -90,10 +99,8 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
   const [pricingFormulaId, setPricingFormulaId] = useState<string | null>(
     initialData?.pricingFormulaId ?? null
   );
-  const [pricingParamsJson, setPricingParamsJson] = useState(
-    initialData?.pricingParams
-      ? JSON.stringify(initialData.pricingParams, null, 2)
-      : "{}"
+  const [pricingParams, setPricingParams] = useState<Record<string, number>>(
+    initialData?.pricingParams ?? {}
   );
   const [options, setOptions] = useState<OptionDef[]>(
     initialData?.options ?? []
@@ -167,15 +174,6 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
-
-    // Validate pricingParams JSON
-    let pricingParams: Record<string, number>;
-    try {
-      pricingParams = JSON.parse(pricingParamsJson);
-    } catch {
-      toast.error("Pricing params must be valid JSON");
-      return;
-    }
 
     // Build productSchema from options
     const productSchema = {
@@ -374,19 +372,45 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
             onCreateFromPreset={handleCreateFromPreset}
           />
 
-          <div>
-            <label className="mb-1.5 block text-sm font-medium text-neutral-700">
-              Pricing Params{" "}
-              <span className="font-normal text-neutral-400">(JSON)</span>
-            </label>
-            <textarea
-              rows={6}
-              value={pricingParamsJson}
-              onChange={(e) => setPricingParamsJson(e.target.value)}
-              spellCheck={false}
-              className="w-full resize-y rounded-lg border border-neutral-300 px-3 py-2 font-mono text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            />
-          </div>
+          {/* Pricing Params — dynamic inputs based on formula variables */}
+          {(() => {
+            const activeFormula = tenantFormulas.find(
+              (f) => f.id === pricingFormulaId
+            );
+            const activePreset = activeFormula?.presetId
+              ? presets.find((p) => p.id === activeFormula.presetId)
+              : null;
+            const variables = activePreset?.variables ?? [];
+
+            if (!pricingFormulaId) {
+              return (
+                <p className="text-sm text-neutral-400 italic">
+                  Select a pricing formula above to configure its parameters.
+                </p>
+              );
+            }
+
+            if (variables.length === 0) {
+              return (
+                <p className="text-sm text-neutral-400 italic">
+                  This formula has no configurable parameters.
+                </p>
+              );
+            }
+
+            return (
+              <div>
+                <label className="mb-3 block text-sm font-medium text-neutral-700">
+                  Pricing Parameters
+                </label>
+                <PricingParamsEditor
+                  params={pricingParams}
+                  onChange={setPricingParams}
+                  variables={variables}
+                />
+              </div>
+            );
+          })()}
         </div>
       </section>
 
@@ -398,23 +422,28 @@ export function ProductForm({ productId, initialData }: ProductFormProps) {
         <OptionBuilder options={options} onChange={setOptions} />
       </section>
 
-      {/* ── Save / Cancel ─────────────────────────────────────────────── */}
-      <div className="flex items-center justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => router.push("/admin/products")}
-          className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={saving}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-60"
-        >
-          {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-          {isEditing ? "Save Changes" : "Create Product"}
-        </button>
+      {/* Spacer so sticky bar doesn't overlap last section */}
+      <div className="h-20" />
+
+      {/* ── Sticky Save / Cancel Bar ─────────────────────────────────── */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-neutral-200 bg-white/95 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-4xl items-center justify-end gap-3 px-6 py-3">
+          <button
+            type="button"
+            onClick={() => router.push("/admin/products")}
+            className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-60"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isEditing ? "Save Changes" : "Create Product"}
+          </button>
+        </div>
       </div>
     </form>
   );

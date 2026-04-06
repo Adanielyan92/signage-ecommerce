@@ -3,6 +3,7 @@ import { Plus, Pencil } from "lucide-react";
 import { requireAdmin } from "@/lib/admin-auth";
 import { prisma } from "@/lib/prisma";
 import { getAllPresetFormulas } from "@/engine/formula-presets";
+import { FormulaRowExpander } from "@/components/admin/formula-row-expander";
 
 export const metadata = {
   title: "Pricing Formulas — Admin | GatSoft Signs",
@@ -36,7 +37,10 @@ export default async function AdminFormulasPage() {
   const [formulas, presets] = await Promise.all([
     prisma.pricingFormula.findMany({
       where: { tenantId: admin.tenantId },
-      include: { _count: { select: { products: true } } },
+      include: {
+        _count: { select: { products: true } },
+        products: { select: { id: true, name: true, slug: true } },
+      },
       orderBy: [{ type: "asc" }, { name: "asc" }],
     }),
     Promise.resolve(getAllPresetFormulas()),
@@ -116,6 +120,9 @@ export default async function AdminFormulasPage() {
                   <th className="px-4 py-3 text-right font-medium text-neutral-600">
                     Products
                   </th>
+                  <th className="px-4 py-3 text-right font-medium text-neutral-600">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
@@ -129,10 +136,14 @@ export default async function AdminFormulasPage() {
                       formula.presetId)
                     : null;
 
+                  const products = formula.products ?? [];
+
                   return (
-                    <tr
+                    <FormulaRowExpander
                       key={formula.id}
-                      className="transition-colors hover:bg-neutral-50"
+                      formulaId={formula.id}
+                      formulaType={formula.type}
+                      products={products}
                     >
                       <td className="px-4 py-3 font-medium text-neutral-900">
                         <div className="flex items-center gap-2">
@@ -168,7 +179,24 @@ export default async function AdminFormulasPage() {
                       <td className="px-4 py-3 text-right tabular-nums text-neutral-700">
                         {formula._count.products}
                       </td>
-                    </tr>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          {formula.type === "VISUAL" ? (
+                            <Link
+                              href={`/admin/formulas/${formula.id}/edit`}
+                              className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-indigo-600 transition hover:bg-indigo-50"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              Edit
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-neutral-400">
+                              View Products
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                    </FormulaRowExpander>
                   );
                 })}
               </tbody>

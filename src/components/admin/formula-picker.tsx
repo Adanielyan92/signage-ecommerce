@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
 interface TenantFormula {
   id: string;
   name: string;
@@ -28,6 +31,8 @@ export function FormulaPicker({
   presets,
   onCreateFromPreset,
 }: FormulaPickerProps) {
+  const [showPresets, setShowPresets] = useState(false);
+
   return (
     <div className="space-y-4">
       {/* Existing formula selector */}
@@ -49,29 +54,41 @@ export function FormulaPicker({
         </select>
       </div>
 
-      {/* Preset cards */}
+      {/* Collapsible preset cards */}
       {presets.length > 0 && (
         <div>
-          <p className="mb-2 text-xs font-medium text-neutral-500">
-            Or create a new formula from a preset:
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {presets.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                onClick={() => onCreateFromPreset(preset.id, preset.name)}
-                className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              >
-                <p className="text-sm font-medium text-neutral-900">
-                  {preset.name}
-                </p>
-                <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500">
-                  {preset.description}
-                </p>
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowPresets((prev) => !prev)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 transition hover:text-blue-700"
+          >
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${showPresets ? "rotate-180" : ""}`}
+            />
+            {showPresets
+              ? "Hide presets"
+              : "Or create from a different preset"}
+          </button>
+
+          {showPresets && (
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {presets.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => onCreateFromPreset(preset.id, preset.name)}
+                  className="rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-left transition hover:border-blue-400 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                >
+                  <p className="text-sm font-medium text-neutral-900">
+                    {preset.name}
+                  </p>
+                  <p className="mt-0.5 line-clamp-2 text-xs text-neutral-500">
+                    {preset.description}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
