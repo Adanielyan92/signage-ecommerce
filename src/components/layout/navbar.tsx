@@ -53,6 +53,12 @@ export function Navbar() {
             Design Your Sign
           </Link>
           <Link
+            href="/manufacturers"
+            className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
+          >
+            Manufacturers
+          </Link>
+          <Link
             href="/admin/orders"
             className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
           >
