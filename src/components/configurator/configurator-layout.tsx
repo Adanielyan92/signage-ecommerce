@@ -265,103 +265,46 @@ export function ConfiguratorLayout({
         {/* Wizard-wrapped options area */}
         <WizardProvider stepDefinitions={WIZARD_STEPS}>
           <StepIndicator />
-          <div className="flex-1 overflow-y-auto p-6 pb-48">
+          <div className="flex-1 overflow-y-auto p-6 pb-4">
             <OptionsPanel />
+          </div>
+          {/* Inline price display above wizard nav */}
+          <div className="border-t border-brand-muted bg-white px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                  Estimated Total
+                </p>
+                <p className="font-heading text-2xl font-bold text-neutral-900">
+                  {hasRequiredInput && breakdown.total > 0
+                    ? formatPrice(breakdown.total)
+                    : "--"}
+                </p>
+              </div>
+              {hasRequiredInput && breakdown.total > 0 && breakdown.minOrderApplied && (
+                <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700">
+                  Min. order applied
+                </span>
+              )}
+            </div>
           </div>
           <WizardNavigation />
         </WizardProvider>
       </div>
 
-      {/* Sticky bottom price bar */}
+      {/* Sticky bottom action bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-neutral-200 bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.08)]">
-        {/* Price breakdown (collapsed on mobile, always visible on desktop) */}
-        {hasRequiredInput && breakdown.total > 0 && (
-          <div className="hidden border-b border-neutral-100 px-6 py-3 lg:block">
-            <div className="mx-auto flex max-w-7xl flex-wrap gap-x-6 gap-y-1 text-xs text-neutral-500">
-              {(productCategory === "CHANNEL_LETTERS") && (
-                <span>
-                  Letters ({config.text.replace(/\s+/g, "").length} x {config.height}&quot;):{" "}
-                  {formatPrice(breakdown.letterPrice)}
-                </span>
-              )}
-              {productCategory === "DIMENSIONAL_LETTERS" && (() => {
-                const activeConfig = getActiveConfig();
-                if ("text" in activeConfig) {
-                  return (
-                    <span>
-                      Letters ({activeConfig.text.replace(/\s+/g, "").length} x {(activeConfig as { height: number }).height}&quot;):{" "}
-                      {formatPrice(breakdown.letterPrice)}
-                    </span>
-                  );
-                }
-                return null;
-              })()}
-              {(productCategory === "CABINET_SIGNS" || productCategory === "LIT_SHAPES" || productCategory === "PRINT_SIGNS") && (
-                <span>
-                  {dimensions.totalWidthInches}&quot; x {dimensions.heightInches}&quot; ({dimensions.squareFeet.toFixed(1)} sqft):{" "}
-                  {formatPrice(breakdown.letterPrice)}
-                </span>
-              )}
-              {productCategory === "LOGOS" && (
-                <span>
-                  {dimensions.totalWidthInches}&quot; x {dimensions.heightInches}&quot;:{" "}
-                  {formatPrice(breakdown.letterPrice)}
-                </span>
-              )}
-              {["LIGHT_BOX_SIGNS", "BLADE_SIGNS", "VINYL_BANNERS"].includes(productCategory) && (
-                <span>
-                  {dimensions.totalWidthInches}&quot; &times; {dimensions.heightInches}&quot; ({dimensions.squareFeet.toFixed(1)} sqft):{" "}
-                  {formatPrice(breakdown.letterPrice)}
-                </span>
-              )}
-              {productCategory === "NEON_SIGNS" && (
-                <span>
-                  Neon text ({(getActiveConfig() as { text: string }).text.replace(/\s+/g, "").length} letters &times; {(getActiveConfig() as { height: number }).height}&quot;):{" "}
-                  {formatPrice(breakdown.letterPrice)}
-                </span>
-              )}
-              {productCategory === "SIGN_POSTS" && (() => {
-                const activeConfig = getActiveConfig();
-                return (
-                  <span>
-                    Post + {("signWidthInches" in activeConfig ? activeConfig.signWidthInches : dimensions.totalWidthInches)}&quot; x {("signHeightInches" in activeConfig ? activeConfig.signHeightInches : dimensions.heightInches)}&quot; panel:{" "}
-                    {formatPrice(breakdown.letterPrice)}
-                  </span>
-                );
-              })()}
-              {breakdown.multipliers.length > 0 && (
-                <span>
-                  After options: {formatPrice(breakdown.priceAfterMultipliers)}
-                </span>
-              )}
-              {breakdown.paintingExtra > 0 && (
-                <span>Multicolor: +{formatPrice(breakdown.paintingExtra)}</span>
-              )}
-              {breakdown.racewayPrice > 0 && (
-                <span>Raceway: +{formatPrice(breakdown.racewayPrice)}</span>
-              )}
-              {breakdown.vinylPrice > 0 && (
-                <span>Vinyl: +{formatPrice(breakdown.vinylPrice)}</span>
-              )}
-              {breakdown.minOrderApplied && (
-                <span className="text-amber-600" title="Our minimum order covers setup, materials, and quality assurance for any custom sign project">
-                  Minimum order: {formatPrice(breakdown.total)}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Main action bar */}
-        <div className="px-4 py-3 sm:px-6">
+        <div className="px-4 py-4 sm:px-6">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
             {/* Price */}
             <div className="shrink-0">
               <div className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
                 Total
               </div>
-              <div className="text-xl font-bold text-neutral-900 sm:text-2xl">
-                {hasRequiredInput ? formatPrice(breakdown.total) : "$0.00"}
+              <div className="text-2xl font-bold text-neutral-900 sm:text-3xl">
+                {hasRequiredInput && breakdown.total > 0
+                  ? formatPrice(breakdown.total)
+                  : "--"}
               </div>
             </div>
 
@@ -398,7 +341,7 @@ export function ConfiguratorLayout({
               <button
                 onClick={handleAddToCart}
                 disabled={!canAddToCart}
-                className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
+                className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span>Add to Cart</span>
