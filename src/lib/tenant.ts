@@ -2,6 +2,13 @@ import { prisma } from "./prisma";
 
 const DEFAULT_TENANT_SLUG = "gatsoft";
 
+const FALLBACK_TENANT: ResolvedTenant = {
+  id: "default",
+  slug: "gatsoft",
+  name: "GatSoft Signs",
+  plan: "ENTERPRISE",
+};
+
 export interface ResolvedTenant {
   id: string;
   slug: string;
@@ -12,22 +19,29 @@ export interface ResolvedTenant {
 /**
  * Resolve the tenant from a request.
  * Priority: X-Tenant-Slug header > X-API-Key header > default tenant.
+ * Falls back to a hardcoded default tenant when the database is unavailable.
  */
 export async function resolveTenant(request: Request): Promise<ResolvedTenant | null> {
-  // 1. Check X-Tenant-Slug header (for widget/API consumers)
-  const slugHeader = request.headers.get("x-tenant-slug");
-  if (slugHeader) {
-    return findTenantBySlug(slugHeader);
-  }
+  try {
+    // 1. Check X-Tenant-Slug header (for widget/API consumers)
+    const slugHeader = request.headers.get("x-tenant-slug");
+    if (slugHeader) {
+      return await findTenantBySlug(slugHeader);
+    }
 
-  // 2. Check X-API-Key header (for widget embed)
-  const apiKey = request.headers.get("x-api-key");
-  if (apiKey) {
-    return findTenantByApiKey(apiKey);
-  }
+    // 2. Check X-API-Key header (for widget embed)
+    const apiKey = request.headers.get("x-api-key");
+    if (apiKey) {
+      return await findTenantByApiKey(apiKey);
+    }
 
-  // 3. Default tenant (D2C storefront)
-  return findTenantBySlug(DEFAULT_TENANT_SLUG);
+    // 3. Default tenant (D2C storefront)
+    return await findTenantBySlug(DEFAULT_TENANT_SLUG);
+  } catch (error) {
+    // Database not connected — return hardcoded default tenant
+    console.warn("Database unavailable, using fallback tenant:", (error as Error).message);
+    return FALLBACK_TENANT;
+  }
 }
 
 async function findTenantBySlug(slug: string): Promise<ResolvedTenant | null> {

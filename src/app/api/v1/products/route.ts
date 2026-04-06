@@ -1,6 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveTenant } from "@/lib/tenant";
 import { prisma } from "@/lib/prisma";
+import {
+  channelLetterProducts,
+  litShapeProducts,
+  cabinetProducts,
+  dimensionalProducts,
+  logoProducts,
+  printProducts,
+  signPostProducts,
+  lightBoxProducts,
+  bladeProducts,
+  neonProducts,
+  bannerProducts,
+  type AnyProduct,
+} from "@/engine/product-definitions";
+
+/**
+ * Map hardcoded product definitions to match the DB-driven API response shape.
+ */
+function getHardcodedProducts(category?: string, slug?: string) {
+  const allProducts: (AnyProduct & { category?: string })[] = [
+    ...channelLetterProducts.map((p) => ({ ...p, category: "CHANNEL_LETTERS" })),
+    ...litShapeProducts,
+    ...cabinetProducts,
+    ...dimensionalProducts,
+    ...logoProducts,
+    ...printProducts,
+    ...signPostProducts,
+    ...lightBoxProducts,
+    ...bladeProducts,
+    ...neonProducts,
+    ...bannerProducts,
+  ];
+
+  let filtered = allProducts;
+  if (category) {
+    filtered = filtered.filter((p) => p.category === category);
+  }
+  if (slug) {
+    filtered = filtered.filter((p) => p.slug === slug);
+  }
+
+  return filtered.map((p) => ({
+    id: `hardcoded-${p.slug}`,
+    slug: p.slug,
+    name: p.name,
+    description: p.description,
+    category: p.category ?? "CHANNEL_LETTERS",
+    isActive: true,
+    pricingParams: p.pricingParams,
+    options: "options" in p ? p.options : [],
+    pricingFormula: null,
+    sortOrder: 0,
+  }));
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,27 +65,35 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const category = searchParams.get("category") ?? undefined;
-    const slug = searchParams.get("slug");
+    const slug = searchParams.get("slug") ?? undefined;
     const activeParam = searchParams.get("active");
     const isActive =
       activeParam === "true" ? true : activeParam === "false" ? false : undefined;
 
-    const products = await prisma.product.findMany({
-      where: {
-        tenantId: tenant.id,
-        ...(category !== undefined ? { category } : {}),
-        ...(slug ? { slug } : {}),
-        ...(isActive !== undefined ? { isActive } : {}),
-      },
-      include: {
-        pricingFormula: {
-          select: { id: true, name: true, type: true },
+    // Try database first; fall back to hardcoded definitions on failure
+    try {
+      const products = await prisma.product.findMany({
+        where: {
+          tenantId: tenant.id,
+          ...(category !== undefined ? { category } : {}),
+          ...(slug ? { slug } : {}),
+          ...(isActive !== undefined ? { isActive } : {}),
         },
-      },
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-    });
+        include: {
+          pricingFormula: {
+            select: { id: true, name: true, type: true },
+          },
+        },
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      });
 
-    return NextResponse.json({ products });
+      return NextResponse.json({ products });
+    } catch {
+      // Database unavailable — serve hardcoded product definitions
+      console.warn("Database unavailable for products listing, using hardcoded definitions");
+      const products = getHardcodedProducts(category, slug);
+      return NextResponse.json({ products });
+    }
   } catch (error) {
     console.error("Error listing products:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
