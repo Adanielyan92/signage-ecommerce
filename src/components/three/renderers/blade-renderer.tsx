@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { useEffect, useMemo, useRef } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
+import { MATERIALS } from "../utils/constants";
 
 interface BladeRendererProps {
   width: number;
@@ -72,8 +73,8 @@ export function BladeRenderer({
     () =>
       new THREE.MeshStandardMaterial({
         color: "#505050",
-        metalness: 0.7,
-        roughness: 0.4,
+        metalness: MATERIALS.ALUMINUM.metalness,
+        roughness: MATERIALS.ALUMINUM.roughness,
       }),
     []
   );

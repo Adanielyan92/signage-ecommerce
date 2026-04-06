@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { useEffect, useMemo, useRef } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { getLedColor } from "../utils/led-colors";
+import { MATERIALS } from "../utils/constants";
 
 interface CabinetRendererProps {
   width: number;
@@ -42,8 +43,8 @@ export function CabinetRenderer({
     () =>
       new THREE.MeshStandardMaterial({
         color: "#d0d0d0",
-        metalness: 0.7,
-        roughness: 0.4,
+        metalness: MATERIALS.ALUMINUM.metalness,
+        roughness: MATERIALS.ALUMINUM.roughness,
       }),
     []
   );

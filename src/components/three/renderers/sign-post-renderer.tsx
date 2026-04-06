@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { useEffect, useMemo, useRef } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
+import { MATERIALS } from "../utils/constants";
 
 interface SignPostRendererProps {
   postType: string; // single-post, double-post, monument-base
@@ -77,9 +78,9 @@ export function SignPostRenderer({
   const monumentMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#505050",
-        metalness: 0.6,
-        roughness: 0.5,
+        color: MATERIALS.CONCRETE.color,
+        metalness: MATERIALS.CONCRETE.metalness,
+        roughness: MATERIALS.CONCRETE.roughness,
       }),
     []
   );

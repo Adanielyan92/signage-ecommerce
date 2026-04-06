@@ -3,6 +3,7 @@
 import * as THREE from "three";
 import { useEffect, useMemo, useRef } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
+import { MATERIALS } from "../utils/constants";
 
 interface LightBoxRendererProps {
   width: number;
@@ -53,9 +54,9 @@ export function LightBoxRenderer({
   const bodyMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: "#c0c0c0",
-        metalness: 0.75,
-        roughness: 0.35,
+        color: MATERIALS.ALUMINUM.color,
+        metalness: MATERIALS.ALUMINUM.metalness,
+        roughness: MATERIALS.ALUMINUM.roughness,
       }),
     []
   );
