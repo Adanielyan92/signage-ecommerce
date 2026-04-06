@@ -119,11 +119,31 @@ async function main() {
 
   // 3a. Channel Letter Products
   for (const product of channelLetterProducts) {
+    const mappedOptions = product.options.map((o) => ({
+      id: o.optionKey ?? o.id,
+      type: o.inputType === "checkbox" ? "toggle" : o.inputType,
+      label: o.label,
+      required: o.isRequired ?? false,
+      defaultValue: o.defaultValue ?? "",
+      values: o.possibleValues ?? [],
+      dependsOn: o.dependsOn ?? {},
+    }));
+    const schema = toJson({
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      category: "CHANNEL_LETTERS",
+      options: mappedOptions,
+      rules: [],
+      renderConfig: { pipeline: "text-to-3d" },
+      pricingFormulaId: perInchFormulaId,
+      pricingParams: product.pricingParams,
+    });
     await prisma.product.upsert({
       where: {
         tenantId_slug: { tenantId: tenant.id, slug: product.slug },
       },
-      update: {},
+      update: { productSchema: schema },
       create: {
         tenantId: tenant.id,
         slug: product.slug,
@@ -133,17 +153,7 @@ async function main() {
         pricingFormulaId: perInchFormulaId,
         pricingParams: toJson(product.pricingParams),
         renderConfig: toJson({ pipeline: "text-to-3d" }),
-        productSchema: toJson({
-          name: product.name,
-          slug: product.slug,
-          description: product.description,
-          category: "CHANNEL_LETTERS",
-          options: product.options,
-          rules: [],
-          renderConfig: { pipeline: "text-to-3d" },
-          pricingFormulaId: perInchFormulaId,
-          pricingParams: product.pricingParams,
-        }),
+        productSchema: schema,
       },
     });
     productCount++;

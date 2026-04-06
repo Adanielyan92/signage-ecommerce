@@ -30,18 +30,20 @@ export default async function EditProductPage({
   const options: OptionDef[] = rawOptions.map((raw) => {
     const o = raw as Record<string, unknown>;
     return {
-      id: typeof o.id === "string" ? o.id : crypto.randomUUID(),
+      id: typeof o.id === "string" ? o.id : typeof o.optionKey === "string" ? o.optionKey : crypto.randomUUID(),
       type: (["text", "number", "select", "color", "toggle", "font-picker"].includes(
-        o.type as string
+        (o.type ?? o.inputType) as string
       )
-        ? o.type
+        ? (o.type ?? o.inputType)
         : "text") as OptionDef["type"],
       label: typeof o.label === "string" ? o.label : "",
       required: typeof o.required === "boolean" ? o.required : false,
       defaultValue: typeof o.defaultValue === "string" ? o.defaultValue : "",
       values: Array.isArray(o.values)
         ? (o.values as { value: string; label?: string }[])
-        : [],
+        : Array.isArray(o.possibleValues)
+          ? (o.possibleValues as { value: string; label?: string }[])
+          : [],
       dependsOn:
         o.dependsOn && typeof o.dependsOn === "object" && !Array.isArray(o.dependsOn)
           ? (o.dependsOn as Record<string, string[]>)
