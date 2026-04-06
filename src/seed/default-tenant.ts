@@ -28,8 +28,13 @@ import {
   pushThroughProducts,
 } from "../engine/product-definitions";
 
-// Prisma v7 requires a driver adapter; workaround for seed context without one
-const prisma = new PrismaClient({} as never);
+import pg from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
+
+const connStr = "postgres://postgres:postgres@localhost:51214/template1?sslmode=disable";
+const pool = new pg.Pool({ connectionString: connStr, max: 5 });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter } as never);
 
 /** Cast any plain object to Prisma's Json input type */
 function toJson(value: unknown): Prisma.InputJsonValue {

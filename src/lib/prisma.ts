@@ -1,19 +1,50 @@
 import { PrismaClient } from "@/generated/prisma/client";
+import pg from "pg";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | undefined };
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+  pool: pg.Pool | undefined;
+};
 
-function createPrismaClient(): PrismaClient {
-  // Prisma v7 "prisma-client" generator requires a driver adapter for the
-  // "client" engine type. The database is not yet connected, so we guard
-  // against build-time instantiation failures by deferring construction.
-  return new PrismaClient({} as never);
+function getConnectionString(): string {
+  const url = process.env.DATABASE_URL ?? "";
+  // Prisma Postgres proxy URL — extract direct PG URL
+  if (url.startsWith("prisma+postgres://")) {
+    try {
+      const apiKey = new URL(url).searchParams.get("api_key");
+      if (apiKey) {
+        const decoded = JSON.parse(Buffer.from(apiKey, "base64").toString());
+        if (decoded.databaseUrl) return decoded.databaseUrl;
+      }
+    } catch {
+      // Fall through to use URL as-is
+    }
+  }
+  return url;
 }
 
-export const prisma = new Proxy({} as PrismaClient, {
-  get(_target, prop: string | symbol) {
-    if (!globalForPrisma.prisma) {
-      globalForPrisma.prisma = createPrismaClient();
-    }
-    return Reflect.get(globalForPrisma.prisma, prop);
-  },
-});
+function createPrismaClient(): PrismaClient {
+  const connStr = getConnectionString();
+  if (!connStr) {
+    // No database URL — return a stub that will fail gracefully
+    return new PrismaClient({} as never);
+  }
+
+  if (!globalForPrisma.pool) {
+    globalForPrisma.pool = new pg.Pool({
+      connectionString: connStr,
+      max: 10,
+    });
+  }
+
+  const adapter = new PrismaPg(globalForPrisma.pool);
+  return new PrismaClient({ adapter } as never);
+}
+
+export const prisma =
+  globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
