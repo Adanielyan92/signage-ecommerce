@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Calculator, Settings, ArrowLeft, ShoppingCart, LayoutTemplate, Box, Palette, Type } from "lucide-react";
+import { LayoutDashboard, Package, Calculator, Settings, ArrowLeft, ShoppingCart, LayoutTemplate, Box, Palette, Type, Webhook, FileCode, Factory } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -15,6 +15,9 @@ const navLinks = [
   { href: "/admin/materials", label: "Materials", icon: Palette, exact: false },
   { href: "/admin/fonts", label: "Fonts", icon: Type, exact: false },
   { href: "/admin/settings", label: "Settings", icon: Settings, exact: false },
+  { href: "/admin/webhooks", label: "Webhooks", icon: Webhook, exact: false },
+  { href: "/admin/manufacturers", label: "Manufacturers", icon: Factory, exact: false },
+  { href: "/admin/api-docs", label: "API Docs", icon: FileCode, exact: false },
 ];
 
 export function AdminSidebar() {
