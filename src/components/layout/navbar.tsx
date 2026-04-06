@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, Menu, X, User, LogOut, LayoutTemplate, Image as ImageIcon } from "lucide-react";
+import { ShoppingCart, Menu, X, User, LogOut, LayoutTemplate } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCartStore } from "@/stores/cart-store";
 import { useSession, signOut } from "next-auth/react";
@@ -19,59 +19,41 @@ export function Navbar() {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-brand-muted bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-sm font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-brand-navy text-sm font-bold text-white">
             GS
           </div>
-          <span className="hidden text-lg font-semibold text-neutral-900 sm:inline">
+          <span className="hidden font-heading text-lg font-semibold text-brand-navy sm:inline">
             GatSoft Signs
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           <MegaMenuDesktop />
           <Link
-            href="/templates"
-            className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
-          >
-            Templates
-          </Link>
-          <Link
-            href="/mockup"
-            className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
-          >
-            Wall Mockup
-          </Link>
-          <Link
             href="/configure/front-lit-trim-cap"
-            className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
+            className="rounded-lg bg-brand-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-accent/90"
           >
             Design Your Sign
           </Link>
           <Link
-            href="/manufacturers"
-            className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
+            href="/templates"
+            className="text-sm font-medium text-brand-text-secondary transition hover:text-brand-navy"
           >
-            Manufacturers
-          </Link>
-          <Link
-            href="/admin/orders"
-            className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
-          >
-            Admin
+            Templates
           </Link>
           <LanguageSwitcher />
           <Link
             href="/cart"
-            className="relative flex items-center gap-1 text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
+            className="relative flex items-center text-brand-text-secondary transition hover:text-brand-navy"
           >
             <ShoppingCart className="h-5 w-5" />
             {mounted && itemCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+              <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-accent text-[10px] font-bold text-white">
                 {itemCount}
               </span>
             )}
@@ -79,38 +61,38 @@ export function Navbar() {
 
           {/* Auth */}
           {status === "loading" ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-neutral-200" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-brand-muted" />
           ) : session ? (
             <div className="relative group">
-              <button className="flex items-center gap-2 text-sm font-medium text-neutral-600 transition hover:text-neutral-900">
+              <button className="flex items-center gap-2 text-sm font-medium text-brand-text-secondary transition hover:text-brand-navy">
                 <User className="h-5 w-5" />
                 <span className="hidden lg:inline">
                   {session.user?.name || session.user?.email?.split("@")[0]}
                 </span>
               </button>
-              <div className="invisible absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg group-hover:visible">
+              <div className="invisible absolute right-0 top-full z-50 mt-2 w-48 rounded-lg border border-brand-muted bg-white py-1 shadow-lg group-hover:visible">
                 <Link
                   href="/account"
-                  className="block px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                  className="block px-4 py-2 text-sm text-brand-text-secondary hover:bg-brand-bg"
                 >
                   My Account
                 </Link>
                 <Link
                   href="/account/designs"
-                  className="block px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                  className="block px-4 py-2 text-sm text-brand-text-secondary hover:bg-brand-bg"
                 >
                   Saved Designs
                 </Link>
                 <Link
                   href="/orders"
-                  className="block px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                  className="block px-4 py-2 text-sm text-brand-text-secondary hover:bg-brand-bg"
                 >
                   My Orders
                 </Link>
-                <hr className="my-1 border-neutral-200" />
+                <hr className="my-1 border-brand-muted" />
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50"
+                  className="flex w-full items-center gap-2 px-4 py-2 text-sm text-brand-text-secondary hover:bg-brand-bg"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out
@@ -120,7 +102,7 @@ export function Navbar() {
           ) : (
             <Link
               href="/auth/signin"
-              className="text-sm font-medium text-neutral-600 transition hover:text-neutral-900"
+              className="text-sm font-medium text-brand-text-secondary transition hover:text-brand-navy"
             >
               Sign In
             </Link>
@@ -143,14 +125,22 @@ export function Navbar() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <nav className="border-t border-neutral-200 bg-white px-4 py-4 md:hidden">
+        <nav className="border-t border-brand-muted bg-white px-4 py-4 md:hidden">
           <div className="flex flex-col gap-4">
             <MegaMenuMobile onNavigate={closeMobile} />
 
-            <div className="border-t border-neutral-100 pt-3">
+            <Link
+              href="/configure/front-lit-trim-cap"
+              className="rounded-lg bg-brand-accent px-4 py-2.5 text-center text-sm font-semibold text-white"
+              onClick={closeMobile}
+            >
+              Design Your Sign
+            </Link>
+
+            <div className="border-t border-brand-muted pt-3">
               <Link
                 href="/templates"
-                className="flex items-center gap-2 text-sm font-medium text-neutral-600"
+                className="flex items-center gap-2 text-sm font-medium text-brand-text-secondary"
                 onClick={closeMobile}
               >
                 <LayoutTemplate className="h-4 w-4" />
@@ -158,23 +148,8 @@ export function Navbar() {
               </Link>
             </div>
             <Link
-              href="/mockup"
-              className="flex items-center gap-2 text-sm font-medium text-neutral-600"
-              onClick={closeMobile}
-            >
-              <ImageIcon className="h-4 w-4" />
-              Wall Mockup
-            </Link>
-            <Link
-              href="/configure/front-lit-trim-cap"
-              className="text-sm font-medium text-neutral-600"
-              onClick={closeMobile}
-            >
-              Design Your Sign
-            </Link>
-            <Link
               href="/cart"
-              className="flex items-center gap-2 text-sm font-medium text-neutral-600"
+              className="flex items-center gap-2 text-sm font-medium text-brand-text-secondary"
               onClick={closeMobile}
             >
               <ShoppingCart className="h-5 w-5" />
@@ -184,14 +159,14 @@ export function Navbar() {
               <>
                 <Link
                   href="/account"
-                  className="text-sm font-medium text-neutral-600"
+                  className="text-sm font-medium text-brand-text-secondary"
                   onClick={closeMobile}
                 >
                   My Account
                 </Link>
                 <Link
                   href="/orders"
-                  className="text-sm font-medium text-neutral-600"
+                  className="text-sm font-medium text-brand-text-secondary"
                   onClick={closeMobile}
                 >
                   My Orders
@@ -201,7 +176,7 @@ export function Navbar() {
                     closeMobile();
                     signOut({ callbackUrl: "/" });
                   }}
-                  className="flex items-center gap-2 text-sm font-medium text-neutral-600"
+                  className="flex items-center gap-2 text-sm font-medium text-brand-text-secondary"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out
@@ -210,7 +185,7 @@ export function Navbar() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="text-sm font-medium text-neutral-600"
+                className="text-sm font-medium text-brand-text-secondary"
                 onClick={closeMobile}
               >
                 Sign In
