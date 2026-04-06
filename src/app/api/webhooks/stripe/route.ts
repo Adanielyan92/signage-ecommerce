@@ -5,6 +5,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { generateProductionFiles } from "@/lib/production-files";
 import type { SignConfiguration, Dimensions } from "@/types/configurator";
 import { estimateDimensions } from "@/engine/pricing";
+import { fireWebhooks } from "@/lib/webhooks";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -119,6 +120,14 @@ export async function POST(request: NextRequest) {
           },
         },
       });
+      // Fire webhook for payment received (non-blocking)
+      if (tenantId) {
+        fireWebhooks(tenantId, "order.paid", {
+          orderNumber,
+          total,
+          stripeSessionId: session.id,
+        }).catch(console.error);
+      }
     } catch (err) {
       console.error("Failed to create order in DB for session", session.id, ":", err);
       // Return 500 so Stripe retries the webhook
@@ -164,6 +173,15 @@ export async function POST(request: NextRequest) {
               });
             }
             console.log(`Generated ${files.length} production files for order item ${item.id}`);
+            // Fire webhook for files ready
+            if (tenantId) {
+              fireWebhooks(tenantId, "order.files_ready", {
+                orderId: createdOrder.id,
+                orderNumber: createdOrder.orderNumber,
+                orderItemId: item.id,
+                fileCount: files.length,
+              }).catch(console.error);
+            }
           })
           .catch((err) => {
             console.error(`Production file generation failed for order item ${item.id}:`, err);

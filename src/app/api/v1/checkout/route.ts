@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { evaluateFormulaDefinition, type VariableMap } from "@/engine/schema-pricing";
 import { getPresetFormula } from "@/engine/formula-presets";
 import type { FormulaDefinition } from "@/engine/formula-types";
+import { fireWebhooks } from "@/lib/webhooks";
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -229,6 +230,13 @@ export async function POST(request: NextRequest) {
         orderItems: orderItemsJson,
       },
     });
+
+    // Fire webhook for order created (non-blocking)
+    fireWebhooks(tenant.id, "order.created", {
+      orderNumber,
+      total: serializedItems.reduce((sum, item) => sum + item.totalPrice, 0),
+      itemCount: serializedItems.length,
+    }).catch(console.error);
 
     return NextResponse.json({
       sessionId: session.id,

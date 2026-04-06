@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { savedDesignSchema } from "@/lib/validations";
+import { fireWebhooks } from "@/lib/webhooks";
 
 export async function GET() {
   try {
@@ -79,6 +80,14 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Fire webhook for design saved (non-blocking)
+    fireWebhooks(product.tenantId, "design.saved", {
+      designId: design.id,
+      designName: name,
+      productSlug: product.slug,
+      userId: session.user.id,
+    }).catch(console.error);
 
     return NextResponse.json({ design }, { status: 201 });
   } catch (error) {
