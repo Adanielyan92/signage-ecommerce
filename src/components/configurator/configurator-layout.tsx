@@ -14,6 +14,9 @@ import { captureCanvasScreenshot, captureCanvasScreenshotAsync } from "@/lib/cap
 import { validateChannelLetterConfig } from "@/lib/validation";
 import { useSession } from "next-auth/react";
 import { DayNightToggle } from "./day-night-toggle";
+import { WizardProvider } from "./wizard/wizard-context";
+import { StepIndicator } from "./wizard/step-indicator";
+import { WizardNavigation } from "./wizard/wizard-navigation";
 import { Save, Image as ImageIcon, ShoppingCart, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { ArButton } from "./ar-button";
@@ -64,6 +67,14 @@ class SceneErrorBoundary extends Component<
     return this.props.children;
   }
 }
+
+const WIZARD_STEPS = [
+  { id: "type", label: "Type" },
+  { id: "text", label: "Text & Font" },
+  { id: "size", label: "Size" },
+  { id: "style", label: "Style & Color" },
+  { id: "review", label: "Review" },
+];
 
 export function ConfiguratorLayout({
   product,
@@ -234,16 +245,20 @@ export function ConfiguratorLayout({
       </div>
 
       {/* Options panel — 40% on desktop, rest of screen on mobile */}
-      <div className="flex flex-1 flex-col overflow-hidden border-l border-neutral-200 lg:w-[40%]">
+      <div className="flex flex-1 flex-col overflow-hidden border-l border-brand-muted lg:w-[40%]">
         {/* Approximate rendering disclaimer */}
-        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs text-amber-700">
+        <div className="border-b border-brand-warning/30 bg-brand-warning/5 px-4 py-2 text-center text-xs text-brand-warning">
           This is an approximate 3D visualization. Actual sign appearance, color, and lighting may vary from this preview.
         </div>
 
-        {/* Scrollable options area — extra bottom padding for the sticky bar */}
-        <div className="flex-1 overflow-y-auto p-6 pb-48">
-          <OptionsPanel />
-        </div>
+        {/* Wizard-wrapped options area */}
+        <WizardProvider stepDefinitions={WIZARD_STEPS}>
+          <StepIndicator />
+          <div className="flex-1 overflow-y-auto p-6 pb-48">
+            <OptionsPanel />
+          </div>
+          <WizardNavigation />
+        </WizardProvider>
       </div>
 
       {/* Sticky bottom price bar */}
