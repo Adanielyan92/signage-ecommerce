@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GatSoft Configurator Widget - Example</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; background: #f5f5f5; }
+    h1 { font-size: 24px; margin-bottom: 20px; }
+    .widget-container { max-width: 1200px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <h1>Embeddable 3D Configurator Widget</h1>
+  <div class="widget-container">
+    <!-- Auto-mount via data attributes -->
+    <div
+      data-gatsoft-configurator
+      data-api-url="http://localhost:3000"
+      data-product="front-lit-trim-cap"
+      data-tenant="gatsoft"
+      style="height: 600px;"
+    ></div>
+  </div>
+
+  <script src="dist/configurator-widget.js"></script>
+
+  <script>
+    // Listen for add-to-cart events
+    document.addEventListener("gatsoft:add-to-cart", (e) => {
+      console.log("Add to cart:", e.detail);
+      alert("Added to cart! Check console for details.");
+    });
+  </script>
+</body>
+</html>
