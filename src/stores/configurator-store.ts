@@ -438,6 +438,10 @@ interface ConfiguratorState {
    */
   getActiveConfig: () => AnySignConfiguration;
 
+  // --- Image upload for logos/lit shapes ---
+  uploadedImageUrl: string | null;
+  setUploadedImageUrl: (url: string | null) => void;
+
   // --- API-based pricing ---
   apiProductId: string | null;
   apiPriceLoading: boolean;
@@ -768,6 +772,10 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
     }
     return getCategoryConfig(state.productCategory, state) ?? state.config;
   },
+
+  // --- Image upload for logos/lit shapes ---
+  uploadedImageUrl: null,
+  setUploadedImageUrl: (url) => set({ uploadedImageUrl: url }),
 
   // --- API-based pricing ---
 

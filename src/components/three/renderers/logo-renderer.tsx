@@ -1,7 +1,8 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { useLoader } from "@react-three/fiber";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { getLedColor } from "../utils/led-colors";
 import {
@@ -16,6 +17,46 @@ const PRESET_LOGOS: Record<string, string> = {
   shield: `<svg viewBox="0 0 100 120"><path d="M50,5 L95,25 L95,60 Q95,95 50,115 Q5,95 5,60 L5,25 Z" /></svg>`,
   circle: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" /></svg>`,
 };
+
+/**
+ * Sub-component that loads an uploaded image and renders it as a textured
+ * plane on the front face of the logo sign.
+ */
+function UploadedImageFace({
+  url,
+  width,
+  height,
+  depth,
+}: {
+  url: string;
+  width: number;
+  height: number;
+  depth: number;
+}) {
+  const texture = useMemo(() => {
+    const tex = new THREE.TextureLoader().load(url);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, [url]);
+
+  useEffect(() => {
+    return () => {
+      texture.dispose();
+    };
+  }, [texture]);
+
+  return (
+    <mesh position={[0, 0, depth / 2 + 0.02]}>
+      <planeGeometry args={[width * 0.85, height * 0.85]} />
+      <meshStandardMaterial
+        map={texture}
+        transparent
+        roughness={0.4}
+        metalness={0.1}
+      />
+    </mesh>
+  );
+}
 
 interface LogoRendererProps {
   width: number;
@@ -37,6 +78,7 @@ export function LogoRenderer({
   presetShape = "shield",
 }: LogoRendererProps) {
   const setDimensions = useConfiguratorStore((s) => s.setDimensions);
+  const uploadedImageUrl = useConfiguratorStore((s) => s.uploadedImageUrl);
   const prevDims = useRef("");
 
   useEffect(() => {
@@ -146,6 +188,16 @@ export function LogoRenderer({
         castShadow
         receiveShadow
       />
+
+      {/* Uploaded image texture on the front face */}
+      {uploadedImageUrl && (
+        <UploadedImageFace
+          url={uploadedImageUrl}
+          width={width}
+          height={height}
+          depth={depth}
+        />
+      )}
 
       {/* Back glow for lit logos */}
       {isLit && (

@@ -4,6 +4,7 @@ import { useConfiguratorStore } from "@/stores/configurator-store";
 import { logoProducts } from "@/engine/product-definitions";
 import type { LogoType, LEDColor, PaintingOption } from "@/types/product";
 import { validateWidth, validateHeight } from "@/lib/validation";
+import { ImageUpload } from "../image-upload";
 
 const LED_SWATCHES: Record<string, string> = {
   "3000K": "#FFB46B",
@@ -92,11 +93,12 @@ export function LogoOptions({ wizardStep }: LogoOptionsProps) {
         </div>
       )}
 
-      {/* Step 1: Text & Font — Logos have no text */}
-      {wizardStep === 1 && (
-        <div className="rounded-lg border border-blue-100 bg-blue-50/50 px-4 py-6 text-center">
-          <p className="text-sm text-neutral-600">
-            Logo signs don&apos;t require text input. Continue to the next step to set dimensions.
+      {/* Step 1: Logo Image Upload (replaces text input for logos) */}
+      {(showAll || wizardStep === 1) && (
+        <div>
+          <ImageUpload />
+          <p className="mt-2 text-xs text-neutral-400">
+            Upload your logo to see it on the 3D sign preview.
           </p>
         </div>
       )}

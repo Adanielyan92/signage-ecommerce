@@ -59,6 +59,7 @@ export function LitShapeRenderer({
 }: LitShapeRendererProps) {
   const setDimensions = useConfiguratorStore((s) => s.setDimensions);
   const productType = useConfiguratorStore((s) => s.litShapeConfig.productType);
+  const uploadedImageUrl = useConfiguratorStore((s) => s.uploadedImageUrl);
   const prevDims = useRef("");
 
   useEffect(() => {
@@ -144,6 +145,20 @@ export function LitShapeRenderer({
     return geo;
   }, [productType, width, height, depth]);
 
+  // Load uploaded image as a texture for the face
+  const imageTexture = useMemo(() => {
+    if (!uploadedImageUrl) return null;
+    const tex = new THREE.TextureLoader().load(uploadedImageUrl);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, [uploadedImageUrl]);
+
+  useEffect(() => {
+    return () => {
+      imageTexture?.dispose();
+    };
+  }, [imageTexture]);
+
   return (
     <group>
       {/* Extruded shape body */}
@@ -156,6 +171,19 @@ export function LitShapeRenderer({
         <primitive object={faceMaterial} attach="material" />
         <planeGeometry args={[width * 0.9, height * 0.9]} />
       </mesh>
+
+      {/* Uploaded image texture on the front face */}
+      {imageTexture && (
+        <mesh position={[0, 0, depth / 2 + 0.15]}>
+          <planeGeometry args={[width * 0.8, height * 0.8]} />
+          <meshStandardMaterial
+            map={imageTexture}
+            transparent
+            roughness={0.4}
+            metalness={0.1}
+          />
+        </mesh>
+      )}
     </group>
   );
 }
