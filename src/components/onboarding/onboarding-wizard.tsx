@@ -18,6 +18,7 @@ interface OnboardingData {
   logoUrl: string;
   templateSlug: string;
   pricingOverrides: Record<string, number>;
+  [key: string]: unknown;
 }
 
 const STEPS = [

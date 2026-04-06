@@ -62,7 +62,7 @@ export async function exportToUsdz(object: Object3D): Promise<Blob> {
   const { USDZExporter } = await import("three/examples/jsm/exporters/USDZExporter.js");
 
   const exporter = new USDZExporter();
-  const arrayBuffer = await exporter.parse(object as unknown as Scene);
+  const arrayBuffer = await exporter.parseAsync(object);
   return new Blob([arrayBuffer], { type: "model/vnd.usdz+zip" });
 }
 

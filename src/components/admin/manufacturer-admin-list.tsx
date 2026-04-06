@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2, Award, AwardOff } from "lucide-react";
+import { Plus, Trash2, Award, ShieldOff } from "lucide-react";
 
 interface Manufacturer {
   id: string;
@@ -125,7 +125,7 @@ export function ManufacturerAdminList() {
                 <td className="px-4 py-3 text-neutral-500">{[m.city, m.state].filter(Boolean).join(", ") || "—"}</td>
                 <td className="px-4 py-3">
                   <button onClick={() => handleToggleVerified(m.id, m.isVerified)} title={m.isVerified ? "Remove verification" : "Verify"}>
-                    {m.isVerified ? <Award className="h-4 w-4 text-green-600" /> : <AwardOff className="h-4 w-4 text-neutral-300" />}
+                    {m.isVerified ? <Award className="h-4 w-4 text-green-600" /> : <ShieldOff className="h-4 w-4 text-neutral-300" />}
                   </button>
                 </td>
                 <td className="px-4 py-3">

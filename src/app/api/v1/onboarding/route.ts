@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/generated/prisma/client";
 import { z } from "zod/v4";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
@@ -103,14 +104,14 @@ export async function POST(request: Request) {
         name: `${template.name} Pricing`,
         type: "PRESET",
         presetId: "per-inch-letter",
-        formulaAst: null,
+        formulaAst: undefined,
       },
     });
 
     // Clone template into product
     const pricingParams =
       data.pricingOverrides && template.pricingParams
-        ? { ...(template.pricingParams as Record<string, unknown>), ...data.pricingOverrides }
+        ? JSON.parse(JSON.stringify({ ...(template.pricingParams as Record<string, unknown>), ...data.pricingOverrides }))
         : template.pricingParams;
 
     await tx.product.create({
@@ -120,9 +121,9 @@ export async function POST(request: Request) {
         name: template.name,
         description: template.description,
         category: template.category,
-        productSchema: template.productSchema,
-        pricingParams,
-        renderConfig: template.renderConfig,
+        productSchema: template.productSchema as Prisma.InputJsonValue | undefined ?? undefined,
+        pricingParams: pricingParams as Prisma.InputJsonValue | undefined ?? undefined,
+        renderConfig: template.renderConfig as Prisma.InputJsonValue | undefined ?? undefined,
         pricingFormulaId: formula.id,
       },
     });

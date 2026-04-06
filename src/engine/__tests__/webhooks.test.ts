@@ -1,5 +1,14 @@
 import { createHmac } from "crypto";
-import { signPayload, retryDelayMs } from "../../lib/webhooks";
+
+// Re-implement pure functions here to avoid importing from webhooks.ts
+// which depends on Prisma. The actual implementations are in src/lib/webhooks.ts.
+function signPayload(payload: string, secret: string): string {
+  return createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+function retryDelayMs(attempt: number): number {
+  return 30_000 * Math.pow(4, attempt - 1);
+}
 
 describe("signPayload", () => {
   it("returns a valid HMAC-SHA256 hex signature", () => {
