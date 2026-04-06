@@ -7,6 +7,7 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import { CartSyncProvider } from "@/components/providers/cart-sync-provider";
 import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import { Toaster } from "sonner";
+import { I18nProvider } from "@/i18n";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -60,13 +61,15 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <SessionProvider>
           <CartSyncProvider>
-            <div className="flex min-h-screen flex-col">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-            <OrganizationJsonLd />
-            <Toaster position="top-right" />
+            <I18nProvider defaultLocale="en" availableLocales={["en", "es"]}>
+              <div className="flex min-h-screen flex-col">
+                <Navbar />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+              <OrganizationJsonLd />
+              <Toaster position="top-right" />
+            </I18nProvider>
           </CartSyncProvider>
         </SessionProvider>
       </body>

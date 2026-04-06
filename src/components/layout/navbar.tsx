@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useCartStore } from "@/stores/cart-store";
 import { useSession, signOut } from "next-auth/react";
 import { MegaMenuDesktop, MegaMenuMobile } from "@/components/products/mega-menu";
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -57,6 +58,7 @@ export function Navbar() {
           >
             Admin
           </Link>
+          <LanguageSwitcher />
           <Link
             href="/cart"
             className="relative flex items-center gap-1 text-sm font-medium text-neutral-600 transition hover:text-neutral-900"

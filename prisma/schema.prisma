@@ -79,6 +79,7 @@ model Tenant {
 
   currency String @default("USD")
   locale   String @default("en-US")
+  defaultLanguage String @default("en")
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
