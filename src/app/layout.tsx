@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Rubik, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -9,9 +9,18 @@ import { OrganizationJsonLd } from "@/components/seo/json-ld";
 import { Toaster } from "sonner";
 import { I18nProvider } from "@/i18n";
 
-const inter = Inter({
+const rubik = Rubik({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-rubik",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  variable: "--font-nunito-sans",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -58,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${rubik.variable} ${nunitoSans.variable} font-sans antialiased`}>
         <SessionProvider>
           <CartSyncProvider>
             <I18nProvider defaultLocale="en" availableLocales={["en", "es"]}>
