@@ -8,6 +8,7 @@
 import { getFileStorage, type StoredFile } from "@/lib/file-storage";
 import { generateSvgCutFile } from "@/engine/svg-generator";
 import { generateBOM, type BOMResult } from "@/engine/bom-generator";
+import { generateDxfFromSvgPaths } from "@/engine/dxf-generator";
 import type { SignConfiguration, Dimensions } from "@/types/configurator";
 import type { ProductionFileType } from "@/types/order";
 import { formatPrice } from "@/lib/utils";
@@ -65,6 +66,39 @@ export async function generateProductionFiles(
       sizeBytes: svgFile.sizeBytes,
       contentType: "image/svg+xml",
     });
+    // Generate DXF from the SVG content
+    try {
+      const svgPathRegex = /<path[^>]*id="([^"]*)"[^>]*d="([^"]*)"[^>]*\/>/g;
+      const dxfPaths: { id: string; d: string }[] = [];
+      let match;
+      while ((match = svgPathRegex.exec(svgContent)) !== null) {
+        dxfPaths.push({ id: match[1], d: match[2] });
+      }
+
+      if (dxfPaths.length > 0) {
+        const dxfContent = generateDxfFromSvgPaths(dxfPaths, {
+          unitInches: true,
+          layerPerLetter: true,
+        });
+
+        const dxfFile = await storage.write(
+          `${basePath}/cut-file.dxf`,
+          dxfContent,
+          "application/dxf"
+        );
+
+        results.push({
+          fileType: "dxf_cut" as ProductionFileType,
+          fileName: `${input.orderNumber}-cut-file.dxf`,
+          storageKey: dxfFile.key,
+          url: dxfFile.url,
+          sizeBytes: dxfFile.sizeBytes,
+          contentType: "application/dxf",
+        });
+      }
+    } catch (dxfErr) {
+      console.error(`Failed to generate DXF for order item ${input.orderItemId}:`, dxfErr);
+    }
   } catch (err) {
     console.error(`Failed to generate SVG for order item ${input.orderItemId}:`, err);
   }
