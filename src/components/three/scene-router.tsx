@@ -81,6 +81,7 @@ export function SceneRouter() {
             logoConfig.productType === "lit-logo" ? logoConfig.led : undefined
           }
           painting={logoConfig.painting}
+          presetShape="shield"
         />
       );
     case "PRINT_SIGNS":
