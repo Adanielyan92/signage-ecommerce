@@ -97,18 +97,18 @@ function calculateDimensionalMultipliers(
 ): MultiplierDetail[] {
   const multipliers: MultiplierDetail[] = [];
 
-  // Thickness premium
-  if (config.thickness === "1.5") {
+  // Thickness premium (base price assumes 1/4"; thicker stock costs more)
+  if (config.thickness === "0.75") {
     multipliers.push({
-      name: 'Thickness 1.5"',
+      name: 'Thickness 3/4"',
       value: 1.1,
-      reason: "Thicker material (1.5 inch)",
+      reason: "Thicker material (3/4 inch)",
     });
-  } else if (config.thickness === "2") {
+  } else if (config.thickness === "1") {
     multipliers.push({
-      name: 'Thickness 2"',
+      name: 'Thickness 1"',
       value: 1.2,
-      reason: "Thicker material (2 inch)",
+      reason: "Thicker material (1 inch)",
     });
   }
 
