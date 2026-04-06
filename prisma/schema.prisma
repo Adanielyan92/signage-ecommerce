@@ -81,6 +81,8 @@ model Tenant {
   locale   String @default("en-US")
   defaultLanguage String @default("en")
 
+  onboardingCompleted Boolean @default(false)
+
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -96,6 +98,8 @@ model Tenant {
   stockParts       StockPart[]
   materialPresets  MaterialPreset[]
   tenantFonts      TenantFont[]
+  exchangeRates   ExchangeRate[]
+  webhooks        Webhook[]
 }
 
 enum TenantPlan {
@@ -394,4 +398,92 @@ enum FontSource {
   PLATFORM   // Shipped with platform (the 15 in font-map.ts)
   GOOGLE     // Downloaded from Google Fonts
   CUSTOM     // Uploaded TTF by tenant
+}
+
+// ─── Exchange Rates ────────────────────────────
+
+model ExchangeRate {
+  id           String   @id @default(cuid())
+  tenantId     String
+  fromCurrency String   @default("USD")
+  toCurrency   String
+  rate         Float
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, fromCurrency, toCurrency])
+}
+
+// ─── Webhooks ──────────────────────────────────
+
+model Webhook {
+  id        String   @id @default(cuid())
+  tenantId  String
+  url       String
+  secret    String
+  events    String[] // ["order.created", "order.paid", "order.files_ready", "design.saved"]
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([tenantId])
+}
+
+model WebhookDelivery {
+  id             String    @id @default(cuid())
+  webhookId      String
+  event          String
+  payload        Json
+  responseStatus Int?
+  responseBody   String?
+  error          String?
+  attempt        Int       @default(1)
+  maxAttempts    Int       @default(3)
+  nextRetryAt    DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([nextRetryAt])
+}
+
+// ─── Manufacturer Marketplace ──────────────────
+
+model Manufacturer {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  website       String?
+  email         String?
+  phone         String?
+  logoUrl       String?
+  coverImageUrl String?
+
+  // Location
+  city          String?
+  state         String?
+  country       String   @default("US")
+  zipCode       String?
+
+  // Capabilities
+  capabilities   String[] // e.g. ["channel-letters", "neon", "cabinet-signs"]
+  certifications String[] // e.g. ["UL Listed", "ISO 9001"]
+
+  // Status
+  isVerified    Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  featuredOrder Int?     // null = not featured, lower = higher priority
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([country, state])
+  @@index([isActive, isVerified])
 }
