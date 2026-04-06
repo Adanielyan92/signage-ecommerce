@@ -60,7 +60,7 @@ const commonOptions: ProductOption[] = [
     optionKey: "side_depth",
     label: "Side Depth",
     inputType: "select",
-    possibleValues: [{ value: '4"' }, { value: '5"' }],
+    possibleValues: [{ value: '3"' }, { value: '4"' }, { value: '5"' }],
     defaultValue: '4"',
   },
   {
@@ -558,6 +558,20 @@ export const printProducts: PrintProduct[] = [
     description: "Indoor display foam board sign.",
     category: "PRINT_SIGNS",
     pricingParams: { basePricePerSqft: 15, minSqft: 4, minOrderPrice: 100 },
+  },
+  {
+    slug: "pvc",
+    name: "PVC Sign",
+    description: "Durable PVC (Sintra) board sign, weather-resistant for indoor and outdoor use.",
+    category: "PRINT_SIGNS",
+    pricingParams: { basePricePerSqft: 20, minSqft: 4, minOrderPrice: 150 },
+  },
+  {
+    slug: "dibond",
+    name: "Dibond Sign",
+    description: "Premium aluminum composite panel with polyethylene core for a rigid, professional finish.",
+    category: "PRINT_SIGNS",
+    pricingParams: { basePricePerSqft: 30, minSqft: 4, minOrderPrice: 250 },
   },
 ];
 

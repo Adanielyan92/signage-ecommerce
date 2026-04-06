@@ -76,7 +76,7 @@ const defaultDimensionalConfig: DimensionalLetterConfiguration = {
   text: "",
   height: 12,
   font: "Standard",
-  thickness: "1",
+  thickness: "0.5",
   painting: "-",
   paintingColors: 1,
   mounting: "stud",

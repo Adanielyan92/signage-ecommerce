@@ -68,7 +68,7 @@ export type DimensionalLetterType =
 
 export type LogoType = "lit-logo" | "non-lit-logo";
 
-export type PrintSignType = "acm-panel" | "coroplast" | "foam-board";
+export type PrintSignType = "acm-panel" | "coroplast" | "foam-board" | "pvc" | "dibond";
 
 export type SignPostType = "single-post" | "double-post" | "monument-base";
 
@@ -112,7 +112,7 @@ export type FontStyle =
 export type PaintingOption = "-" | "Painted" | "Painted Multicolor";
 export type RacewayOption = "-" | "Raceway" | "Raceway Box";
 export type VinylOption = "-" | "Regular" | "Perforated";
-export type DepthOption = '4"' | '5"';
+export type DepthOption = '3"' | '4"' | '5"';
 
 export interface SqftPricingParams {
   basePricePerSqft: number;

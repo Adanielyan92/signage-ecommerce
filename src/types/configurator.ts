@@ -103,7 +103,7 @@ export interface DimensionalLetterConfiguration {
   text: string;
   height: number;
   font: FontStyle;
-  thickness: "0.5" | "1" | "1.5" | "2";
+  thickness: "0.25" | "0.5" | "0.75" | "1";
   painting: PaintingOption;
   paintingColors: number;
   mounting: "stud" | "tape" | "standoff";
