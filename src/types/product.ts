@@ -42,7 +42,13 @@ export type ProductCategory =
   | "LIGHT_BOX_SIGNS"
   | "BLADE_SIGNS"
   | "NEON_SIGNS"
-  | "VINYL_BANNERS";
+  | "VINYL_BANNERS"
+  | "A_FRAME_SIGNS"
+  | "YARD_SIGNS"
+  | "PLAQUES"
+  | "VINYL_GRAPHICS"
+  | "WAYFINDING_SIGNS"
+  | "PUSH_THROUGH_SIGNS";
 
 export type ChannelLetterType =
   | "front-lit-trim-cap"
@@ -77,6 +83,13 @@ export type BladeSignType = "blade-rectangular" | "blade-round";
 export type NeonSignType = "led-neon";
 export type VinylBannerType = "vinyl-banner-13oz" | "vinyl-banner-15oz" | "mesh-banner";
 
+export type AFrameType = "a-frame-standard" | "a-frame-metal" | "a-frame-plastic";
+export type YardSignType = "yard-sign-coroplast" | "yard-sign-aluminum";
+export type PlaqueType = "plaque-aluminum" | "plaque-acrylic" | "plaque-wood" | "plaque-brass";
+export type VinylGraphicType = "vinyl-wall-graphic" | "vinyl-window-graphic" | "vinyl-floor-graphic" | "vinyl-vehicle-wrap";
+export type WayfindingType = "wayfinding-ada" | "wayfinding-directional" | "wayfinding-room-id";
+export type PushThroughType = "push-through-single" | "push-through-double";
+
 export type ProductTypeSlug =
   | ChannelLetterType
   | LitShapeType
@@ -88,7 +101,13 @@ export type ProductTypeSlug =
   | LightBoxType
   | BladeSignType
   | NeonSignType
-  | VinylBannerType;
+  | VinylBannerType
+  | AFrameType
+  | YardSignType
+  | PlaqueType
+  | VinylGraphicType
+  | WayfindingType
+  | PushThroughType;
 
 export type LitOption = "Lit" | "Non-Lit";
 export type LEDColor = "3000K" | "3500K" | "6000K" | "Red" | "Green" | "Blue" | "RGB";
@@ -163,3 +182,35 @@ export interface BannerPricingParams {
 }
 
 export type MountingType = "flush" | "standoff" | "stud" | "tape" | "wall" | "pole" | "roof";
+
+export interface AFramePricingParams {
+  basePricePerSqft: number;
+  minOrderPrice: number;
+}
+
+export interface YardSignPricingParams {
+  basePricePerSqft: number;
+  minOrderPrice: number;
+}
+
+export interface PlaquePricingParams {
+  basePricePerSqInch: number;
+  minOrderPrice: number;
+}
+
+export interface VinylGraphicPricingParams {
+  basePricePerSqft: number;
+  minOrderPrice: number;
+}
+
+export interface WayfindingPricingParams {
+  basePrice: number;
+  pricePerCharacter: number;
+  minOrderPrice: number;
+}
+
+export interface PushThroughPricingParams {
+  cabinetPricePerSqft: number;
+  letterPricePerInch: number;
+  minOrderPrice: number;
+}

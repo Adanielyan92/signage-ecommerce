@@ -2,8 +2,11 @@ import type {
   PricingParams, ChannelLetterType, ProductOption,
   LitShapeType, CabinetSignType, DimensionalLetterType, LogoType, PrintSignType, SignPostType,
   LightBoxType, BladeSignType, NeonSignType, VinylBannerType,
+  AFrameType, YardSignType, PlaqueType, VinylGraphicType, WayfindingType, PushThroughType,
   SqftPricingParams, LogoPricingParams, PrintPricingParams, SignPostPricingParams,
   BladePricingParams, NeonPricingParams, BannerPricingParams,
+  AFramePricingParams, YardSignPricingParams, PlaquePricingParams,
+  VinylGraphicPricingParams, WayfindingPricingParams, PushThroughPricingParams,
 } from "@/types/product";
 
 export interface ChannelLetterProduct {
@@ -771,6 +774,230 @@ export const bannerProducts: BannerProduct[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// A-Frame / Sandwich Board Products
+// ---------------------------------------------------------------------------
+
+export interface AFrameProduct {
+  slug: AFrameType;
+  name: string;
+  description: string;
+  category: "A_FRAME_SIGNS";
+  pricingParams: AFramePricingParams;
+}
+
+export const aFrameProducts: AFrameProduct[] = [
+  {
+    slug: "a-frame-standard",
+    name: "Standard A-Frame",
+    description: "Classic A-frame sandwich board with corrugated plastic panels.",
+    category: "A_FRAME_SIGNS",
+    pricingParams: { basePricePerSqft: 15, minOrderPrice: 150 },
+  },
+  {
+    slug: "a-frame-metal",
+    name: "Metal A-Frame",
+    description: "Heavy-duty metal A-frame sign for permanent outdoor use.",
+    category: "A_FRAME_SIGNS",
+    pricingParams: { basePricePerSqft: 25, minOrderPrice: 150 },
+  },
+  {
+    slug: "a-frame-plastic",
+    name: "Plastic A-Frame",
+    description: "Lightweight plastic A-frame sign, easy to move and store.",
+    category: "A_FRAME_SIGNS",
+    pricingParams: { basePricePerSqft: 12, minOrderPrice: 150 },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Yard Sign / Lawn Sign Products
+// ---------------------------------------------------------------------------
+
+export interface YardSignProduct {
+  slug: YardSignType;
+  name: string;
+  description: string;
+  category: "YARD_SIGNS";
+  pricingParams: YardSignPricingParams;
+}
+
+export const yardSignProducts: YardSignProduct[] = [
+  {
+    slug: "yard-sign-coroplast",
+    name: "Coroplast Yard Sign",
+    description: "Standard corrugated plastic yard sign.",
+    category: "YARD_SIGNS",
+    pricingParams: { basePricePerSqft: 8, minOrderPrice: 50 },
+  },
+  {
+    slug: "yard-sign-aluminum",
+    name: "Aluminum Yard Sign",
+    description: "Premium aluminum yard sign for long-term outdoor use.",
+    category: "YARD_SIGNS",
+    pricingParams: { basePricePerSqft: 18, minOrderPrice: 50 },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Plaque / Award Sign Products
+// ---------------------------------------------------------------------------
+
+export interface PlaqueProduct {
+  slug: PlaqueType;
+  name: string;
+  description: string;
+  category: "PLAQUES";
+  pricingParams: PlaquePricingParams;
+}
+
+export const plaqueProducts: PlaqueProduct[] = [
+  {
+    slug: "plaque-aluminum",
+    name: "Aluminum Plaque",
+    description: "Professional aluminum plaque with custom engraving.",
+    category: "PLAQUES",
+    pricingParams: { basePricePerSqInch: 0.35, minOrderPrice: 100 },
+  },
+  {
+    slug: "plaque-acrylic",
+    name: "Acrylic Plaque",
+    description: "Clear or tinted acrylic plaque with modern look.",
+    category: "PLAQUES",
+    pricingParams: { basePricePerSqInch: 0.25, minOrderPrice: 100 },
+  },
+  {
+    slug: "plaque-wood",
+    name: "Wood Plaque",
+    description: "Natural wood plaque with engraved text.",
+    category: "PLAQUES",
+    pricingParams: { basePricePerSqInch: 0.30, minOrderPrice: 100 },
+  },
+  {
+    slug: "plaque-brass",
+    name: "Brass Plaque",
+    description: "Premium brass plaque for distinguished signage.",
+    category: "PLAQUES",
+    pricingParams: { basePricePerSqInch: 0.50, minOrderPrice: 100 },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Vinyl Graphics / Window Graphics Products
+// ---------------------------------------------------------------------------
+
+export interface VinylGraphicProduct {
+  slug: VinylGraphicType;
+  name: string;
+  description: string;
+  category: "VINYL_GRAPHICS";
+  pricingParams: VinylGraphicPricingParams;
+}
+
+export const vinylGraphicProducts: VinylGraphicProduct[] = [
+  {
+    slug: "vinyl-wall-graphic",
+    name: "Wall Graphic",
+    description: "Custom vinyl wall graphic for interior branding.",
+    category: "VINYL_GRAPHICS",
+    pricingParams: { basePricePerSqft: 8, minOrderPrice: 75 },
+  },
+  {
+    slug: "vinyl-window-graphic",
+    name: "Window Graphic",
+    description: "Vinyl window graphic for storefront displays.",
+    category: "VINYL_GRAPHICS",
+    pricingParams: { basePricePerSqft: 12, minOrderPrice: 75 },
+  },
+  {
+    slug: "vinyl-floor-graphic",
+    name: "Floor Graphic",
+    description: "Durable floor graphic with anti-slip lamination.",
+    category: "VINYL_GRAPHICS",
+    pricingParams: { basePricePerSqft: 18, minOrderPrice: 75 },
+  },
+  {
+    slug: "vinyl-vehicle-wrap",
+    name: "Vehicle Wrap",
+    description: "Cast vinyl vehicle wrap for fleet branding.",
+    category: "VINYL_GRAPHICS",
+    pricingParams: { basePricePerSqft: 15, minOrderPrice: 75 },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Wayfinding / ADA Sign Products
+// ---------------------------------------------------------------------------
+
+export interface WayfindingProduct {
+  slug: WayfindingType;
+  name: string;
+  description: string;
+  category: "WAYFINDING_SIGNS";
+  pricingParams: WayfindingPricingParams;
+}
+
+export const wayfindingProducts: WayfindingProduct[] = [
+  {
+    slug: "wayfinding-ada",
+    name: "ADA Compliant Sign",
+    description: "ADA-compliant sign with tactile text and Grade 2 Braille.",
+    category: "WAYFINDING_SIGNS",
+    pricingParams: { basePrice: 45, pricePerCharacter: 5, minOrderPrice: 100 },
+  },
+  {
+    slug: "wayfinding-directional",
+    name: "Directional Sign",
+    description: "Wayfinding directional sign with arrows and icons.",
+    category: "WAYFINDING_SIGNS",
+    pricingParams: { basePrice: 25, pricePerCharacter: 2, minOrderPrice: 100 },
+  },
+  {
+    slug: "wayfinding-room-id",
+    name: "Room ID Sign",
+    description: "Room identification sign for offices and facilities.",
+    category: "WAYFINDING_SIGNS",
+    pricingParams: { basePrice: 35, pricePerCharacter: 2, minOrderPrice: 100 },
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Push-Through Sign Products
+// ---------------------------------------------------------------------------
+
+export interface PushThroughProduct {
+  slug: PushThroughType;
+  name: string;
+  description: string;
+  category: "PUSH_THROUGH_SIGNS";
+  pricingParams: PushThroughPricingParams;
+}
+
+export const pushThroughProducts: PushThroughProduct[] = [
+  {
+    slug: "push-through-single",
+    name: "Single-Sided Push-Through",
+    description: "Single-sided push-through letter sign with LED illumination.",
+    category: "PUSH_THROUGH_SIGNS",
+    pricingParams: {
+      cabinetPricePerSqft: 75,
+      letterPricePerInch: 12,
+      minOrderPrice: 1200,
+    },
+  },
+  {
+    slug: "push-through-double",
+    name: "Double-Sided Push-Through",
+    description: "Double-sided push-through letter sign with LED illumination.",
+    category: "PUSH_THROUGH_SIGNS",
+    pricingParams: {
+      cabinetPricePerSqft: 75,
+      letterPricePerInch: 12,
+      minOrderPrice: 1200,
+    },
+  },
+];
+
+// ---------------------------------------------------------------------------
 // Unified Lookup
 // ---------------------------------------------------------------------------
 
@@ -785,7 +1012,13 @@ export type AnyProduct =
   | LightBoxProduct
   | BladeProduct
   | NeonProduct
-  | BannerProduct;
+  | BannerProduct
+  | AFrameProduct
+  | YardSignProduct
+  | PlaqueProduct
+  | VinylGraphicProduct
+  | WayfindingProduct
+  | PushThroughProduct;
 
 export function getAnyProductBySlug(slug: string): AnyProduct | undefined {
   return (
@@ -799,6 +1032,12 @@ export function getAnyProductBySlug(slug: string): AnyProduct | undefined {
     (lightBoxProducts as AnyProduct[]).find((p) => p.slug === slug) ||
     (bladeProducts as AnyProduct[]).find((p) => p.slug === slug) ||
     (neonProducts as AnyProduct[]).find((p) => p.slug === slug) ||
-    (bannerProducts as AnyProduct[]).find((p) => p.slug === slug)
+    (bannerProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (aFrameProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (yardSignProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (plaqueProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (vinylGraphicProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (wayfindingProducts as AnyProduct[]).find((p) => p.slug === slug) ||
+    (pushThroughProducts as AnyProduct[]).find((p) => p.slug === slug)
   );
 }

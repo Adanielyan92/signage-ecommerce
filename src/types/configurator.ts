@@ -17,6 +17,12 @@ import type {
   BladeSignType,
   NeonSignType,
   VinylBannerType,
+  AFrameType,
+  YardSignType,
+  PlaqueType,
+  VinylGraphicType,
+  WayfindingType,
+  PushThroughType,
   ProductCategory,
   ProductTypeSlug,
 } from "./product";
@@ -184,6 +190,77 @@ export interface VinylBannerConfiguration {
   doubleSided: boolean;
 }
 
+export interface AFrameConfiguration {
+  productCategory: "A_FRAME_SIGNS";
+  productType: AFrameType;
+  widthInches: number;
+  heightInches: number;
+  material: "corrugated-plastic" | "aluminum" | "steel";
+  doubleSided: boolean;
+  insertType: "printed-panel" | "chalkboard" | "dry-erase";
+  baseWeight: "none" | "water-fill" | "sandbag";
+}
+
+export interface YardSignConfiguration {
+  productCategory: "YARD_SIGNS";
+  productType: YardSignType;
+  widthInches: number;
+  heightInches: number;
+  material: "coroplast" | "aluminum";
+  doubleSided: boolean;
+  stakeType: "h-stake" | "spider-stake" | "none";
+  quantity: number;
+}
+
+export interface PlaqueConfiguration {
+  productCategory: "PLAQUES";
+  productType: PlaqueType;
+  widthInches: number;
+  heightInches: number;
+  material: "aluminum" | "acrylic" | "wood" | "brass";
+  thickness: "1/8" | "1/4" | "3/8";
+  mounting: "standoffs" | "flat" | "easel";
+  finish: "brushed" | "polished" | "matte" | "painted";
+  textEngraving: boolean;
+}
+
+export interface VinylGraphicConfiguration {
+  productCategory: "VINYL_GRAPHICS";
+  productType: VinylGraphicType;
+  widthInches: number;
+  heightInches: number;
+  vinylType: "calendered" | "cast" | "reflective" | "perforated-window";
+  lamination: "none" | "matte" | "gloss";
+  applicationSurface: "wall" | "window" | "floor" | "vehicle";
+  contourCut: boolean;
+}
+
+export interface WayfindingConfiguration {
+  productCategory: "WAYFINDING_SIGNS";
+  productType: WayfindingType;
+  widthInches: number;
+  heightInches: number;
+  material: "acrylic" | "photopolymer" | "pvc";
+  adaCompliant: boolean;
+  text: string;
+  pictogram: "arrow" | "restroom" | "exit" | "custom" | "none";
+  mounting: "wall" | "projecting" | "ceiling-hung";
+}
+
+export interface PushThroughConfiguration {
+  productCategory: "PUSH_THROUGH_SIGNS";
+  productType: PushThroughType;
+  widthInches: number;
+  heightInches: number;
+  depth: "3" | "4" | "5" | "6";
+  faceMaterial: "acrylic-quarter" | "polycarbonate";
+  text: string;
+  font: FontStyle;
+  letterHeight: number;
+  led: LEDColor;
+  frameFinish: "painted" | "brushed" | "raw";
+}
+
 // --- Union of all configuration types ---
 
 export type AnySignConfiguration =
@@ -197,7 +274,13 @@ export type AnySignConfiguration =
   | LightBoxConfiguration
   | BladeSignConfiguration
   | NeonSignConfiguration
-  | VinylBannerConfiguration;
+  | VinylBannerConfiguration
+  | AFrameConfiguration
+  | YardSignConfiguration
+  | PlaqueConfiguration
+  | VinylGraphicConfiguration
+  | WayfindingConfiguration
+  | PushThroughConfiguration;
 
 // --- Unified cart item type ---
 

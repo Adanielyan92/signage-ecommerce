@@ -13,6 +13,12 @@ import { LightBoxOptions } from "./options/light-box-options";
 import { BladeOptions } from "./options/blade-options";
 import { NeonOptions } from "./options/neon-options";
 import { BannerOptions } from "./options/banner-options";
+import { AFrameOptions } from "./options/a-frame-options";
+import { YardSignOptions } from "./options/yard-sign-options";
+import { PlaqueOptions } from "./options/plaque-options";
+import { VinylGraphicOptions } from "./options/vinyl-graphic-options";
+import { WayfindingOptions } from "./options/wayfinding-options";
+import { PushThroughOptions } from "./options/push-through-options";
 import { ReviewSummary } from "./review-summary";
 
 export function OptionsPanel() {
@@ -58,6 +64,18 @@ export function OptionsPanel() {
       return <NeonOptions wizardStep={wizardStep} />;
     case "VINYL_BANNERS":
       return <BannerOptions wizardStep={wizardStep} />;
+    case "A_FRAME_SIGNS":
+      return <AFrameOptions wizardStep={wizardStep} />;
+    case "YARD_SIGNS":
+      return <YardSignOptions wizardStep={wizardStep} />;
+    case "PLAQUES":
+      return <PlaqueOptions wizardStep={wizardStep} />;
+    case "VINYL_GRAPHICS":
+      return <VinylGraphicOptions wizardStep={wizardStep} />;
+    case "WAYFINDING_SIGNS":
+      return <WayfindingOptions wizardStep={wizardStep} />;
+    case "PUSH_THROUGH_SIGNS":
+      return <PushThroughOptions wizardStep={wizardStep} />;
     default:
       return <ChannelLetterOptions wizardStep={wizardStep} />;
   }

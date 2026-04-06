@@ -17,6 +17,12 @@ import type {
   BladeSignConfiguration,
   NeonSignConfiguration,
   VinylBannerConfiguration,
+  AFrameConfiguration,
+  YardSignConfiguration,
+  PlaqueConfiguration,
+  VinylGraphicConfiguration,
+  WayfindingConfiguration,
+  PushThroughConfiguration,
 } from "@/types/configurator";
 import type {
   ChannelLetterType,
@@ -156,6 +162,77 @@ const defaultBannerConfig: VinylBannerConfiguration = {
   doubleSided: false,
 };
 
+const defaultAFrameConfig: AFrameConfiguration = {
+  productCategory: "A_FRAME_SIGNS",
+  productType: "a-frame-standard",
+  widthInches: 24,
+  heightInches: 36,
+  material: "corrugated-plastic",
+  doubleSided: true,
+  insertType: "printed-panel",
+  baseWeight: "none",
+};
+
+const defaultYardSignConfig: YardSignConfiguration = {
+  productCategory: "YARD_SIGNS",
+  productType: "yard-sign-coroplast",
+  widthInches: 24,
+  heightInches: 18,
+  material: "coroplast",
+  doubleSided: false,
+  stakeType: "h-stake",
+  quantity: 1,
+};
+
+const defaultPlaqueConfig: PlaqueConfiguration = {
+  productCategory: "PLAQUES",
+  productType: "plaque-aluminum",
+  widthInches: 12,
+  heightInches: 8,
+  material: "aluminum",
+  thickness: "1/8",
+  mounting: "flat",
+  finish: "brushed",
+  textEngraving: false,
+};
+
+const defaultVinylGraphicConfig: VinylGraphicConfiguration = {
+  productCategory: "VINYL_GRAPHICS",
+  productType: "vinyl-wall-graphic",
+  widthInches: 48,
+  heightInches: 36,
+  vinylType: "calendered",
+  lamination: "none",
+  applicationSurface: "wall",
+  contourCut: false,
+};
+
+const defaultWayfindingConfig: WayfindingConfiguration = {
+  productCategory: "WAYFINDING_SIGNS",
+  productType: "wayfinding-ada",
+  widthInches: 12,
+  heightInches: 8,
+  material: "acrylic",
+  adaCompliant: true,
+  text: "",
+  pictogram: "none",
+  mounting: "wall",
+};
+
+const defaultPushThroughConfig: PushThroughConfiguration = {
+  productCategory: "PUSH_THROUGH_SIGNS",
+  productType: "push-through-single",
+  widthInches: 48,
+  heightInches: 24,
+  depth: "4",
+  faceMaterial: "acrylic-quarter",
+  text: "",
+  font: "Standard",
+  letterHeight: 12,
+  led: "3000K",
+  frameFinish: "painted",
+};
+
 // ---------------------------------------------------------------------------
 // Empty defaults
 // ---------------------------------------------------------------------------
@@ -233,6 +310,12 @@ function getDimensionsForCategoryConfig(
     | "bladeConfig"
     | "neonConfig"
     | "bannerConfig"
+    | "aFrameConfig"
+    | "yardSignConfig"
+    | "plaqueConfig"
+    | "vinylGraphicConfig"
+    | "wayfindingConfig"
+    | "pushThroughConfig"
   >,
 ): Dimensions {
   switch (cat) {
@@ -288,6 +371,36 @@ function getDimensionsForCategoryConfig(
         state.bannerConfig.widthInches,
         state.bannerConfig.heightInches,
       );
+    case "A_FRAME_SIGNS":
+      return estimateCategoryDimensions(
+        state.aFrameConfig.widthInches,
+        state.aFrameConfig.heightInches,
+      );
+    case "YARD_SIGNS":
+      return estimateCategoryDimensions(
+        state.yardSignConfig.widthInches,
+        state.yardSignConfig.heightInches,
+      );
+    case "PLAQUES":
+      return estimateCategoryDimensions(
+        state.plaqueConfig.widthInches,
+        state.plaqueConfig.heightInches,
+      );
+    case "VINYL_GRAPHICS":
+      return estimateCategoryDimensions(
+        state.vinylGraphicConfig.widthInches,
+        state.vinylGraphicConfig.heightInches,
+      );
+    case "WAYFINDING_SIGNS":
+      return estimateCategoryDimensions(
+        state.wayfindingConfig.widthInches,
+        state.wayfindingConfig.heightInches,
+      );
+    case "PUSH_THROUGH_SIGNS":
+      return estimateCategoryDimensions(
+        state.pushThroughConfig.widthInches,
+        state.pushThroughConfig.heightInches,
+      );
     default:
       return emptyDimensions;
   }
@@ -308,6 +421,12 @@ function getCategoryConfig(
     | "bladeConfig"
     | "neonConfig"
     | "bannerConfig"
+    | "aFrameConfig"
+    | "yardSignConfig"
+    | "plaqueConfig"
+    | "vinylGraphicConfig"
+    | "wayfindingConfig"
+    | "pushThroughConfig"
   >,
 ): AnySignConfiguration | null {
   switch (cat) {
@@ -331,6 +450,18 @@ function getCategoryConfig(
       return state.neonConfig;
     case "VINYL_BANNERS":
       return state.bannerConfig;
+    case "A_FRAME_SIGNS":
+      return state.aFrameConfig;
+    case "YARD_SIGNS":
+      return state.yardSignConfig;
+    case "PLAQUES":
+      return state.plaqueConfig;
+    case "VINYL_GRAPHICS":
+      return state.vinylGraphicConfig;
+    case "WAYFINDING_SIGNS":
+      return state.wayfindingConfig;
+    case "PUSH_THROUGH_SIGNS":
+      return state.pushThroughConfig;
     default:
       return null;
   }
@@ -397,6 +528,12 @@ interface ConfiguratorState {
   bladeConfig: BladeSignConfiguration;
   neonConfig: NeonSignConfiguration;
   bannerConfig: VinylBannerConfiguration;
+  aFrameConfig: AFrameConfiguration;
+  yardSignConfig: YardSignConfiguration;
+  plaqueConfig: PlaqueConfiguration;
+  vinylGraphicConfig: VinylGraphicConfiguration;
+  wayfindingConfig: WayfindingConfiguration;
+  pushThroughConfig: PushThroughConfiguration;
 
   // --- Channel letter setters (backward compatible) ---
   setProductType: (type: ChannelLetterType) => void;
@@ -474,6 +611,12 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   bladeConfig: { ...defaultBladeConfig },
   neonConfig: { ...defaultNeonConfig },
   bannerConfig: { ...defaultBannerConfig },
+  aFrameConfig: { ...defaultAFrameConfig },
+  yardSignConfig: { ...defaultYardSignConfig },
+  plaqueConfig: { ...defaultPlaqueConfig },
+  vinylGraphicConfig: { ...defaultVinylGraphicConfig },
+  wayfindingConfig: { ...defaultWayfindingConfig },
+  pushThroughConfig: { ...defaultPushThroughConfig },
 
   // --- Channel letter setters (unchanged for backward compat) ---
 
@@ -589,6 +732,12 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       bladeConfig: { ...defaultBladeConfig },
       neonConfig: { ...defaultNeonConfig },
       bannerConfig: { ...defaultBannerConfig },
+      aFrameConfig: { ...defaultAFrameConfig },
+      yardSignConfig: { ...defaultYardSignConfig },
+      plaqueConfig: { ...defaultPlaqueConfig },
+      vinylGraphicConfig: { ...defaultVinylGraphicConfig },
+      wayfindingConfig: { ...defaultWayfindingConfig },
+      pushThroughConfig: { ...defaultPushThroughConfig },
     });
   },
 
@@ -693,6 +842,42 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
             productType: productType as VinylBannerConfiguration["productType"],
           };
           break;
+        case "A_FRAME_SIGNS":
+          updates.aFrameConfig = {
+            ...get().aFrameConfig,
+            productType: productType as AFrameConfiguration["productType"],
+          };
+          break;
+        case "YARD_SIGNS":
+          updates.yardSignConfig = {
+            ...get().yardSignConfig,
+            productType: productType as YardSignConfiguration["productType"],
+          };
+          break;
+        case "PLAQUES":
+          updates.plaqueConfig = {
+            ...get().plaqueConfig,
+            productType: productType as PlaqueConfiguration["productType"],
+          };
+          break;
+        case "VINYL_GRAPHICS":
+          updates.vinylGraphicConfig = {
+            ...get().vinylGraphicConfig,
+            productType: productType as VinylGraphicConfiguration["productType"],
+          };
+          break;
+        case "WAYFINDING_SIGNS":
+          updates.wayfindingConfig = {
+            ...get().wayfindingConfig,
+            productType: productType as WayfindingConfiguration["productType"],
+          };
+          break;
+        case "PUSH_THROUGH_SIGNS":
+          updates.pushThroughConfig = {
+            ...get().pushThroughConfig,
+            productType: productType as PushThroughConfiguration["productType"],
+          };
+          break;
       }
     }
 
@@ -758,6 +943,36 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
       case "VINYL_BANNERS":
         set((s) => ({
           bannerConfig: { ...s.bannerConfig, [key]: value } as VinylBannerConfiguration,
+        }));
+        break;
+      case "A_FRAME_SIGNS":
+        set((s) => ({
+          aFrameConfig: { ...s.aFrameConfig, [key]: value } as AFrameConfiguration,
+        }));
+        break;
+      case "YARD_SIGNS":
+        set((s) => ({
+          yardSignConfig: { ...s.yardSignConfig, [key]: value } as YardSignConfiguration,
+        }));
+        break;
+      case "PLAQUES":
+        set((s) => ({
+          plaqueConfig: { ...s.plaqueConfig, [key]: value } as PlaqueConfiguration,
+        }));
+        break;
+      case "VINYL_GRAPHICS":
+        set((s) => ({
+          vinylGraphicConfig: { ...s.vinylGraphicConfig, [key]: value } as VinylGraphicConfiguration,
+        }));
+        break;
+      case "WAYFINDING_SIGNS":
+        set((s) => ({
+          wayfindingConfig: { ...s.wayfindingConfig, [key]: value } as WayfindingConfiguration,
+        }));
+        break;
+      case "PUSH_THROUGH_SIGNS":
+        set((s) => ({
+          pushThroughConfig: { ...s.pushThroughConfig, [key]: value } as PushThroughConfiguration,
         }));
         break;
     }

@@ -12,6 +12,12 @@ import type {
   BladePricingParams,
   NeonPricingParams,
   BannerPricingParams,
+  AFramePricingParams,
+  YardSignPricingParams,
+  PlaquePricingParams,
+  VinylGraphicPricingParams,
+  WayfindingPricingParams,
+  PushThroughPricingParams,
 } from "@/types/product";
 import type {
   SignConfiguration,
@@ -28,6 +34,12 @@ import type {
   BladeSignConfiguration,
   NeonSignConfiguration,
   VinylBannerConfiguration,
+  AFrameConfiguration,
+  YardSignConfiguration,
+  PlaqueConfiguration,
+  VinylGraphicConfiguration,
+  WayfindingConfiguration,
+  PushThroughConfiguration,
 } from "@/types/configurator";
 import { calculateChannelLetterPrice } from "./channel-letter-pricing";
 import { calculateShapeSignPrice } from "./shape-sign-pricing";
@@ -40,6 +52,12 @@ import { calculateLightBoxPrice } from "./light-box-pricing";
 import { calculateBladePrice } from "./blade-pricing";
 import { calculateNeonPrice } from "./neon-pricing";
 import { calculateBannerPrice } from "./banner-pricing";
+import { calculateAFramePrice } from "./a-frame-pricing";
+import { calculateYardSignPrice } from "./yard-sign-pricing";
+import { calculatePlaquePrice } from "./plaque-pricing";
+import { calculateVinylGraphicPrice } from "./vinyl-graphic-pricing";
+import { calculateWayfindingPrice } from "./wayfinding-pricing";
+import { calculatePushThroughPrice } from "./push-through-pricing";
 import { getAnyProductBySlug } from "./product-definitions";
 
 export { calculateChannelLetterPrice } from "./channel-letter-pricing";
@@ -194,6 +212,42 @@ export function calculatePriceUnified(
         config as VinylBannerConfiguration,
         dimensions,
         product.pricingParams as BannerPricingParams,
+      );
+    case "A_FRAME_SIGNS":
+      return calculateAFramePrice(
+        config as AFrameConfiguration,
+        dimensions,
+        product.pricingParams as AFramePricingParams,
+      );
+    case "YARD_SIGNS":
+      return calculateYardSignPrice(
+        config as YardSignConfiguration,
+        dimensions,
+        product.pricingParams as YardSignPricingParams,
+      );
+    case "PLAQUES":
+      return calculatePlaquePrice(
+        config as PlaqueConfiguration,
+        dimensions,
+        product.pricingParams as PlaquePricingParams,
+      );
+    case "VINYL_GRAPHICS":
+      return calculateVinylGraphicPrice(
+        config as VinylGraphicConfiguration,
+        dimensions,
+        product.pricingParams as VinylGraphicPricingParams,
+      );
+    case "WAYFINDING_SIGNS":
+      return calculateWayfindingPrice(
+        config as WayfindingConfiguration,
+        dimensions,
+        product.pricingParams as WayfindingPricingParams,
+      );
+    case "PUSH_THROUGH_SIGNS":
+      return calculatePushThroughPrice(
+        config as PushThroughConfiguration,
+        dimensions,
+        product.pricingParams as PushThroughPricingParams,
       );
     default:
       return emptyBreakdown();
