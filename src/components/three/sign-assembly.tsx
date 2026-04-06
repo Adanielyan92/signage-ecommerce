@@ -199,8 +199,32 @@ export function SignAssembly() {
 
   const isBackLit =
     config.productType === "back-lit" || config.productType === "halo-lit";
+  const isTrimCap = config.productType === "front-lit-trim-cap";
+  const isMarquee = config.productType === "marquee-letters";
   const ledColorHex = getLedColor(config.led);
-  const bevelEnabled = config.productType === "front-lit-trim-cap";
+  const bevelEnabled = isTrimCap;
+
+  // Trim cap border material (aluminum edge ring)
+  const trimCapMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: "#c0c0c0",
+        metalness: 0.85,
+        roughness: 0.3,
+      }),
+    []
+  );
+
+  // Marquee bulb material (warm emissive spheres)
+  const bulbMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: "#ffffff",
+        emissive: new THREE.Color(ledColorHex),
+        emissiveIntensity: config.lit === "Lit" ? 2.5 : 0,
+      }),
+    [ledColorHex, config.lit]
+  );
 
   if (!font) return null;
 
@@ -221,6 +245,52 @@ export function SignAssembly() {
           bevelEnabled={bevelEnabled}
         />
       ))}
+
+      {/* Trim cap: aluminum border around each letter (slightly larger outline) */}
+      {isTrimCap &&
+        letterPositions.map((lp, i) => (
+          <mesh
+            key={`trim-${i}`}
+            position={[
+              lp.x + xOffset + lp.width / 2,
+              height / 2,
+              depth / 2 + 0.01,
+            ]}
+          >
+            <planeGeometry args={[lp.width + 0.3, height + 0.3]} />
+            <primitive object={trimCapMaterial} attach="material" />
+          </mesh>
+        ))}
+
+      {/* Marquee bulbs: emissive spheres along each letter perimeter */}
+      {isMarquee &&
+        letterPositions.map((lp, i) => {
+          // Place bulbs evenly along top and bottom of each letter
+          const bulbs: [number, number, number][] = [];
+          const bulbSpacing = 1.5; // inches between bulbs
+          const numBulbsH = Math.max(2, Math.floor(lp.width / bulbSpacing));
+          const numBulbsV = Math.max(2, Math.floor(height / bulbSpacing));
+
+          // Top and bottom rows
+          for (let b = 0; b <= numBulbsH; b++) {
+            const bx = lp.x + xOffset + (lp.width * b) / numBulbsH;
+            bulbs.push([bx, 0, depth / 2 + 0.3]);
+            bulbs.push([bx, height, depth / 2 + 0.3]);
+          }
+          // Left and right columns
+          for (let b = 1; b < numBulbsV; b++) {
+            const by = (height * b) / numBulbsV;
+            bulbs.push([lp.x + xOffset, by, depth / 2 + 0.3]);
+            bulbs.push([lp.x + xOffset + lp.width, by, depth / 2 + 0.3]);
+          }
+
+          return bulbs.map((pos, j) => (
+            <mesh key={`bulb-${i}-${j}`} position={pos}>
+              <sphereGeometry args={[0.3, 8, 8]} />
+              <primitive object={bulbMaterial} attach="material" />
+            </mesh>
+          ));
+        })}
 
       {/* Back-lit / Halo-lit: emissive glow plane behind each letter */}
       {isBackLit &&
