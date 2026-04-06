@@ -10,7 +10,7 @@ import { useCartStore } from "@/stores/cart-store";
 import { useMockupStore } from "@/stores/mockup-store";
 import { formatPrice } from "@/lib/utils";
 import type { UnifiedCartItem } from "@/types/configurator";
-import { captureCanvasScreenshot } from "@/lib/capture-screenshot";
+import { captureCanvasScreenshot, captureCanvasScreenshotAsync } from "@/lib/capture-screenshot";
 import { validateChannelLetterConfig } from "@/lib/validation";
 import { useSession } from "next-auth/react";
 import { DayNightToggle } from "./day-night-toggle";
@@ -145,11 +145,12 @@ export function ConfiguratorLayout({
     router.push("/mockup");
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!canAddToCart) return;
 
     const activeConfig = getActiveConfig();
-    const thumbnailUrl = captureCanvasScreenshot() ?? undefined;
+    // Capture with async to ensure frame is rendered
+    const thumbnailUrl = await captureCanvasScreenshotAsync() ?? undefined;
 
     addItem({
       productCategory,
@@ -183,7 +184,7 @@ export function ConfiguratorLayout({
     setSavingDesign(true);
     try {
       const activeConfig = getActiveConfig();
-      const thumbnailUrl = captureCanvasScreenshot();
+      const thumbnailUrl = await captureCanvasScreenshotAsync();
       const designName =
         "text" in activeConfig && typeof activeConfig.text === "string"
           ? activeConfig.text
