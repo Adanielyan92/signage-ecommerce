@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCartStore } from "@/stores/cart-store";
 import { formatPrice } from "@/lib/utils";
-import { Trash2, Plus, Minus } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingCart, ArrowRight, ArrowLeft, Pencil } from "lucide-react";
 import type { UnifiedCartItem } from "@/types/configurator";
 
 function getItemSummary(item: UnifiedCartItem): { title: string; specs: string[] } {
@@ -135,17 +135,21 @@ export default function CartPage() {
     return (
       <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-900">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-muted">
+            <ShoppingCart className="h-8 w-8 text-brand-text-secondary" />
+          </div>
+          <h1 className="mt-6 font-heading text-2xl font-bold text-brand-navy">
             Your cart is empty
           </h1>
-          <p className="mt-2 text-neutral-500">
+          <p className="mt-2 text-brand-text-secondary">
             Design a custom sign and add it to your cart to get started.
           </p>
           <Link
             href="/products"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-brand-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-accent/90"
           >
             Browse Products
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
@@ -154,7 +158,16 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold text-neutral-900">Shopping Cart</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="font-heading text-2xl font-bold text-brand-navy">Shopping Cart</h1>
+        <Link
+          href="/products"
+          className="flex items-center gap-1 text-sm font-medium text-brand-accent transition hover:text-brand-accent/80"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Continue Shopping
+        </Link>
+      </div>
 
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Cart items */}
@@ -165,69 +178,76 @@ export default function CartPage() {
               return (
                 <div
                   key={index}
-                  className="flex gap-4 rounded-xl border border-neutral-200 bg-white p-4"
+                  className="flex gap-4 rounded-xl border border-brand-muted bg-white p-4"
                 >
                   {/* Thumbnail */}
                   {item.thumbnailUrl ? (
                     <img
                       src={item.thumbnailUrl}
                       alt={getItemAltText(item)}
-                      className="h-20 w-20 flex-shrink-0 rounded-lg object-cover"
+                      className="h-28 w-28 flex-shrink-0 rounded-lg border border-brand-muted object-cover"
                     />
                   ) : (
-                    <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-neutral-100">
-                      <span className="text-xs font-bold text-neutral-400">3D</span>
+                    <div className="flex h-28 w-28 flex-shrink-0 items-center justify-center rounded-lg bg-brand-bg">
+                      <span className="text-xs font-bold text-brand-text-secondary">3D</span>
                     </div>
                   )}
 
                   <div className="flex flex-1 flex-col">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="font-medium text-neutral-900">
+                        <h3 className="font-heading font-semibold text-brand-navy">
                           {item.productName}
                         </h3>
-                        <p className="text-sm text-neutral-500">
+                        <p className="text-sm text-brand-text-secondary">
                           {summary.title}
                         </p>
                         {summary.specs.length > 0 && (
-                          <p className="text-xs text-neutral-400">
+                          <p className="text-xs text-brand-text-secondary/70">
                             {summary.specs.join(" | ")}
                           </p>
                         )}
+                        <Link
+                          href={`/configure/${item.productType}`}
+                          className="mt-2 inline-flex items-center gap-1 rounded-lg border border-brand-muted px-3 py-1.5 text-xs font-medium text-brand-accent transition hover:bg-brand-accent/5"
+                        >
+                          <Pencil className="h-3 w-3" />
+                          Edit Design
+                        </Link>
                       </div>
                       <button
                         onClick={() => removeItem(index)}
-                        className="text-neutral-400 transition hover:text-red-500"
+                        className="text-brand-text-secondary/50 transition hover:text-brand-error"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
 
-                    <div className="mt-2 flex items-center justify-between">
+                    <div className="mt-3 flex items-center justify-between">
                       {/* Quantity controls */}
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() =>
                             updateQuantity(index, item.quantity - 1)
                           }
-                          className="flex h-7 w-7 items-center justify-center rounded border border-neutral-300 text-neutral-600 hover:bg-neutral-50"
+                          className="flex h-7 w-7 items-center justify-center rounded border border-brand-muted text-brand-text-secondary hover:bg-brand-bg"
                         >
                           <Minus className="h-3 w-3" />
                         </button>
-                        <span className="w-8 text-center text-sm font-medium">
+                        <span className="w-8 text-center text-sm font-medium text-brand-navy">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() =>
                             updateQuantity(index, item.quantity + 1)
                           }
-                          className="flex h-7 w-7 items-center justify-center rounded border border-neutral-300 text-neutral-600 hover:bg-neutral-50"
+                          className="flex h-7 w-7 items-center justify-center rounded border border-brand-muted text-brand-text-secondary hover:bg-brand-bg"
                         >
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
 
-                      <span className="font-semibold text-neutral-900">
+                      <span className="font-heading font-bold text-brand-navy">
                         {formatPrice(item.unitPrice * item.quantity)}
                       </span>
                     </div>
@@ -239,7 +259,7 @@ export default function CartPage() {
 
           <button
             onClick={clearCart}
-            className="mt-4 text-sm text-neutral-500 underline transition hover:text-neutral-700"
+            className="mt-4 text-sm text-brand-text-secondary underline transition hover:text-brand-navy"
           >
             Clear cart
           </button>
@@ -247,32 +267,32 @@ export default function CartPage() {
 
         {/* Order summary */}
         <div>
-          <div className="rounded-xl border border-neutral-200 bg-white p-6">
-            <h2 className="text-lg font-semibold text-neutral-900">
+          <div className="rounded-xl border border-brand-muted bg-white p-6">
+            <h2 className="font-heading text-lg font-semibold text-brand-navy">
               Order Summary
             </h2>
             <div className="mt-4 space-y-2">
-              <div className="flex justify-between text-sm text-neutral-600">
+              <div className="flex justify-between text-sm text-brand-text-secondary">
                 <span>Subtotal</span>
                 <span>{formatPrice(getTotal())}</span>
               </div>
-              <div className="flex justify-between text-sm text-neutral-600">
+              <div className="flex justify-between text-sm text-brand-text-secondary">
                 <span>Shipping</span>
-                <span className="text-green-600">Free</span>
+                <span className="text-brand-success">Free</span>
               </div>
-              <div className="border-t border-neutral-200 pt-2">
-                <div className="flex justify-between text-base font-semibold text-neutral-900">
+              <div className="border-t border-brand-muted pt-2">
+                <div className="flex justify-between text-base font-semibold text-brand-navy">
                   <span>Total</span>
                   <span>{formatPrice(getTotal())}</span>
                 </div>
               </div>
             </div>
 
-            <button className="mt-6 w-full rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
+            <button className="mt-6 w-full rounded-lg bg-brand-accent px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-accent/90">
               Proceed to Checkout
             </button>
 
-            <p className="mt-3 text-center text-xs text-neutral-400">
+            <p className="mt-3 text-center text-xs text-brand-text-secondary/60">
               Secure checkout powered by Stripe
             </p>
           </div>
