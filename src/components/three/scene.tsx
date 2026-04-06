@@ -18,7 +18,7 @@ import {
   EffectPass,
   RenderPass,
 } from "postprocessing";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { WallPlane } from "./wall-plane";
 import { SceneRouter } from "./scene-router";
@@ -195,6 +195,30 @@ const _targetBg = new THREE.Color();
 
 function SceneContent() {
   const sceneMode = useConfiguratorStore((s) => s.sceneMode);
+  const productCategory = useConfiguratorStore((s) => s.productCategory);
+  const cabinetConfig = useConfiguratorStore((s) => s.cabinetConfig);
+  const bladeConfig = useConfiguratorStore((s) => s.bladeConfig);
+  const signPostConfig = useConfiguratorStore((s) => s.signPostConfig);
+  const lightBoxConfig = useConfiguratorStore((s) => s.lightBoxConfig);
+  const bannerConfig = useConfiguratorStore((s) => s.bannerConfig);
+
+  const isDoubleSided = useMemo(() => {
+    switch (productCategory) {
+      case "CABINET_SIGNS":
+        return cabinetConfig.productType.startsWith("double");
+      case "BLADE_SIGNS":
+        return bladeConfig.doubleSided;
+      case "SIGN_POSTS":
+        return signPostConfig.doubleSided;
+      case "LIGHT_BOX_SIGNS":
+        return lightBoxConfig.productType === "light-box-double";
+      case "VINYL_BANNERS":
+        return bannerConfig.doubleSided;
+      default:
+        return false;
+    }
+  }, [productCategory, cabinetConfig, bladeConfig, signPostConfig, lightBoxConfig, bannerConfig]);
+
   const target = sceneMode === "night" ? NIGHT_LIGHTING : DAY_LIGHTING;
 
   const ambientRef = useRef<THREE.AmbientLight>(null);
@@ -263,8 +287,8 @@ function SceneContent() {
         enablePan={false}
         minPolarAngle={Math.PI * 0.2}
         maxPolarAngle={Math.PI * 0.75}
-        minAzimuthAngle={-Math.PI * 0.45}
-        maxAzimuthAngle={Math.PI * 0.45}
+        minAzimuthAngle={isDoubleSided ? -Infinity : -Math.PI * 0.45}
+        maxAzimuthAngle={isDoubleSided ? Infinity : Math.PI * 0.45}
       />
 
       {/* --- Three-point studio lighting --- */}

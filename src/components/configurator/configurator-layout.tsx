@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useState, Component, type ReactNode, type ErrorInfo } from "react";
+import { useState, useMemo, Component, type ReactNode, type ErrorInfo } from "react";
 import type { AnyProduct } from "@/engine/product-definitions";
 import { OptionsPanel } from "./options-panel";
 import { useConfiguratorStore } from "@/stores/configurator-store";
@@ -13,7 +13,7 @@ import type { UnifiedCartItem } from "@/types/configurator";
 import { captureCanvasScreenshot } from "@/lib/capture-screenshot";
 import { useSession } from "next-auth/react";
 import { DayNightToggle } from "./day-night-toggle";
-import { Save, Image as ImageIcon, ShoppingCart } from "lucide-react";
+import { Save, Image as ImageIcon, ShoppingCart, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import { ArButton } from "./ar-button";
 import { getSignGroupRef } from "@/components/three/scene-ref";
@@ -74,11 +74,35 @@ export function ConfiguratorLayout({
   const breakdown = useConfiguratorStore((s) => s.priceBreakdown);
   const productCategory = useConfiguratorStore((s) => s.productCategory);
   const getActiveConfig = useConfiguratorStore((s) => s.getActiveConfig);
+  const isFlipped = useConfiguratorStore((s) => s.isFlipped);
+  const toggleFlip = useConfiguratorStore((s) => s.toggleFlip);
+  const cabinetConfig = useConfiguratorStore((s) => s.cabinetConfig);
+  const bladeConfig = useConfiguratorStore((s) => s.bladeConfig);
+  const signPostConfig = useConfiguratorStore((s) => s.signPostConfig);
+  const lightBoxConfig = useConfiguratorStore((s) => s.lightBoxConfig);
+  const bannerConfig = useConfiguratorStore((s) => s.bannerConfig);
   const addItem = useCartStore((s) => s.addItem);
   const setMockupSignConfig = useMockupStore((s) => s.setSignConfig);
   const router = useRouter();
   const { data: session } = useSession();
   const [savingDesign, setSavingDesign] = useState(false);
+
+  const isDoubleSided = useMemo(() => {
+    switch (productCategory) {
+      case "CABINET_SIGNS":
+        return cabinetConfig.productType.startsWith("double");
+      case "BLADE_SIGNS":
+        return bladeConfig.doubleSided;
+      case "SIGN_POSTS":
+        return signPostConfig.doubleSided;
+      case "LIGHT_BOX_SIGNS":
+        return lightBoxConfig.productType === "light-box-double";
+      case "VINYL_BANNERS":
+        return bannerConfig.doubleSided;
+      default:
+        return false;
+    }
+  }, [productCategory, cabinetConfig, bladeConfig, signPostConfig, lightBoxConfig, bannerConfig]);
 
   // For text-based categories, require non-empty text. For others, always valid.
   const hasRequiredInput = (() => {
@@ -179,6 +203,16 @@ export function ConfiguratorLayout({
         </div>
         {/* Day/Night toggle */}
         <DayNightToggle />
+        {/* Flip button for double-sided products */}
+        {isDoubleSided && (
+          <button
+            onClick={toggleFlip}
+            className="absolute right-4 top-14 flex items-center gap-1.5 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-medium text-neutral-700 shadow-sm backdrop-blur-sm transition hover:bg-white"
+          >
+            <RotateCw className="h-4 w-4" />
+            {isFlipped ? "Front View" : "Back View"}
+          </button>
+        )}
       </div>
 
       {/* Options panel — 40% on desktop, rest of screen on mobile */}

@@ -384,6 +384,7 @@ interface ConfiguratorState {
   priceBreakdown: PriceBreakdown;
   quality: QualityLevel;
   sceneMode: SceneMode;
+  isFlipped: boolean;
 
   // --- Non-channel-letter category configs ---
   litShapeConfig: LitShapeConfiguration;
@@ -401,6 +402,7 @@ interface ConfiguratorState {
   setProductType: (type: ChannelLetterType) => void;
   setQuality: (quality: QualityLevel) => void;
   setSceneMode: (mode: SceneMode) => void;
+  toggleFlip: () => void;
   setText: (text: string) => void;
   setHeight: (height: number) => void;
   setFont: (font: SignConfiguration["font"]) => void;
@@ -456,6 +458,7 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   priceBreakdown: emptyBreakdown,
   quality: "medium",
   sceneMode: "day",
+  isFlipped: false,
 
   litShapeConfig: { ...defaultLitShapeConfig },
   cabinetConfig: { ...defaultCabinetConfig },
@@ -476,6 +479,10 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
 
   setSceneMode: (sceneMode) => {
     set({ sceneMode });
+  },
+
+  toggleFlip: () => {
+    set((s) => ({ isFlipped: !s.isFlipped }));
   },
 
   setProductType: (type) => {
