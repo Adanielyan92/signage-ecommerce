@@ -138,9 +138,9 @@ export type FontStyle =
   | "Passion One"
   | "Russo One"
   | "Black Ops One";
-export type PaintingOption = "-" | "Painted" | "Painted Multicolor";
-export type RacewayOption = "-" | "Raceway" | "Raceway Box";
-export type VinylOption = "-" | "Regular" | "Perforated";
+export type PaintingOption = "-" | "Painted" | "Painted Multicolor" | "Painted Aluminum" | "Brushed Aluminum" | "Polished Stainless" | "Matte Black";
+export type RacewayOption = "-" | "Raceway" | "Raceway Box" | "Flush Mount" | "Raceway Mount" | "Wireway Mount";
+export type VinylOption = "-" | "Regular" | "Perforated" | "Standard White Acrylic" | "Black (Day/Night) Acrylic" | "Color Vinyl Wrap";
 export type DepthOption = '3"' | '4"' | '5"';
 
 export interface SqftPricingParams {

@@ -145,16 +145,19 @@ export function validatePrice(
 export function calculatePriceUnified(
   config: AnySignConfiguration,
   dimensions: Dimensions,
+  overrideParams?: any
 ): PriceBreakdown {
   const product = getAnyProductBySlug(config.productType);
   if (!product) return emptyBreakdown();
+
+  const finalParams = overrideParams || product.pricingParams;
 
   // Legacy SignConfiguration (channel letters) has no productCategory field
   if (!("productCategory" in config)) {
     return calculatePrice(
       config as SignConfiguration,
       dimensions,
-      product.pricingParams as PricingParams,
+      finalParams as PricingParams,
     );
   }
 
@@ -163,97 +166,97 @@ export function calculatePriceUnified(
       return calculateShapeSignPrice(
         config as LitShapeConfiguration,
         dimensions,
-        product.pricingParams as SqftPricingParams,
+        finalParams as SqftPricingParams,
       );
     case "CABINET_SIGNS":
       return calculateCabinetPrice(
         config as CabinetConfiguration,
         dimensions,
-        product.pricingParams as SqftPricingParams,
+        finalParams as SqftPricingParams,
       );
     case "DIMENSIONAL_LETTERS":
       return calculateDimensionalPrice(
         config as DimensionalLetterConfiguration,
         dimensions,
-        product.pricingParams as PricingParams,
+        finalParams as PricingParams,
       );
     case "LOGOS":
       return calculateLogoPrice(
         config as LogoConfiguration,
         dimensions,
-        product.pricingParams as LogoPricingParams,
+        finalParams as LogoPricingParams,
       );
     case "PRINT_SIGNS":
       return calculatePrintPrice(
         config as PrintConfiguration,
         dimensions,
-        product.pricingParams as PrintPricingParams,
+        finalParams as PrintPricingParams,
       );
     case "SIGN_POSTS":
       return calculateSignPostPrice(
         config as SignPostConfiguration,
         dimensions,
-        product.pricingParams as SignPostPricingParams,
+        finalParams as SignPostPricingParams,
       );
     case "LIGHT_BOX_SIGNS":
       return calculateLightBoxPrice(
         config as LightBoxConfiguration,
         dimensions,
-        product.pricingParams as SqftPricingParams,
+        finalParams as SqftPricingParams,
       );
     case "BLADE_SIGNS":
       return calculateBladePrice(
         config as BladeSignConfiguration,
         dimensions,
-        product.pricingParams as BladePricingParams,
+        finalParams as BladePricingParams,
       );
     case "NEON_SIGNS":
       return calculateNeonPrice(
         config as NeonSignConfiguration,
         dimensions,
-        product.pricingParams as NeonPricingParams,
+        finalParams as NeonPricingParams,
       );
     case "VINYL_BANNERS":
       return calculateBannerPrice(
         config as VinylBannerConfiguration,
         dimensions,
-        product.pricingParams as BannerPricingParams,
+        finalParams as BannerPricingParams,
       );
     case "A_FRAME_SIGNS":
       return calculateAFramePrice(
         config as AFrameConfiguration,
         dimensions,
-        product.pricingParams as AFramePricingParams,
+        finalParams as AFramePricingParams,
       );
     case "YARD_SIGNS":
       return calculateYardSignPrice(
         config as YardSignConfiguration,
         dimensions,
-        product.pricingParams as YardSignPricingParams,
+        finalParams as YardSignPricingParams,
       );
     case "PLAQUES":
       return calculatePlaquePrice(
         config as PlaqueConfiguration,
         dimensions,
-        product.pricingParams as PlaquePricingParams,
+        finalParams as PlaquePricingParams,
       );
     case "VINYL_GRAPHICS":
       return calculateVinylGraphicPrice(
         config as VinylGraphicConfiguration,
         dimensions,
-        product.pricingParams as VinylGraphicPricingParams,
+        finalParams as VinylGraphicPricingParams,
       );
     case "WAYFINDING_SIGNS":
       return calculateWayfindingPrice(
         config as WayfindingConfiguration,
         dimensions,
-        product.pricingParams as WayfindingPricingParams,
+        finalParams as WayfindingPricingParams,
       );
     case "PUSH_THROUGH_SIGNS":
       return calculatePushThroughPrice(
         config as PushThroughConfiguration,
         dimensions,
-        product.pricingParams as PushThroughPricingParams,
+        finalParams as PushThroughPricingParams,
       );
     default:
       return emptyBreakdown();

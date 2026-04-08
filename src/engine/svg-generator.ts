@@ -8,6 +8,7 @@
 
 import { loadFont } from "@/engine/letter-measurement";
 import type { Font, Path as OTPath } from "opentype.js";
+import { computeLetterPositions, getTotalWidth, getTotalHeight } from "@/components/three/utils/letter-layout";
 
 export interface SvgGeneratorInput {
   text: string;
@@ -58,51 +59,54 @@ export async function generateSvgCutFile(
   }
 
   const font = await loadFont(fontName);
+  
+  // Use the shared layout engine
+  const positions = computeLetterPositions(font, text, heightInches);
+  
+  const widthInches = getTotalWidth(positions);
+  const totalHeight = getTotalHeight(positions, heightInches);
+
   const scale = heightInches / font.unitsPerEm;
-
   const paths: LetterPath[] = [];
-  let cursorX = 0;
 
-  for (let i = 0; i < strippedText.length; i++) {
-    const char = strippedText[i];
-    const glyph = font.charToGlyph(char);
+  for (let i = 0; i < positions.length; i++) {
+    const lp = positions[i];
+    // Spaces don't have visual glyphs, skip rendering them
+    if (lp.char === ' ' || lp.char === '\n' || lp.char === '\r') continue;
+    
+    const glyph = font.charToGlyph(lp.char);
     const glyphPath = glyph.getPath(0, 0, font.unitsPerEm);
-
-    // Convert opentype path commands to SVG path data, applying scale and offset
-    const svgPathData = opentypePathToSvgPath(glyphPath, scale, cursorX, heightInches);
-
-    const advanceWidth = (glyph.advanceWidth || font.unitsPerEm * 0.6) * scale;
+    
+    const svgPathData = opentypePathToSvgPath(glyphPath, scale, lp.x, lp.y + heightInches);
 
     paths.push({
       id: `letter-${i}`,
-      char,
+      char: lp.char,
       d: svgPathData,
-      xOffset: cursorX,
-      width: advanceWidth,
+      xOffset: lp.x,
+      width: lp.width,
     });
+  }
 
-    cursorX += advanceWidth;
-
-    // Add kerning
-    if (i < strippedText.length - 1) {
-      const nextGlyph = font.charToGlyph(strippedText[i + 1]);
-      const kerning = font.getKerningValue(glyph, nextGlyph) * scale;
-      cursorX += kerning;
-    }
-
-    // Add letter spacing (except after last letter)
-    if (i < strippedText.length - 1) {
-      cursorX += letterSpacingInches;
-    }
+  // Adjust positions to be strictly positive (Layout engine centers at 0)
+  const minX = Math.min(...positions.map(p => p.x));
+  const minY = Math.min(...positions.map(p => p.y));
+  
+  for (const p of paths) {
+      // Re-parse and shift path
+      // Actually, since we're generating static SVG string, it's easier to use SVG group transform.
+      // We will do `<g transform="translate(${-minX + padding}, ${-minY + padding})">` inside buildSvg.
   }
 
   return buildSvg({
     paths,
-    totalWidth: cursorX,
-    totalHeight: heightInches,
+    totalWidth: widthInches,
+    totalHeight: totalHeight,
     heightInches,
     fontName,
     strokeWidthInches,
+    minX,
+    minY
   });
 }
 
@@ -125,6 +129,8 @@ interface BuildSvgOptions {
   heightInches: number;
   fontName: string;
   strokeWidthInches: number;
+  minX?: number;
+  minY?: number;
 }
 
 /**
@@ -139,7 +145,7 @@ function opentypePathToSvgPath(
   otPath: OTPath,
   scale: number,
   offsetX: number,
-  heightInches: number
+  offsetY: number
 ): string {
   const commands: string[] = [];
 
@@ -151,22 +157,22 @@ function opentypePathToSvgPath(
     switch (cmd.type) {
       case "M":
         commands.push(
-          `M ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
+          `M ${round((cmd.x ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y ?? 0) * scale)}`
         );
         break;
       case "L":
         commands.push(
-          `L ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
+          `L ${round((cmd.x ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y ?? 0) * scale)}`
         );
         break;
       case "Q":
         commands.push(
-          `Q ${round((cmd.x1 ?? 0) * scale + offsetX)} ${round((cmd.y1 ?? 0) * scale)} ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
+          `Q ${round((cmd.x1 ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y1 ?? 0) * scale)} ${round((cmd.x ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y ?? 0) * scale)}`
         );
         break;
       case "C":
         commands.push(
-          `C ${round((cmd.x1 ?? 0) * scale + offsetX)} ${round((cmd.y1 ?? 0) * scale)} ${round((cmd.x2 ?? 0) * scale + offsetX)} ${round((cmd.y2 ?? 0) * scale)} ${round((cmd.x ?? 0) * scale + offsetX)} ${round((cmd.y ?? 0) * scale)}`
+          `C ${round((cmd.x1 ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y1 ?? 0) * scale)} ${round((cmd.x2 ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y2 ?? 0) * scale)} ${round((cmd.x ?? 0) * scale + offsetX)} ${round(offsetY - (cmd.y ?? 0) * scale)}`
         );
         break;
       case "Z":
@@ -187,11 +193,18 @@ function escapeXml(s: string): string {
 }
 
 function buildSvg(opts: BuildSvgOptions): string {
-  const { paths, totalWidth, totalHeight, heightInches, fontName, strokeWidthInches } = opts;
+  const { paths, totalWidth, totalHeight, heightInches, fontName, strokeWidthInches, minX = 0, minY = 0 } = opts;
 
-  const padding = 0.5; // 0.5 inch padding
-  const svgWidth = Math.max(totalWidth + padding * 2, 1);
-  const svgHeight = totalHeight + padding * 2;
+  // Make room for dimension lines wrapping the SVG
+  const paddingX = 3; 
+  const paddingY = 3;
+  
+  const svgWidth = Math.max(totalWidth + paddingX * 2, 8);
+  const svgHeight = Math.max(totalHeight + paddingY * 2, 4);
+
+  // Layout transform base
+  const baseX = paddingX - minX;
+  const baseY = paddingY - minY;
 
   const lines: string[] = [
     `<?xml version="1.0" encoding="UTF-8"?>`,
@@ -203,19 +216,54 @@ function buildSvg(opts: BuildSvgOptions): string {
     `  data-total-width-inches="${round(totalWidth)}"`,
     `  data-font="${escapeXml(fontName)}"`,
     `  data-letter-count="${paths.length}">`,
-    `  <g transform="translate(${padding}, ${padding})"`,
+    `  <defs>`,
+    `    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">`,
+    `      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0000ff" />`,
+    `    </marker>`,
+    `  </defs>`,
+    `  <g transform="translate(${baseX}, ${baseY})"`,
     `    fill="none"`,
     `    stroke="#000000"`,
     `    stroke-width="${strokeWidthInches}">`,
   ];
 
   for (const p of paths) {
-    lines.push(
-      `    <path id="${p.id}" d="${p.d}" data-char="${escapeXml(p.char)}" />`
-    );
+    if (p.d) {
+      lines.push(
+        `    <path id="${p.id}" d="${p.d}" data-char="${escapeXml(p.char)}" />`
+      );
+    }
   }
 
   lines.push(`  </g>`);
+  
+  // Dimensions group
+  const dimColor = "#0000ff";
+  const dimFontSize = Math.min(totalHeight * 0.15, 1);
+  const dimYOffset = totalHeight + baseY + 1; // 1 inch below the bounding box
+  const rightXOffset = totalWidth + baseX + 1; // 1 inch right of bounding box
+  
+  lines.push(`  <!-- Dimensions Overlay -->`);
+  lines.push(`  <g fill="${dimColor}" stroke="${dimColor}" stroke-width="${strokeWidthInches * 2}" font-family="sans-serif" font-size="${dimFontSize}px" text-anchor="middle">`);
+  
+  // Width dimension
+  lines.push(`    <line x1="${baseX}" y1="${dimYOffset}" x2="${totalWidth + baseX}" y2="${dimYOffset}" marker-start="url(#arrow)" marker-end="url(#arrow)" />`);
+  lines.push(`    <text x="${baseX + totalWidth / 2}" y="${dimYOffset - 0.2}" stroke="none">${totalWidth.toFixed(2)}" W</text>`);
+
+  // Height dimension
+  lines.push(`    <line x1="${rightXOffset}" y1="${baseY}" x2="${rightXOffset}" y2="${totalHeight + baseY}" marker-start="url(#arrow)" marker-end="url(#arrow)" />`);
+  // Vertical text
+  lines.push(`    <g transform="translate(${rightXOffset + 0.3}, ${baseY + totalHeight / 2})">`);
+  lines.push(`      <text x="0" y="0" stroke="none" transform="rotate(-90)">${totalHeight.toFixed(2)}" H</text>`);
+  lines.push(`    </g>`);
+  
+  // Optional letter height info
+  if (heightInches !== totalHeight) {
+    lines.push(`    <text x="${baseX + totalWidth / 2}" y="${baseY - 0.5}" stroke="none" fill="#666">Line Height: ${heightInches.toFixed(2)}" H</text>`);
+  }
+
+  lines.push(`  </g>`);
+
   lines.push(`</svg>`);
 
   return lines.join("\n");

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { pricingRequestSchema } from "@/lib/validations";
 import { getProductBySlug } from "@/engine/product-definitions";
-import { calculatePrice, validatePrice } from "@/engine/pricing";
+import { calculatePriceUnified, validatePrice } from "@/engine/pricing";
+import { prisma } from "@/lib/prisma";
+import type { SignConfiguration } from "@/types/configurator";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +27,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Attempt to load live pricing params from DB
+    const dbProduct = await prisma.productTemplate.findFirst({
+      where: { slug: config.productType }
+    });
+    
+    // Choose DB overrides if they exist, otherwise fallback to local code definition
+    const activeParams = dbProduct?.pricingParams 
+      ? (dbProduct.pricingParams as any) 
+      : product.pricingParams;
+
     // Map validated input to SignConfiguration format expected by pricing engine
     const signConfig = {
       productType: config.productType,
@@ -38,6 +50,7 @@ export async function POST(request: NextRequest) {
       painting: config.painting,
       paintingColors: config.paintColorCount ?? 1,
       raceway: config.raceway,
+      racewayColor: "#808080",
       vinyl: config.vinyl,
       background: config.hasBackground ? "Background" : "-",
     } as const;
@@ -50,10 +63,10 @@ export async function POST(request: NextRequest) {
       letterWidths: [],
     };
 
-    const breakdown = calculatePrice(
+    const breakdown = calculatePriceUnified(
       signConfig,
       engineDimensions,
-      product.pricingParams
+      activeParams
     );
 
     // If client price was provided, validate it
@@ -61,8 +74,8 @@ export async function POST(request: NextRequest) {
     if (clientPrice !== undefined) {
       validation = validatePrice(
         clientPrice,
-        signConfig,
-        product.pricingParams
+        signConfig as SignConfiguration,
+        activeParams
       );
     }
 

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 
 interface MountingStudsProps {
-  letterPositions: { x: number; width: number }[];
+  letterPositions: { x: number; y: number; width: number }[];
   height: number;
   depth: number;
   xOffset: number;
@@ -35,7 +35,7 @@ export function MountingStuds({ letterPositions, height, depth, xOffset }: Mount
           <mesh
             geometry={studGeometry}
             material={studMaterial}
-            position={[lp.x + xOffset + lp.width / 2, height * 0.75, -(depth + STUD_LENGTH / 2)]}
+            position={[lp.x + lp.width / 2, lp.y + height * 0.75, -(depth + STUD_LENGTH / 2)]}
             rotation={[Math.PI / 2, 0, 0]}
             castShadow
           />
@@ -43,7 +43,7 @@ export function MountingStuds({ letterPositions, height, depth, xOffset }: Mount
           <mesh
             geometry={studGeometry}
             material={studMaterial}
-            position={[lp.x + xOffset + lp.width / 2, height * 0.25, -(depth + STUD_LENGTH / 2)]}
+            position={[lp.x + lp.width / 2, lp.y + height * 0.25, -(depth + STUD_LENGTH / 2)]}
             rotation={[Math.PI / 2, 0, 0]}
             castShadow
           />

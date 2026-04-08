@@ -69,41 +69,34 @@ const commonOptions: ProductOption[] = [
   {
     id: "raceway",
     optionKey: "raceway",
-    label: "Raceway",
+    label: "Mounting Method",
     inputType: "select",
     possibleValues: [
-      { value: "-" },
-      { value: "Raceway" },
-      { value: "Raceway Box" },
+      { value: "Flush Mount" },
+      { value: "Raceway Mount" },
+      { value: "Wireway Mount" },
     ],
-    defaultValue: "-",
+    defaultValue: "Flush Mount",
   },
   {
     id: "painting",
     optionKey: "painting",
-    label: "Painting",
+    label: "Return (Sides) Finish",
     inputType: "select",
     possibleValues: [
-      { value: "-" },
-      { value: "Painted" },
-      { value: "Painted Multicolor" },
+      { value: "Painted Aluminum" },
+      { value: "Brushed Aluminum" },
+      { value: "Polished Stainless" },
+      { value: "Matte Black" },
     ],
-    defaultValue: "-",
-  },
-  {
-    id: "painting-color",
-    optionKey: "painting-color",
-    label: "Painting Colors",
-    inputType: "number",
-    defaultValue: "1",
-    dependsOn: { painting: ["Painted Multicolor"] },
+    defaultValue: "Painted Aluminum",
   },
   {
     id: "background",
     optionKey: "background",
-    label: "Background",
+    label: "Background Panel",
     inputType: "select",
-    possibleValues: [{ value: "-" }, { value: "Background" }],
+    possibleValues: [{ value: "-" }, { value: "Included" }],
     defaultValue: "-",
   },
 ];
@@ -146,15 +139,14 @@ const litOptions: ProductOption[] = [
   {
     id: "vinyl",
     optionKey: "vinyl",
-    label: "Vinyl",
+    label: "Face Finish",
     inputType: "select",
     possibleValues: [
-      { value: "-" },
-      { value: "Regular" },
-      { value: "Perforated" },
+      { value: "Standard White Acrylic" },
+      { value: "Black (Day/Night) Acrylic" },
+      { value: "Color Vinyl Wrap" },
     ],
-    defaultValue: "-",
-    dependsOn: { lit: ["Lit"] },
+    defaultValue: "Standard White Acrylic",
   },
 ];
 
@@ -201,15 +193,7 @@ export const channelLetterProducts: ChannelLetterProduct[] = [
     options: [
       ...commonOptions.slice(0, 3), // text, height, font
       ...litOptions,
-      {
-        id: "face",
-        optionKey: "face",
-        label: "Face",
-        inputType: "select",
-        possibleValues: [{ value: "Lexan 3/16" }],
-        defaultValue: "Lexan 3/16",
-      },
-      ...commonOptions.slice(3), // side_depth, raceway, painting, painting-color, background
+      ...commonOptions.slice(3), // side_depth, mounting, returnFinish, background
     ],
   },
   {
@@ -227,14 +211,6 @@ export const channelLetterProducts: ChannelLetterProduct[] = [
     options: [
       ...commonOptions.slice(0, 3),
       ...alwaysLitOptions,
-      {
-        id: "face",
-        optionKey: "face",
-        label: "Face",
-        inputType: "select",
-        possibleValues: [{ value: 'Acrylic 1/4"' }],
-        defaultValue: 'Acrylic 1/4"',
-      },
       ...litOptions.filter((o) => o.optionKey === "vinyl"),
       ...commonOptions.slice(3),
     ],
@@ -260,7 +236,7 @@ export const channelLetterProducts: ChannelLetterProduct[] = [
         label: "Face",
         inputType: "select",
         possibleValues: [{ value: "Bulbs" }],
-        defaultValue: "Bulbs",
+        defaultValue: "Exposed Bulbs",
       },
       {
         id: "side_depth",
@@ -270,7 +246,7 @@ export const channelLetterProducts: ChannelLetterProduct[] = [
         possibleValues: [{ value: '4"' }],
         defaultValue: '4"',
       },
-      ...commonOptions.slice(4), // raceway, painting, painting-color, background
+      ...commonOptions.slice(4), // mounting, returnFinish, background
     ],
   },
   {

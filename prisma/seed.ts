@@ -6,8 +6,8 @@
  * - Font catalog (15 platform fonts from font-map.ts)
  * - Default tenant (gatsoft)
  */
-
 import { PrismaClient } from "../src/generated/prisma/client";
+import { seedSalesforceProducts } from "../src/seed/salesforce-products";
 
 const prisma = new PrismaClient({} as never);
 
@@ -137,6 +137,8 @@ async function main() {
     }
   }
   console.log(`  Fonts: ${fonts.length} seeded`);
+
+  await seedSalesforceProducts(prisma);
 
   console.log("Seeding complete.");
 }

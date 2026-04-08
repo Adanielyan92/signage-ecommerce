@@ -7,15 +7,35 @@ import type { ChannelLetterType } from "@/types/product";
 import { channelLetterProducts } from "@/engine/product-definitions";
 import { FONT_CSS_MAP } from "@/engine/font-map";
 import { validateTextInput, validateHeight } from "@/lib/validation";
+import { useProductSchema } from "@/hooks/use-product-schema";
+import { Check } from "lucide-react";
 
-const LED_SWATCHES: Record<string, string> = {
+// Beautiful FrontSigns spec Swatches
+const COLOR_MAP: Record<string, string> = {
+  // LED
   "3000K": "#FFB46B",
   "3500K": "#FFC98E",
   "6000K": "#E3EEFF",
+  "Warm White (3000K)": "#FFB46B",
+  "Neutral (3500K)": "#FFC98E",
+  "Cool White (6000K)": "#E3EEFF",
   Red: "#FF0000",
   Green: "#00FF00",
   Blue: "#0066FF",
-  RGB: "conic-gradient(red, yellow, lime, cyan, blue, magenta, red)",
+  RGB: "conic-gradient(from 0deg, red, yellow, lime, cyan, blue, magenta, red)",
+  "RGB Color": "conic-gradient(from 0deg, red, yellow, lime, cyan, blue, magenta, red)",
+
+  // Acrylic Faces
+  "Standard White Acrylic": "#F9FAFB",
+  "Black (Day/Night) Acrylic": "#171717",
+  "Color Vinyl Wrap": "conic-gradient(from 90deg, #3b82f6, #ef4444, #eab308, #22c55e)",
+  "Lexan 3/16": "#e0e7ff",
+
+  // Metal Finishes
+  "Painted Aluminum": "#64748b",
+  "Brushed Aluminum": "linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)",
+  "Polished Stainless": "linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%)",
+  "Matte Black": "#0f172a",
 };
 
 interface ChannelLetterOptionsProps {
@@ -36,6 +56,7 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
     setPainting,
     setPaintingColors,
     setRaceway,
+    setRacewayColor,
     setVinyl,
     setBackground,
   } = useConfiguratorStore();
@@ -44,13 +65,14 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
     (p) => p.slug === config.productType
   ) as ChannelLetterProduct;
 
+  const { options: dbOptions } = useProductSchema(config.productType);
+  const activeOptions = dbOptions && dbOptions.length > 0 ? dbOptions : product.options;
+
   // Debounced text input (300ms)
   const [localText, setLocalText] = useState(config.text);
   const textTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const prevStoreText = useRef(config.text);
 
-  // Sync local text when store changes externally (e.g. loading saved design)
-  // eslint-disable-next-line react-hooks/refs -- standard pattern for syncing external state
   if (prevStoreText.current !== config.text) {
     prevStoreText.current = config.text; // eslint-disable-line react-hooks/refs
     setLocalText(config.text);
@@ -72,51 +94,113 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
   const textErrors = localText.length > 0 ? validateTextInput(localText) : [];
   const heightErrors = validateHeight(config.height);
 
-  const hasOption = (key: string) =>
-    product.options.some((o) => o.optionKey === key);
+  const hasOption = (key: string) => activeOptions.some((o) => o.optionKey === key);
+  const getOption = (key: string) => activeOptions.find((o) => o.optionKey === key);
 
-  const getOption = (key: string) =>
-    product.options.find((o) => o.optionKey === key);
-
-  // Check if a dependent option should be visible
   const isVisible = (key: string) => {
     const option = getOption(key);
     if (!option?.dependsOn) return true;
     return Object.entries(option.dependsOn).every(([depKey, allowedValues]) => {
-      const currentValue = (config as unknown as Record<string, unknown>)[
-        depKey
-      ] as string;
+      const currentValue = (config as unknown as Record<string, unknown>)[depKey] as string;
       return allowedValues.includes(currentValue);
     });
   };
 
   const showAll = wizardStep === null;
 
+  // Generic Card Selector
+  const renderCardGrid = (
+    optionKey: string,
+    currentValue: string,
+    setter: (value: any) => void,
+    useSwatches = false
+  ) => {
+    const opt = getOption(optionKey);
+    if (!opt || !isVisible(optionKey)) return null;
+
+    return (
+      <div className="mb-6">
+        <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-neutral-800">
+          {opt.label}
+        </label>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {opt.possibleValues?.map((v) => {
+            const isSelected = currentValue === v.value;
+            const swatch = COLOR_MAP[v.label || v.value];
+            
+            return (
+              <button
+                key={v.value}
+                onClick={() => setter(v.value)}
+                className={`group relative flex flex-col items-center justify-center overflow-hidden rounded-xl border-2 p-3 text-center transition-all duration-200 ${
+                  isSelected
+                    ? "border-blue-600 bg-blue-50/50 shadow-md ring-4 ring-blue-600/10"
+                    : "border-neutral-200 bg-white hover:border-blue-300 hover:bg-neutral-50 hover:shadow-sm"
+                }`}
+              >
+                {isSelected && (
+                  <div className="absolute right-2 top-2 rounded-full bg-blue-600 p-0.5 text-white shadow-sm">
+                    <Check className="h-3 w-3" />
+                  </div>
+                )}
+                {useSwatches && swatch && (
+                  <div
+                    className={`mb-2 h-8 w-8 rounded-full border border-neutral-300 shadow-inner ${
+                      isSelected ? "ring-2 ring-blue-600 ring-offset-2" : ""
+                    }`}
+                    style={{ background: swatch }}
+                  />
+                )}
+                <span
+                  className={`text-xs font-medium transition-colors ${
+                    isSelected ? "text-blue-900" : "text-neutral-600 group-hover:text-blue-700"
+                  }`}
+                >
+                  {v.label || v.value}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Step 0: Type — Letter type buttons */}
+    <div className="mx-auto max-w-2xl pb-10">
+      {/* Configuration Header visually tying to the portfolio style */}
+      <div className="mb-6 flex items-center justify-between border-b pb-4">
+        <h2 className="text-lg font-bold tracking-tight text-neutral-900">
+          Custom Specifications
+        </h2>
+        <span className="text-xs font-medium uppercase tracking-wide text-blue-600">
+          Professional Grade
+        </span>
+      </div>
+
+      {/* Step 0: Letter Type */}
       {(showAll || wizardStep === 0) && (
-        <div>
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            Letter Type
+        <div className="mb-8">
+          <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-neutral-800">
+            Sign Architecture
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {channelLetterProducts.map((p) => (
               <button
                 key={p.slug}
                 onClick={() => setProductType(p.slug as ChannelLetterType)}
-                title={
-                  p.slug === "front-lit-trim-cap"
-                    ? "Decorative aluminum border around each letter face"
-                    : undefined
-                }
-                className={`rounded-lg border px-3 py-2 text-left text-xs font-medium transition ${
+                className={`relative flex flex-col items-start gap-1 rounded-xl border-2 p-4 text-left transition-all ${
                   config.productType === p.slug
-                    ? "border-blue-600 bg-blue-50 text-blue-700"
-                    : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300"
+                    ? "border-blue-600 bg-blue-50/40 shadow-md ring-4 ring-blue-600/10"
+                    : "border-neutral-200 bg-white hover:border-blue-300 hover:shadow-sm"
                 }`}
               >
-                {p.name}
+                <span className={`text-sm font-bold ${config.productType === p.slug ? "text-blue-900" : "text-neutral-800"}`}>
+                  {p.name}
+                </span>
+                <span className="text-xs leading-relaxed text-neutral-500 line-clamp-2">
+                  {p.description}
+                </span>
               </button>
             ))}
           </div>
@@ -125,48 +209,49 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
 
       {/* Step 1: Text & Font */}
       {(showAll || wizardStep === 1) && (
-        <>
-          {/* Text Input */}
-          <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              Sign Text
+        <div className="mb-8 space-y-6">
+          <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-neutral-800">
+              Sign Copy
             </label>
             <input
               type="text"
               value={localText}
               onChange={(e) => handleTextChange(e.target.value)}
-              placeholder="Enter your sign text..."
-              className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              placeholder="Enter your exact lettering..."
+              className="w-full rounded-lg border-2 border-neutral-200 bg-neutral-50 px-4 py-3 text-lg font-medium text-neutral-900 transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
             />
             {textErrors.length > 0 && (
-              <p className="mt-1 text-xs text-red-500">{textErrors[0].message}</p>
+              <p className="mt-2 text-xs font-medium text-red-500 flex items-center gap-1">
+                <span className="inline-block h-1 w-1 rounded-full bg-red-500" />
+                {textErrors[0].message}
+              </p>
             )}
           </div>
 
-          {/* Font */}
           {hasOption("font") && (
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Font Style
+              <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-neutral-800">
+                Typography Selection
               </label>
-              <div className="grid max-h-48 grid-cols-2 gap-2 overflow-y-auto pr-1">
+              <div className="grid max-h-60 grid-cols-2 gap-3 overflow-y-auto p-1 sm:grid-cols-3">
                 {getOption("font")?.possibleValues?.map((v) => (
                   <button
                     key={v.value}
                     onClick={() => setFont(v.value as typeof config.font)}
-                    className={`rounded-lg border px-3 py-2 text-left transition ${
+                    className={`flex flex-col items-center justify-center rounded-xl border-2 p-3 transition-all ${
                       config.font === v.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
+                        ? "border-blue-600 bg-blue-50 text-blue-900 shadow-md ring-4 ring-blue-600/10"
+                        : "border-neutral-200 bg-white text-neutral-600 hover:border-blue-300 hover:bg-neutral-50"
                     }`}
                   >
                     <span
-                      className="block truncate text-sm"
+                      className="mb-1 text-2xl"
                       style={{ fontFamily: FONT_CSS_MAP[v.value] || "inherit" }}
                     >
-                      {localText || "Abc"}
+                      Aa
                     </span>
-                    <span className="mt-0.5 block truncate text-[10px] text-neutral-400">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60">
                       {v.label || v.value}
                     </span>
                   </button>
@@ -174,18 +259,17 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
 
-      {/* Step 2: Size — Height slider + side depth */}
+      {/* Step 2: Scale & Dimension */}
       {(showAll || wizardStep === 2) && (
-        <>
-          {/* Height */}
+        <div className="mb-8 space-y-6 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
           <div>
-            <label className="mb-2 flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              <span>Letter Height</span>
-              <span className="text-sm font-bold text-neutral-900">
-                {config.height}&quot;
+            <label className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-wider text-neutral-800">
+              <span>Overall Letter Height</span>
+              <span className="rounded bg-blue-100 px-2 py-0.5 text-sm font-black text-blue-800">
+                {config.height}&quot; inches
               </span>
             </label>
             <input
@@ -195,32 +279,31 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
               step={1}
               value={config.height}
               onChange={(e) => setHeight(Number(e.target.value))}
-              className="w-full accent-blue-600"
+              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-neutral-200 accent-blue-600 outline-none hover:bg-neutral-300"
             />
-            <div className="mt-1 flex justify-between text-[10px] text-neutral-400">
-              <span>6&quot;</span>
-              <span>72&quot;</span>
+            <div className="mt-2 flex justify-between text-xs font-medium text-neutral-400">
+              <span>6&quot; Min</span>
+              <span>72&quot; Max</span>
             </div>
-            {heightErrors.length > 0 && (
-              <p className="mt-1 text-xs text-red-500">{heightErrors[0].message}</p>
-            )}
           </div>
 
-          {/* Side Depth */}
+          <div className="h-px w-full bg-neutral-100" />
+
+          {/* Depth / Side Depth */}
           {hasOption("side_depth") && (
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Side Depth
+              <label className="mb-3 block text-xs font-bold uppercase tracking-wider text-neutral-800">
+                Extrusion Depth (Returns)
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-2 rounded-lg bg-neutral-100 p-1">
                 {getOption("side_depth")?.possibleValues?.map((v) => (
                   <button
                     key={v.value}
                     onClick={() => setSideDepth(v.value)}
-                    className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition ${
+                    className={`flex-1 rounded-md py-2 text-sm font-semibold transition-all ${
                       config.sideDepth === v.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
+                        ? "bg-white text-blue-700 shadow-sm ring-1 ring-neutral-200/50"
+                        : "text-neutral-500 hover:text-neutral-800"
                     }`}
                   >
                     {v.value}
@@ -229,220 +312,68 @@ export function ChannelLetterOptions({ wizardStep }: ChannelLetterOptionsProps) 
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
 
-      {/* Step 3: Style & Color — Illumination, LED, lit sides, painting, raceway, vinyl, background */}
+      {/* Step 3: Illumination & Materials */}
       {(showAll || wizardStep === 3) && (
-        <>
-          {/* Lit */}
-          {hasOption("lit") && (
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Illumination
-              </label>
-              <div className="flex gap-2">
-                {getOption("lit")?.possibleValues?.map((v) => (
-                  <button
-                    key={v.value}
-                    onClick={() => setLit(v.value as typeof config.lit)}
-                    className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition ${
-                      config.lit === v.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
-                    }`}
-                  >
-                    {v.value}
-                  </button>
-                ))}
-              </div>
+        <div className="space-y-8">
+          
+          {/* Section: Illumination */}
+          {(hasOption("lit") || hasOption("led") || hasOption("lit_sides")) && (
+            <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-400">
+                Illumination Properties
+              </h3>
+              
+              {renderCardGrid("lit", config.lit, setLit)}
+              {renderCardGrid("led", config.led, setLed, true)}
+              {renderCardGrid("lit_sides", config.litSides, setLitSides)}
             </div>
           )}
 
-          {/* LED Color */}
-          {hasOption("led") && isVisible("led") && (
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                LED Color
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {getOption("led")?.possibleValues?.map((v) => (
-                  <button
-                    key={v.value}
-                    onClick={() => setLed(v.value as typeof config.led)}
-                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition ${
-                      config.led === v.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
-                    }`}
-                  >
-                    {LED_SWATCHES[v.value] && (
-                      <span
-                        className="inline-block h-3.5 w-3.5 shrink-0 rounded-full border border-neutral-300"
-                        style={{
-                          background: LED_SWATCHES[v.value],
-                        }}
-                      />
-                    )}
-                    {v.label || v.value}
-                  </button>
-                ))}
-              </div>
+          {/* Section: Finishes & Materials */}
+          {(hasOption("vinyl") || hasOption("painting") || hasOption("raceway")) && (
+            <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm">
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-neutral-400">
+                Materials & Mounting
+              </h3>
+
+              {/* Face Finish mapped from `vinyl` internal key */}
+              {renderCardGrid("vinyl", config.vinyl, setVinyl, true)}
+              
+              {/* Return Finish mapped from `painting` internal key */}
+              {renderCardGrid("painting", config.painting, setPainting, true)}
+
+              {/* Mounting mapped from `raceway` internal key */}
+              {renderCardGrid("raceway", config.raceway, setRaceway)}
+
+              {config.raceway && config.raceway !== "-" && config.raceway !== "Flush Mount" && (
+                <div className="mt-4 flex items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50 px-5 py-4 transition-all">
+                  <div>
+                    <label className="text-xs font-bold text-neutral-800">
+                      Mounting Rack Color
+                    </label>
+                    <p className="text-[10px] text-neutral-500">Pick a color to match your façade</p>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="color"
+                      value={config.racewayColor}
+                      onChange={(e) => setRacewayColor(e.target.value)}
+                      className="absolute inset-0 h-full w-full opacity-0 cursor-pointer"
+                    />
+                    <div 
+                      className="h-10 w-16 rounded-lg border-2 border-white shadow-md ring-1 ring-neutral-200" 
+                      style={{ backgroundColor: config.racewayColor }} 
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Lit Sides */}
-          {hasOption("lit_sides") && isVisible("lit_sides") && (
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Lit Sides
-              </label>
-              <div className="flex gap-2">
-                {getOption("lit_sides")?.possibleValues?.map((v) => (
-                  <button
-                    key={v.value}
-                    onClick={() =>
-                      setLitSides(v.value as typeof config.litSides)
-                    }
-                    title={
-                      v.value === "Duo Lit"
-                        ? "LED lighting on both front face and behind the letter"
-                        : undefined
-                    }
-                    className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition ${
-                      config.litSides === v.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
-                    }`}
-                  >
-                    {v.value}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Raceway */}
-          {hasOption("raceway") && (
-            <div>
-              <label
-                className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500"
-                title="Metal channel that holds and hides wiring behind the letters"
-              >
-                Raceway
-              </label>
-              <select
-                value={config.raceway}
-                onChange={(e) =>
-                  setRaceway(e.target.value as typeof config.raceway)
-                }
-                className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              >
-                {getOption("raceway")?.possibleValues?.map((v) => (
-                  <option key={v.value} value={v.value}>
-                    {v.value === "-" ? "None" : v.value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Vinyl */}
-          {hasOption("vinyl") && isVisible("vinyl") && (
-            <div>
-              <label
-                className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500"
-                title="Translucent colored film applied over the letter face"
-              >
-                Vinyl
-              </label>
-              <select
-                value={config.vinyl}
-                onChange={(e) =>
-                  setVinyl(e.target.value as typeof config.vinyl)
-                }
-                className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              >
-                {getOption("vinyl")?.possibleValues?.map((v) => (
-                  <option
-                    key={v.value}
-                    value={v.value}
-                    title={
-                      v.value === "Perforated"
-                        ? "One-way vision material — graphics visible outside, see-through inside"
-                        : undefined
-                    }
-                  >
-                    {v.value === "-" ? "None" : v.value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Painting */}
-          {hasOption("painting") && (
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Painting
-              </label>
-              <select
-                value={config.painting}
-                onChange={(e) =>
-                  setPainting(e.target.value as typeof config.painting)
-                }
-                className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              >
-                {getOption("painting")?.possibleValues?.map((v) => (
-                  <option key={v.value} value={v.value}>
-                    {v.value === "-" ? "None" : v.value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Painting Colors */}
-          {config.painting === "Painted Multicolor" && (
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Number of Colors
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={10}
-                value={config.paintingColors}
-                onChange={(e) => setPaintingColors(Number(e.target.value))}
-                className="w-full rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              />
-            </div>
-          )}
-
-          {/* Background */}
-          {hasOption("background") && (
-            <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                Background Panel
-              </label>
-              <div className="flex gap-2">
-                {getOption("background")?.possibleValues?.map((v) => (
-                  <button
-                    key={v.value}
-                    onClick={() => setBackground(v.value)}
-                    className={`flex-1 rounded-lg border px-4 py-2 text-sm font-medium transition ${
-                      config.background === v.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-neutral-200 text-neutral-600 hover:border-neutral-300"
-                    }`}
-                  >
-                    {v.value === "-" ? "None" : v.value}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
+        </div>
       )}
     </div>
   );

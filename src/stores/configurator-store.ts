@@ -51,6 +51,7 @@ const defaultConfig: SignConfiguration = {
   painting: "-",
   paintingColors: 1,
   raceway: "-",
+  racewayColor: "#808080",
   vinyl: "-",
   background: "-",
 };
@@ -481,6 +482,7 @@ function buildOptionValues(state: ConfiguratorState): Record<string, unknown> {
       painting: c.painting,
       paintingColors: c.paintingColors,
       raceway: c.raceway,
+      racewayColor: c.racewayColor,
       vinyl: c.vinyl,
       background: c.background,
       letterCount: c.text.replace(/\s+/g, "").length,
@@ -550,6 +552,7 @@ interface ConfiguratorState {
   setPainting: (painting: SignConfiguration["painting"]) => void;
   setPaintingColors: (count: number) => void;
   setRaceway: (raceway: SignConfiguration["raceway"]) => void;
+  setRacewayColor: (color: string) => void;
   setVinyl: (vinyl: SignConfiguration["vinyl"]) => void;
   setBackground: (bg: string) => void;
   setDimensions: (dims: Dimensions) => void;
@@ -699,6 +702,10 @@ export const useConfiguratorStore = create<ConfiguratorState>((set, get) => ({
   setRaceway: (raceway) => {
     set((s) => ({ config: { ...s.config, raceway } }));
     get().recalculatePrice();
+  },
+
+  setRacewayColor: (color) => {
+    set((s) => ({ config: { ...s.config, racewayColor: color } }));
   },
 
   setVinyl: (vinyl) => {

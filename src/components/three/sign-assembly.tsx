@@ -10,7 +10,7 @@ import { clearGeometryCache } from "./utils/geometry-cache";
 import { Raceway, RacewayBox, BackgroundPanel, MountingStuds } from "./objects";
 import { DAY_LIGHTING, NIGHT_LIGHTING } from "./utils/day-night-lighting";
 import { getLedColor } from "./utils/led-colors";
-import { computeLetterPositions, getTotalWidth } from "./utils/letter-layout";
+import { computeLetterPositions, getTotalWidth, getTotalHeight } from "./utils/letter-layout";
 
 const QUALITY_MAP: Record<string, number> = {
   low: 4,
@@ -143,14 +143,15 @@ export function SignAssembly() {
   useEffect(() => {
     if (letterPositions.length > 0) {
       const totalWidth = getTotalWidth(letterPositions);
-      const dimsKey = `${totalWidth}:${height}`;
+      const totalHeight = getTotalHeight(letterPositions, height);
+      const dimsKey = `${totalWidth}:${totalHeight}`;
       if (dimsKey !== prevDimsRef.current) {
         prevDimsRef.current = dimsKey;
         setDimensions({
           totalWidthInches: totalWidth,
-          heightInches: height,
-          squareFeet: (totalWidth * height) / 144,
-          linearFeet: ((totalWidth + height) * 2) / 12,
+          heightInches: totalHeight,
+          squareFeet: (totalWidth * totalHeight) / 144,
+          linearFeet: ((totalWidth + totalHeight) * 2) / 12,
           letterWidths: letterPositions.map((p) => p.width),
         });
       }
@@ -158,7 +159,8 @@ export function SignAssembly() {
   }, [letterPositions, height, setDimensions]);
 
   const totalWidth = getTotalWidth(letterPositions);
-  const xOffset = -totalWidth / 2;
+  const totalHeight = getTotalHeight(letterPositions, height);
+  const xOffset = 0; // Already centered by layout engine
 
   // Dynamically adjust emissive intensity based on day/night mode
   useFrame((_state, delta) => {
@@ -238,7 +240,7 @@ export function SignAssembly() {
           fontSize={height}
           depth={depth}
           curveSegments={curveSegments}
-          position={[lp.x + xOffset, 0, 0]}
+          position={[lp.x, lp.y, 0]}
           faceMaterial={materials.face}
           sidesMaterial={materials.sides}
           fontName={config.font}
@@ -252,8 +254,8 @@ export function SignAssembly() {
           <mesh
             key={`trim-${i}`}
             position={[
-              lp.x + xOffset + lp.width / 2,
-              height / 2,
+              lp.x + lp.width / 2,
+              lp.y + height / 2,
               depth / 2 + 0.01,
             ]}
           >
@@ -273,15 +275,15 @@ export function SignAssembly() {
 
           // Top and bottom rows
           for (let b = 0; b <= numBulbsH; b++) {
-            const bx = lp.x + xOffset + (lp.width * b) / numBulbsH;
-            bulbs.push([bx, 0, depth / 2 + 0.3]);
-            bulbs.push([bx, height, depth / 2 + 0.3]);
+            const bx = lp.x + (lp.width * b) / numBulbsH;
+            bulbs.push([bx, lp.y, depth / 2 + 0.3]);
+            bulbs.push([bx, lp.y + height, depth / 2 + 0.3]);
           }
           // Left and right columns
           for (let b = 1; b < numBulbsV; b++) {
-            const by = (height * b) / numBulbsV;
-            bulbs.push([lp.x + xOffset, by, depth / 2 + 0.3]);
-            bulbs.push([lp.x + xOffset + lp.width, by, depth / 2 + 0.3]);
+            const by = lp.y + (height * b) / numBulbsV;
+            bulbs.push([lp.x, by, depth / 2 + 0.3]);
+            bulbs.push([lp.x + lp.width, by, depth / 2 + 0.3]);
           }
 
           return bulbs.map((pos, j) => (
@@ -299,8 +301,8 @@ export function SignAssembly() {
           <mesh
             key={`glow-${i}`}
             position={[
-              lp.x + xOffset + lp.width / 2,
-              height / 2,
+              lp.x + lp.width / 2,
+              lp.y + height / 2,
               -(depth + 0.5),
             ]}
           >
@@ -319,9 +321,9 @@ export function SignAssembly() {
       {/* Back light area light */}
       {isBackLit && config.lit === "Lit" && (
         <rectAreaLight
-          position={[0, height / 2, -(depth + 1)]}
+          position={[0, 0, -(depth + 1)]}
           width={totalWidth * 1.1}
-          height={height * 1.2}
+          height={totalHeight * 1.2}
           color={ledColorHex}
           intensity={config.productType === "halo-lit" ? 5 : 3}
           rotation={[0, Math.PI, 0]}
@@ -330,17 +332,17 @@ export function SignAssembly() {
 
       {/* Raceway (linear) */}
       {config.raceway === "Raceway" && totalWidth > 0 && (
-        <Raceway width={totalWidth} height={height} depth={depth} />
+        <Raceway width={totalWidth} height={totalHeight} depth={depth} />
       )}
 
       {/* Raceway Box */}
       {config.raceway === "Raceway Box" && totalWidth > 0 && (
-        <RacewayBox width={totalWidth} height={height} depth={depth} />
+        <RacewayBox width={totalWidth} height={totalHeight} depth={depth} />
       )}
 
       {/* Background Panel */}
       {config.background === "Background" && totalWidth > 0 && (
-        <BackgroundPanel width={totalWidth} height={height} depth={depth} />
+        <BackgroundPanel width={totalWidth} height={totalHeight} depth={depth} />
       )}
 
       {/* Mounting Studs */}

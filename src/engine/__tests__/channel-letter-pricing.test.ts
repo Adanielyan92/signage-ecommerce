@@ -33,6 +33,7 @@ function makeConfig(
     painting: "-",
     paintingColors: 1,
     raceway: "-",
+    racewayColor: "#808080",
     vinyl: "-",
     background: "-",
     ...overrides,

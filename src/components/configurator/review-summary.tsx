@@ -2,7 +2,9 @@
 
 import { useConfiguratorStore } from "@/stores/configurator-store";
 import { formatPrice } from "@/lib/utils";
-import { Check, Info } from "lucide-react";
+import { Check, Info, Copy, DownloadCloud } from "lucide-react";
+import { useState } from "react";
+import { generateClientQuotePDF } from "@/lib/pdf-generator";
 
 /**
  * Human-readable labels for product categories.
@@ -122,6 +124,26 @@ function buildRows(config: Record<string, unknown>): ReviewRow[] {
   return rows;
 }
 
+function generateSalesforceDescription(category: string, config: Record<string, unknown>, dims: any): string {
+  let desc = `${CATEGORY_LABELS[category] ?? category}`;
+  if (config.material) desc += ` on ${config.material}`;
+  if (config.thickness) desc += ` (${config.thickness})`;
+  if (config.text) desc += ` spelling "${config.text}"`;
+  
+  const w = dims.totalWidthInches > 0 ? dims.totalWidthInches.toFixed(1) : config.widthInches;
+  const h = dims.heightInches > 0 ? dims.heightInches.toFixed(1) : config.heightInches;
+  
+  if (w && h) {
+    desc += ` - ${w}" W x ${h}" H`;
+  }
+  
+  if (config.lit === "Lit") {
+    desc += ` with ${config.led ?? "LED"} illumination`;
+  }
+  
+  return desc;
+}
+
 export function ReviewSummary() {
   const productCategory = useConfiguratorStore((s) => s.productCategory);
   const getActiveConfig = useConfiguratorStore((s) => s.getActiveConfig);
@@ -131,6 +153,24 @@ export function ReviewSummary() {
   const activeConfig = getActiveConfig();
   const configObj = activeConfig as unknown as Record<string, unknown>;
   const rows = buildRows(configObj);
+  const sfDescription = generateSalesforceDescription(productCategory, configObj, dimensions);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(sfDescription);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadPDF = async () => {
+    await generateClientQuotePDF(
+      CATEGORY_LABELS[productCategory] ?? productCategory,
+      configObj,
+      dimensions,
+      breakdown,
+      sfDescription
+    );
+  };
 
   const hasPrice = breakdown.total > 0;
 
@@ -262,6 +302,46 @@ export function ReviewSummary() {
           </div>
         </div>
       )}
+
+      {/* Salesforce Output block */}
+      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+        <div className="flex items-center justify-between mb-2">
+           <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-600">
+             Salesforce Description
+           </p>
+           <button 
+             onClick={handleCopy}
+             className="text-blue-600 hover:text-blue-800 flex items-center gap-1 text-[10px] font-medium"
+           >
+             <Copy className="h-3 w-3" />
+             {copied ? "Copied!" : "Copy"}
+           </button>
+        </div>
+        <textarea 
+          readOnly 
+          value={sfDescription} 
+          className="w-full text-sm font-medium text-neutral-800 bg-transparent border-0 p-0 focus:ring-0 resize-none h-16"
+        />
+      </div>
+
+      {/* PDF Export block */}
+      <div className="flex items-center justify-between rounded-lg border border-purple-200 bg-purple-50 px-4 py-3">
+        <div>
+          <p className="text-xs font-semibold text-purple-900">
+            Client Presentation Output
+          </p>
+          <p className="text-[10px] text-purple-700">
+            Generate a clean, unbranded PDF invoice for external signoff.
+          </p>
+        </div>
+        <button 
+          onClick={handleDownloadPDF}
+          className="flex items-center gap-1.5 rounded bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-purple-700 shadow-sm"
+        >
+          <DownloadCloud className="h-4 w-4" />
+          Download PDF
+        </button>
+      </div>
 
       {/* Confirmation check */}
       <div className="flex items-start gap-2 rounded-lg bg-green-50 px-4 py-3">

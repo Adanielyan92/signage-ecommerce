@@ -39,6 +39,7 @@ export interface SignConfiguration {
   painting: PaintingOption;
   paintingColors: number;
   raceway: RacewayOption;
+  racewayColor: string;
   vinyl: VinylOption;
   background: string;
 }

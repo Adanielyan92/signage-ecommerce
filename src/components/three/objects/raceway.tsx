@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfiguratorStore } from "@/stores/configurator-store";
+
 interface RacewayProps {
   width: number;    // total sign width in inches
   height: number;   // sign height for vertical positioning
@@ -12,6 +14,7 @@ interface RacewayProps {
  * top of the raceway. Height ~2.5", depth ~3".
  */
 export function Raceway({ width, depth }: RacewayProps) {
+  const racewayColor = useConfiguratorStore((s) => s.config.racewayColor) || "#808080";
   const racewayHeight = 2.5;
   const racewayDepth = Math.min(depth, 3);
 
@@ -23,7 +26,7 @@ export function Raceway({ width, depth }: RacewayProps) {
     >
       <boxGeometry args={[width + 4, racewayHeight, racewayDepth]} />
       <meshStandardMaterial
-        color="#808080"
+        color={racewayColor}
         metalness={0.85}
         roughness={0.3}
       />

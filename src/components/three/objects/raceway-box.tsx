@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfiguratorStore } from "@/stores/configurator-store";
+
 interface RacewayBoxProps {
   width: number;
   height: number;
@@ -12,6 +14,7 @@ interface RacewayBoxProps {
  * the letter depth. Letters are mounted on the front face of this box.
  */
 export function RacewayBox({ width, height, depth }: RacewayBoxProps) {
+  const racewayColor = useConfiguratorStore((s) => s.config.racewayColor) || "#707070";
   const boxDepth = Math.min(depth + 1, 6);
   const padding = 2;
 
@@ -23,7 +26,7 @@ export function RacewayBox({ width, height, depth }: RacewayBoxProps) {
     >
       <boxGeometry args={[width + padding * 2, height + padding * 2, boxDepth]} />
       <meshStandardMaterial
-        color="#707070"
+        color={racewayColor}
         metalness={0.8}
         roughness={0.35}
       />
